@@ -25,8 +25,15 @@
     "proxy": "node scripts/proxyServer.cjs",
     "tauri": "tauri"
   },
+  "description": "Endly - Modern, Privacy-First API Client & Mobile Proxy Interceptor",
+  "author": {
+    "name": "Rajesh Narwal",
+    "email": "rajesh@grassroot.digital",
+    "url": "https://grassroot.digital"
+  },
+  "homepage": "https://endly.grassroot.digital",
   "build": {
-    "appId": "com.endly.app",
+    "appId": "digital.grassroot.endly",
     "productName": "Endly",
     "directories": {
       "output": "release"
@@ -57,6 +64,7 @@
     "linux": {
       "icon": "electron/icon.png",
       "category": "Development",
+      "maintainer": "Rajesh Narwal <rajesh@grassroot.digital>",
       "target": [
         "AppImage",
         "deb"
