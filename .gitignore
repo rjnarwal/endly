@@ -21,6 +21,12 @@ release*
 *.AppImage
 build/icons
 
+# Standalone Tool Repositories
+cipherlab/
+jsonlens/
+regexforge/
+tokenlens/
+
 # Environment & Secrets
 .env
 .env.local
