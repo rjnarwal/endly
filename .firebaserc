@@ -1,0 +1,29 @@
+{
+  "projects": {
+    "default": "endly-client-94812"
+  },
+  "targets": {
+    "endly-client-94812": {
+      "hosting": {
+        "endly": [
+          "endly-client-94812"
+        ],
+        "landing": [
+          "grassroot-digital"
+        ],
+        "tokenlens": [
+          "tokenlens-digital"
+        ],
+        "jsonlens": [
+          "jsonlens-digital"
+        ],
+        "regexforge": [
+          "regexforge-digital"
+        ],
+        "cipherlab": [
+          "cipherlab-digital"
+        ]
+      }
+    }
+  }
+}

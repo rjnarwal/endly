@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://endly.grassroot.digital/sitemap.xml

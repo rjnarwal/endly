@@ -1,0 +1,88 @@
+{
+  "name": "endly",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "dev:landing": "vite --config vite.config.landing.ts",
+    "dev:tokenlens": "vite --config vite.config.tokenlens.ts",
+    "dev:jsonlens": "vite --config vite.config.jsonlens.ts",
+    "dev:regexforge": "vite --config vite.config.regexforge.ts",
+    "dev:cipherlab": "vite --config vite.config.cipherlab.ts",
+    "build": "tsc && vite build",
+    "build:landing": "vite build --config vite.config.landing.ts",
+    "build:tokenlens": "vite build --config vite.config.tokenlens.ts",
+    "build:jsonlens": "vite build --config vite.config.jsonlens.ts",
+    "build:regexforge": "vite build --config vite.config.regexforge.ts",
+    "build:cipherlab": "vite build --config vite.config.cipherlab.ts",
+    "build:all": "npm run build && npm run build:landing && npm run build:tokenlens && npm run build:jsonlens && npm run build:regexforge && npm run build:cipherlab",
+    "build:win": "npm run build && electron-builder --win --x64",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/verify-core.mjs",
+    "proxy": "node scripts/proxyServer.cjs",
+    "tauri": "tauri"
+  },
+  "build": {
+    "appId": "com.endly.app",
+    "productName": "Endly",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "icon": "electron/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "electron/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-http": "^2.0.0",
+    "clsx": "^2.1.1",
+    "dexie": "^4.0.10",
+    "js-yaml": "^4.1.0",
+    "lucide-react": "^1.16.0",
+    "tailwind-merge": "^3.0.1",
+    "ws": "^8.21.3",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "electron": "^41.7.1",
+    "electron-builder": "^26.15.3",
+    "postcss": "^8.4.49",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.16",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.1"
+  }
+}
