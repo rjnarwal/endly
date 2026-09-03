@@ -26,6 +26,7 @@ import { useWorkspaceStore } from '../../store/useWorkspaceStore';
 import { useEnvironmentStore } from '../../store/useEnvironmentStore';
 import { useProxyStore } from '../../store/useProxyStore';
 import { isDesktopEnvironment, isMacDesktopEnvironment } from '../../services/httpDispatcher';
+import { DownloadDesktopModal } from '../download/DownloadDesktopModal';
 
 export const Header: React.FC = () => {
   const {
@@ -48,6 +49,7 @@ export const Header: React.FC = () => {
   const { openModal: openProxyModal, isRunning: isProxyRunning } = useProxyStore();
   const { environments, activeEnvironmentId, setActiveEnvironmentId } = useEnvironmentStore();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
   const activeEnv = environments.find((e) => e.id === activeEnvironmentId);
   const isDesktop = isDesktopEnvironment();
@@ -64,7 +66,7 @@ export const Header: React.FC = () => {
   return (
     <header
       className={`flex items-center justify-between h-12 ${
-        isMac ? 'pl-20 pr-3' : 'px-2 sm:px-3'
+        isMac ? 'pl-24 pr-3' : 'px-2 sm:px-3'
       } bg-background-secondary border-b border-border select-none z-30 relative shrink-0 app-drag-region`}
     >
       {/* Brand & Sidebar Toggle */}
@@ -91,66 +93,22 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Grassroot Digital Ecosystem Links */}
-        <div className="hidden sm:flex items-center space-x-1.5 ml-1">
-          <a
-            href="https://grassroot.digital"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-1 px-2 py-0.5 rounded-md text-xs text-text-secondary hover:text-text hover:bg-background-tertiary border border-border/50 hover:border-emerald-500/40 transition-colors group"
-            title="Visit Grassroot Digital Welcome Hub"
-          >
-            <Home className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span className="font-semibold text-text-primary text-[11px]">Home</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-60 text-text-muted" />
-          </a>
-
-          <a
-            href="https://tokenlens.grassroot.digital"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:flex items-center space-x-1 px-2 py-0.5 rounded-md text-xs text-text-secondary hover:text-text hover:bg-background-tertiary border border-border/50 hover:border-purple-500/40 transition-colors group"
-            title="Launch TokenLens JWT Studio"
-          >
-            <span className="text-[11px] font-semibold text-purple-400">TokenLens</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-60 text-text-muted" />
-          </a>
-
-          <a
-            href="https://jsonlens.grassroot.digital"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:flex items-center space-x-1 px-2 py-0.5 rounded-md text-xs text-text-secondary hover:text-text hover:bg-background-tertiary border border-border/50 hover:border-cyan-500/40 transition-colors group"
-            title="Launch JSONLens Diff & Formatter"
-          >
-            <span className="text-[11px] font-semibold text-cyan-400">JSONLens</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-60 text-text-muted" />
-          </a>
-
-          <a
-            href="https://regexforge.grassroot.digital"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden lg:flex items-center space-x-1 px-2 py-0.5 rounded-md text-xs text-text-secondary hover:text-text hover:bg-background-tertiary border border-border/50 hover:border-emerald-500/40 transition-colors group"
-            title="Launch RegexForge Visual Studio"
-          >
-            <span className="text-[11px] font-semibold text-emerald-400">RegexForge</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-60 text-text-muted" />
-          </a>
-        </div>
-
-        {/* Platform Pill */}
-        <div className="hidden lg:flex items-center space-x-1 px-2 py-0.5 rounded-full bg-background-tertiary border border-border/50 text-[10px] text-text-secondary">
+        {/* Platform Pill & Download Desktop */}
+        <div className="hidden sm:flex items-center space-x-1.5 ml-2">
           {isDesktop ? (
-            <>
+            <div className="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-background-tertiary border border-border/50 text-[10px] text-text-secondary">
               <Monitor className="w-3 h-3 text-emerald-400" />
               <span>Desktop</span>
-            </>
+            </div>
           ) : (
-            <>
-              <Globe className="w-3 h-3 text-blue-400" />
-              <span>Web Mode</span>
-            </>
+            <button
+              onClick={() => setIsDownloadModalOpen(true)}
+              className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/40 text-[11px] font-semibold transition-all shadow-sm cursor-pointer"
+              title="Download Endly Desktop App (macOS DMG, Windows EXE, Linux)"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              <span>Download Desktop</span>
+            </button>
           )}
         </div>
       </div>
@@ -427,6 +385,14 @@ export const Header: React.FC = () => {
           <Settings className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Direct OS Binary Download Modal */}
+      {!isDesktop && (
+        <DownloadDesktopModal
+          isOpen={isDownloadModalOpen}
+          onClose={() => setIsDownloadModalOpen(false)}
+        />
+      )}
     </header>
   );
 };

@@ -26,6 +26,14 @@ export interface ProductItem {
     sampleResult?: string;
     tags: string[];
   };
+  githubUrl?: string;
+  downloads?: {
+    macArmUrl?: string;
+    macIntelUrl?: string;
+    winUrl?: string;
+    linuxUrl?: string;
+    releasesUrl?: string;
+  };
   actions: {
     primaryLabel: string;
     primaryUrl?: string;

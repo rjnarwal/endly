@@ -11,13 +11,15 @@ import {
   Terminal,
   Layers,
   Cpu,
+  Monitor,
 } from 'lucide-react';
 
 interface HeroProps {
   onExploreClick: () => void;
+  onOpenDownload?: (productId: string) => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
+export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) => {
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       {/* Background Ambient Glow Orbs */}
@@ -55,9 +57,9 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
           uncompromising speed, zero telemetry, and seamless operation behind strict corporate firewalls.
         </p>
 
-        {/* Hero CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto mb-16">
-          {/* Launch Endly Button */}
+        {/* Hero CTA Buttons - Only 2 Options: Launch Web App & Download Desktop */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-lg mx-auto mb-16">
+          {/* Launch Endly Web App */}
           <a
             href="https://endly.grassroot.digital"
             target="_blank"
@@ -65,17 +67,17 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-bold text-base shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all group"
           >
             <Zap className="w-5 h-5 fill-white group-hover:animate-pulse" />
-            <span>Launch Endly (API Client)</span>
+            <span>Launch Endly (Web)</span>
             <ExternalLink className="w-4 h-4 opacity-80" />
           </a>
 
-          {/* Explore Product Showcase */}
+          {/* Download Desktop App Modal */}
           <button
-            onClick={onExploreClick}
-            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-3.5 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border text-text-primary font-semibold text-base shadow-md hover:border-accent/30 transition-all"
+            onClick={() => onOpenDownload && onOpenDownload('endly')}
+            className="w-full sm:w-auto flex items-center justify-center space-x-2.5 px-7 py-3.5 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary font-bold text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
-            <span>Product Showcase</span>
-            <ArrowRight className="w-4 h-4 text-text-muted" />
+            <Monitor className="w-5 h-5 text-accent" />
+            <span>Download Desktop ▾</span>
           </button>
         </div>
 

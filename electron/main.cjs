@@ -16,6 +16,7 @@ function createWindow() {
       webSecurity: false, // Disables CORS restrictions for desktop API client testing
     },
     titleBarStyle: 'hiddenInset', // Sleek macOS titlebar with native window traffic lights
+    trafficLightPosition: { x: 16, y: 14 },
     autoHideMenuBar: true,
   });
 

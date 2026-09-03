@@ -51,12 +51,20 @@ Content-Type: application/json
   "verifiedBy": "Endly-Client"
 }`,
     },
+    githubUrl: 'https://github.com/rjnarwal/endly',
+    downloads: {
+      macArmUrl: 'https://github.com/rjnarwal/endly/releases/latest/download/Endly-1.0.0-arm64.dmg',
+      macIntelUrl: 'https://github.com/rjnarwal/endly/releases/latest/download/Endly-1.0.0.dmg',
+      winUrl: 'https://github.com/rjnarwal/endly/releases/latest/download/Endly-Setup-1.0.0.exe',
+      linuxUrl: 'https://github.com/rjnarwal/endly/releases/latest/download/Endly-1.0.0.AppImage',
+      releasesUrl: 'https://github.com/rjnarwal/endly/releases',
+    },
     actions: {
       primaryLabel: 'Launch Endly ↗',
       primaryUrl: 'https://endly.grassroot.digital',
       isExternal: true,
       secondaryLabel: 'Download Desktop (Mac / Win)',
-      secondaryUrl: '#downloads',
+      secondaryUrl: 'https://github.com/rjnarwal/endly/releases',
     },
   },
   {
@@ -103,6 +111,14 @@ jM8lG3Oq8zI0i-y2tB1mD4kP7xV9nL2jE6cT3rF1wQk`,
   "roles": ["admin"],
   "status": "Token Active (Expires in 10+ yrs)"
 }`,
+    },
+    githubUrl: 'https://github.com/rjnarwal/tokenlens',
+    downloads: {
+      macArmUrl: 'https://github.com/rjnarwal/tokenlens/releases/latest/download/TokenLens-1.0.0-arm64.dmg',
+      macIntelUrl: 'https://github.com/rjnarwal/tokenlens/releases/latest/download/TokenLens-1.0.0.dmg',
+      winUrl: 'https://github.com/rjnarwal/tokenlens/releases/latest/download/TokenLens-Setup-1.0.0.exe',
+      linuxUrl: 'https://github.com/rjnarwal/tokenlens/releases/latest/download/TokenLens-1.0.0.AppImage',
+      releasesUrl: 'https://github.com/rjnarwal/tokenlens/releases',
     },
     actions: {
       primaryLabel: 'Launch TokenLens ↗',
@@ -153,6 +169,14 @@ jM8lG3Oq8zI0i-y2tB1mD4kP7xV9nL2jE6cT3rF1wQk`,
 ~ tier: "free" -> "pro"
 + seats: 5`,
     },
+    githubUrl: 'https://github.com/rjnarwal/jsonlens',
+    downloads: {
+      macArmUrl: 'https://github.com/rjnarwal/jsonlens/releases/latest/download/JSONLens-1.0.0-arm64.dmg',
+      macIntelUrl: 'https://github.com/rjnarwal/jsonlens/releases/latest/download/JSONLens-1.0.0.dmg',
+      winUrl: 'https://github.com/rjnarwal/jsonlens/releases/latest/download/JSONLens-Setup-1.0.0.exe',
+      linuxUrl: 'https://github.com/rjnarwal/jsonlens/releases/latest/download/JSONLens-1.0.0.AppImage',
+      releasesUrl: 'https://github.com/rjnarwal/jsonlens/releases',
+    },
     actions: {
       primaryLabel: 'Launch JSONLens ↗',
       primaryUrl: 'https://jsonlens.grassroot.digital',
@@ -198,6 +222,14 @@ jM8lG3Oq8zI0i-y2tB1mD4kP7xV9nL2jE6cT3rF1wQk`,
 • Group 1: "support"
 • Group 2: "grassroot.digital"`,
     },
+    githubUrl: 'https://github.com/rjnarwal/regexforge',
+    downloads: {
+      macArmUrl: 'https://github.com/rjnarwal/regexforge/releases/latest/download/RegexForge-1.0.0-arm64.dmg',
+      macIntelUrl: 'https://github.com/rjnarwal/regexforge/releases/latest/download/RegexForge-1.0.0.dmg',
+      winUrl: 'https://github.com/rjnarwal/regexforge/releases/latest/download/RegexForge-Setup-1.0.0.exe',
+      linuxUrl: 'https://github.com/rjnarwal/regexforge/releases/latest/download/RegexForge-1.0.0.AppImage',
+      releasesUrl: 'https://github.com/rjnarwal/regexforge/releases',
+    },
     actions: {
       primaryLabel: 'Launch RegexForge ↗',
       primaryUrl: 'https://regexforge.grassroot.digital',
@@ -242,6 +274,14 @@ jM8lG3Oq8zI0i-y2tB1mD4kP7xV9nL2jE6cT3rF1wQk`,
       sampleResult: `SHA-256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069
 UUID v7: 018df13b-8250-71a2-9442-1e9681145b20
 Base64:  R3Jhc3Nyb290IERpZ2l0YWwgLSBMb2NhbCBGaXJzdA==`,
+    },
+    githubUrl: 'https://github.com/rjnarwal/cipherlab',
+    downloads: {
+      macArmUrl: 'https://github.com/rjnarwal/cipherlab/releases/latest/download/CipherLab-1.0.0-arm64.dmg',
+      macIntelUrl: 'https://github.com/rjnarwal/cipherlab/releases/latest/download/CipherLab-1.0.0.dmg',
+      winUrl: 'https://github.com/rjnarwal/cipherlab/releases/latest/download/CipherLab-Setup-1.0.0.exe',
+      linuxUrl: 'https://github.com/rjnarwal/cipherlab/releases/latest/download/CipherLab-1.0.0.AppImage',
+      releasesUrl: 'https://github.com/rjnarwal/cipherlab/releases',
     },
     actions: {
       primaryLabel: 'Launch CipherLab ↗',

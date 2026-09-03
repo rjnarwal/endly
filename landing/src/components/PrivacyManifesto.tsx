@@ -12,9 +12,14 @@ import {
   Monitor,
   Download,
   CheckCircle,
+  ExternalLink,
 } from 'lucide-react';
 
-export const PrivacyManifesto: React.FC = () => {
+interface PrivacyManifestoProps {
+  onOpenDownload?: (productId: string) => void;
+}
+
+export const PrivacyManifesto: React.FC<PrivacyManifestoProps> = ({ onOpenDownload }) => {
   return (
     <section id="manifesto" className="py-16 md:py-24 relative overflow-hidden">
       {/* Background Orbs */}
@@ -99,38 +104,26 @@ export const PrivacyManifesto: React.FC = () => {
                 integrated mobile HTTP/HTTPS LAN interceptor without opening a browser.
               </p>
 
-              <div className="flex flex-wrap gap-4 pt-4">
-                {/* Mac Download Button */}
+              <div className="flex flex-wrap items-center gap-4 pt-4">
+                {/* Launch Endly Web App */}
                 <a
                   href="https://endly.grassroot.digital"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-3 px-5 py-3 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs font-semibold shadow-md transition-all group"
+                  className="flex items-center space-x-2 px-6 py-3 rounded-2xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/20 transition-all"
                 >
-                  <Apple className="w-5 h-5 text-accent" />
-                  <div className="text-left">
-                    <div className="font-bold text-sm text-text-primary group-hover:text-accent transition-colors">
-                      macOS Apple Silicon
-                    </div>
-                    <div className="text-[10px] text-text-muted">M1 / M2 / M3 / M4 Macs (64-bit)</div>
-                  </div>
+                  <span>Launch Web App</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
 
-                {/* Windows Download Button */}
-                <a
-                  href="https://endly.grassroot.digital"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 px-5 py-3 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs font-semibold shadow-md transition-all group"
+                {/* Download Desktop App Modal */}
+                <button
+                  onClick={() => onOpenDownload && onOpenDownload('endly')}
+                  className="flex items-center space-x-2 px-6 py-3 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs font-bold shadow-md transition-all cursor-pointer"
                 >
-                  <Monitor className="w-5 h-5 text-blue-400" />
-                  <div className="text-left">
-                    <div className="font-bold text-sm text-text-primary group-hover:text-accent transition-colors">
-                      Windows Desktop
-                    </div>
-                    <div className="text-[10px] text-text-muted">64-bit Standalone (.exe)</div>
-                  </div>
-                </a>
+                  <Monitor className="w-4 h-4 text-accent" />
+                  <span>Download Desktop ▾</span>
+                </button>
               </div>
             </div>
 

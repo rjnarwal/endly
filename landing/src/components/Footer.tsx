@@ -161,6 +161,70 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct }) => {
               </li>
             </ul>
           </div>
+
+          {/* Desktop Downloads Col */}
+          <div className="md:col-span-3 space-y-3">
+            <div className="font-bold text-xs uppercase tracking-wider text-text-primary">
+              Desktop Apps (Mac/Win)
+            </div>
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="https://github.com/rjnarwal/endly/releases"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-amber-400 flex items-center space-x-1 transition-colors font-medium"
+                >
+                  <span>⚡ Endly Desktop</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/rjnarwal/tokenlens/releases"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-purple-400 flex items-center space-x-1 transition-colors font-medium"
+                >
+                  <span>🔑 TokenLens Desktop</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/rjnarwal/jsonlens/releases"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-cyan-400 flex items-center space-x-1 transition-colors font-medium"
+                >
+                  <span>🗂️ JSONLens Desktop</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/rjnarwal/regexforge/releases"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-emerald-400 flex items-center space-x-1 transition-colors font-medium"
+                >
+                  <span>🎯 RegexForge Desktop</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/rjnarwal/cipherlab/releases"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-pink-400 flex items-center space-x-1 transition-colors font-medium"
+                >
+                  <span>🔐 CipherLab Desktop</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Bottom copyright */}

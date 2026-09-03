@@ -16,6 +16,7 @@ import {
   Terminal,
   ShieldAlert,
   Apple,
+  Monitor,
 } from 'lucide-react';
 import { ProductItem } from '../types';
 import { PRODUCTS } from '../data/products';
@@ -23,11 +24,13 @@ import { PRODUCTS } from '../data/products';
 interface ProductCarouselProps {
   selectedProductId?: string;
   onOpenEarlyAccess: (product: ProductItem) => void;
+  onOpenDownload?: (product: ProductItem) => void;
 }
 
 export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   selectedProductId,
   onOpenEarlyAccess,
+  onOpenDownload,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -189,7 +192,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                 ))}
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons - Only 2 Options: Launch Web App & Download Desktop */}
               <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-border/60">
                 {currentProduct.status === 'live' ? (
                   <>
@@ -205,14 +208,14 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
 
-                    {/* Desktop App Downloads Link */}
-                    <a
-                      href="#downloads"
-                      className="flex items-center space-x-2 px-4 py-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary text-xs font-semibold border border-border transition-colors"
+                    {/* Download Desktop App Modal */}
+                    <button
+                      onClick={() => onOpenDownload && onOpenDownload(currentProduct)}
+                      className="flex items-center space-x-2 px-5 py-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary font-bold text-xs border border-border hover:border-accent/40 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                     >
-                      <Apple className="w-4 h-4 text-text-muted" />
-                      <span>Desktop (Mac / Win)</span>
-                    </a>
+                      <Monitor className="w-4 h-4 text-accent" />
+                      <span>Download Desktop ▾</span>
+                    </button>
                   </>
                 ) : (
                   <button
