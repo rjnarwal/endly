@@ -56,7 +56,7 @@ export const App: React.FC = () => {
         downloads: {
           macArmUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0-arm64.dmg',
           macIntelUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0.dmg',
-          winUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-Setup-1.0.0.exe',
+          winUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly.Setup.1.0.0.exe',
           linuxUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0.AppImage',
         },
       } as any;
@@ -73,7 +73,7 @@ export const App: React.FC = () => {
     downloads: {
       macArm: product.downloads?.macArmUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-1.0.0-arm64.dmg`,
       macIntel: product.downloads?.macIntelUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-1.0.0.dmg`,
-      winX64: product.downloads?.winUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-Setup-1.0.0.exe`,
+      winX64: product.downloads?.winUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}.Setup.1.0.0.exe`,
       linuxAppImage: product.downloads?.linuxUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-1.0.0.AppImage`,
     },
   });
