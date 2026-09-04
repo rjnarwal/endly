@@ -90,6 +90,17 @@ export interface DomainFilterConfig {
   onlyWhitelisted: boolean;
 }
 
+export interface ProxyConsoleLog {
+  id: string;
+  timestamp: number;
+  level: 'info' | 'warn' | 'error' | 'success' | 'debug';
+  stage: 'bridge' | 'server' | 'device' | 'tunnel' | 'http';
+  message: string;
+  details?: any;
+}
+
+export type BridgeStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+
 interface ProxyState {
   isOpen: boolean;
   isRunning: boolean;
@@ -97,8 +108,15 @@ interface ProxyState {
   localIps: string[];
   trafficLogs: TrafficLogItem[];
   selectedLogId: string | null;
-  activeStudioTab: 'traffic' | 'breakpoints' | 'map' | 'throttling' | 'domains' | 'diff' | 'guide';
+  activeStudioTab: 'traffic' | 'console' | 'breakpoints' | 'map' | 'throttling' | 'domains' | 'diff' | 'guide';
   activeGuideTab: 'ios' | 'android' | 'flutter' | 'react-native';
+
+  // Live Console & Diagnostics
+  consoleLogs: ProxyConsoleLog[];
+  isConsoleOpen: boolean;
+  bridgeStatus: BridgeStatus;
+  lastDeviceIp: string | null;
+  lastActivityTime: number | null;
 
   // Breakpoints
   breakpointRules: BreakpointRule[];
@@ -130,6 +148,11 @@ interface ProxyState {
   stopProxy: () => Promise<void>;
   addTrafficLog: (log: TrafficLogItem) => void;
   clearTrafficLogs: () => void;
+
+  // Console Actions
+  toggleConsole: () => void;
+  addConsoleLog: (level: ProxyConsoleLog['level'], stage: ProxyConsoleLog['stage'], message: string, details?: any) => void;
+  clearConsoleLogs: () => void;
 
   // Breakpoint Actions
   addBreakpointRule: (rule: Omit<BreakpointRule, 'id'>) => void;
@@ -233,6 +256,21 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
   activeStudioTab: 'traffic',
   activeGuideTab: 'ios',
 
+  // Live Console & Diagnostics
+  consoleLogs: [
+    {
+      id: 'c-init',
+      timestamp: Date.now(),
+      level: 'info',
+      stage: 'bridge',
+      message: 'Proxy Diagnostics Console initialized. Checking companion runner on port 8889...',
+    },
+  ],
+  isConsoleOpen: true,
+  bridgeStatus: 'disconnected',
+  lastDeviceIp: null,
+  lastActivityTime: null,
+
   breakpointRules: DEFAULT_BREAKPOINTS,
   pausedBreakpoints: [],
   activePausedId: null,
@@ -259,9 +297,11 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
 
   openModal: () => {
     set({ isOpen: true });
+    get().addConsoleLog('info', 'bridge', 'Opening Mobile Interceptor Studio...');
     autoDetectLocalIp((detectedIp) => {
       if (detectedIp) {
         set({ localIps: [detectedIp] });
+        get().addConsoleLog('success', 'server', `Auto-detected machine LAN IP: ${detectedIp}`);
         if (typeof window !== 'undefined') localStorage.setItem('endly_proxy_ip', detectedIp);
       }
     });
@@ -271,16 +311,37 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
   },
 
   closeModal: () => set({ isOpen: false }),
-  setPort: (port) => set({ port }),
+  setPort: (port) => {
+    get().addConsoleLog('info', 'server', `Proxy port configured to ${port}`);
+    set({ port });
+  },
   setLocalIps: (localIps) => {
     if (localIps && localIps.length > 0 && typeof window !== 'undefined') {
       localStorage.setItem('endly_proxy_ip', localIps[0]);
+      get().addConsoleLog('info', 'server', `Target Host IP set to ${localIps[0]}`);
     }
     set({ localIps });
   },
   setActiveStudioTab: (tab) => set({ activeStudioTab: tab }),
   setActiveGuideTab: (tab) => set({ activeGuideTab: tab }),
   setSelectedLogId: (id) => set({ selectedLogId: id }),
+
+  toggleConsole: () => set((s) => ({ isConsoleOpen: !s.isConsoleOpen })),
+  addConsoleLog: (level, stage, message, details) => {
+    const log: ProxyConsoleLog = {
+      id: generateId(),
+      timestamp: Date.now(),
+      level,
+      stage,
+      message,
+      details,
+    };
+    set((state) => ({
+      consoleLogs: [...state.consoleLogs, log].slice(-300),
+      lastActivityTime: Date.now(),
+    }));
+  },
+  clearConsoleLogs: () => set({ consoleLogs: [] }),
 
   startProxy: async () => {
     const { port, breakpointRules, mapRemoteRules, mapLocalRules, throttling, domainFilter } = get();
@@ -554,10 +615,14 @@ function syncRulesToBridge(get: () => ProxyState) {
 
 function connectToLocalProxyBridge(get: () => ProxyState) {
   try {
+    get().addConsoleLog('info', 'bridge', 'Connecting to companion proxy runner at ws://localhost:8889...');
+    useProxyStore.setState({ bridgeStatus: 'connecting' });
     const ws = new WebSocket('ws://localhost:8889');
 
     ws.onopen = () => {
       wsConnection = ws;
+      useProxyStore.setState({ bridgeStatus: 'connected' });
+      get().addConsoleLog('success', 'bridge', 'Connected to companion proxy runner on ws://localhost:8889');
       ws.send(JSON.stringify({ type: 'GET_STATUS' }));
       syncRulesToBridge(get);
     };
@@ -569,10 +634,26 @@ function connectToLocalProxyBridge(get: () => ProxyState) {
           useProxyStore.setState({
             isRunning: data.isRunning,
             port: data.port || 8888,
-            localIps: data.localIps || ['127.0.0.1'],
+            localIps: data.localIps || ['192.168.68.62'],
           });
+          get().addConsoleLog(
+            data.isRunning ? 'success' : 'info',
+            'server',
+            data.isRunning ? `Proxy server is listening on 0.0.0.0:${data.port || 8888}` : 'Proxy server is currently stopped'
+          );
         } else if (data.type === 'TRAFFIC_EVENT') {
           get().addTrafficLog(data.log);
+          if (data.log.clientIp) {
+            useProxyStore.setState({ lastDeviceIp: data.log.clientIp });
+            get().addConsoleLog('info', 'device', `Data received from device ${data.log.clientIp}`);
+          }
+          get().addConsoleLog(
+            data.log.statusCode >= 400 ? 'warn' : 'info',
+            data.log.method === 'CONNECT' ? 'tunnel' : 'http',
+            `[${data.log.method}] ${data.log.url} -> ${data.log.statusCode} (${data.log.timeMs}ms, ${data.log.sizeBytes} B)`
+          );
+        } else if (data.type === 'CONSOLE_EVENT') {
+          get().addConsoleLog(data.level || 'info', data.stage || 'server', data.message);
         }
       } catch (e) {
         console.error('Error parsing proxy bridge message', e);
@@ -581,12 +662,17 @@ function connectToLocalProxyBridge(get: () => ProxyState) {
 
     ws.onclose = () => {
       wsConnection = null;
+      useProxyStore.setState({ bridgeStatus: 'disconnected' });
+      get().addConsoleLog('warn', 'bridge', 'Companion proxy runner disconnected. Run "npm run proxy" in terminal.');
     };
 
     ws.onerror = () => {
       wsConnection = null;
+      useProxyStore.setState({ bridgeStatus: 'error' });
+      get().addConsoleLog('error', 'bridge', 'Cannot reach companion proxy on ws://localhost:8889. Make sure to run "npm run proxy" on your computer.');
     };
   } catch {
     wsConnection = null;
+    useProxyStore.setState({ bridgeStatus: 'error' });
   }
 }

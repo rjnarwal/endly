@@ -53,6 +53,10 @@ function broadcast(data) {
   }
 }
 
+function logConsole(level, stage, message) {
+  broadcast({ type: 'CONSOLE_EVENT', level, stage, message });
+}
+
 // 3. Create High-Performance HTTP & CONNECT Proxy Server
 function startHttpProxy(port) {
   if (proxyServer) {
