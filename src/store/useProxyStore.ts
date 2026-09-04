@@ -663,13 +663,20 @@ function connectToLocalProxyBridge(get: () => ProxyState) {
     ws.onclose = () => {
       wsConnection = null;
       useProxyStore.setState({ bridgeStatus: 'disconnected' });
-      get().addConsoleLog('warn', 'bridge', 'Companion proxy runner disconnected. Run "npm run proxy" in terminal.');
+      // Retry connection in 3 seconds if modal is open
+      if (get().isOpen) {
+        setTimeout(() => {
+          if (get().isOpen && !wsConnection) {
+            connectToLocalProxyBridge(get);
+          }
+        }, 3000);
+      }
     };
 
     ws.onerror = () => {
       wsConnection = null;
       useProxyStore.setState({ bridgeStatus: 'error' });
-      get().addConsoleLog('error', 'bridge', 'Cannot reach companion proxy on ws://localhost:8889. Make sure to run "npm run proxy" on your computer.');
+      get().addConsoleLog('error', 'bridge', 'Cannot reach companion proxy on ws://localhost:8889. Run "npm run proxy" on your computer.');
     };
   } catch {
     wsConnection = null;

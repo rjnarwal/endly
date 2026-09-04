@@ -1,6 +1,6 @@
 [package]
 name = "endly"
-version = "1.0.0"
+version = "1.0.1"
 description = "Endly - Modern Cross-Platform API Client"
 authors = ["Endly Team"]
 edition = "2021"

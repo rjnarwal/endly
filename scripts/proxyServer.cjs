@@ -1,21 +1,84 @@
 /**
- * Endly Mobile Proxy Interceptor & Proxyman Engine (High-Performance Turbo Edition)
+ * Endly Mobile Proxy Interceptor & Traffic Engine (Full SSL MITM Decryption Edition)
+ * Decrypts HTTPS traffic on-the-fly, extracts complete URLs + query params + decompressed response bodies.
  * Run with: npm run proxy
  */
 
 const http = require('http');
 const https = require('https');
 const net = require('net');
+const tls = require('tls');
 const url = require('url');
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+const { execSync } = require('child_process');
 const { WebSocketServer } = require('ws');
 
 let PROXY_PORT = 8888;
 const WS_PORT = 8889;
 
+// Certificate paths & in-memory SNI cache
+const ROOT_CA_CERT = path.resolve(__dirname, '../public/endly-root-ca.crt');
+const ROOT_CA_KEY = path.resolve(__dirname, '../public/endly-root-ca.key');
+const CERT_CACHE_DIR = path.join(os.tmpdir(), 'endly_mitm_certs');
+
+if (!fs.existsSync(CERT_CACHE_DIR)) {
+  fs.mkdirSync(CERT_CACHE_DIR, { recursive: true });
+}
+
+const secureContextCache = new Map();
+
+// Generate dynamic SSL cert signed by Endly Root CA
+function getOrCreateSecureContext(rawHostname) {
+  if (!rawHostname) return null;
+  const hostname = rawHostname.split(':')[0].toLowerCase();
+
+  if (secureContextCache.has(hostname)) {
+    return secureContextCache.get(hostname);
+  }
+
+  const keyPath = path.join(CERT_CACHE_DIR, `${hostname}.key`);
+  const csrPath = path.join(CERT_CACHE_DIR, `${hostname}.csr`);
+  const crtPath = path.join(CERT_CACHE_DIR, `${hostname}.crt`);
+  const extPath = path.join(CERT_CACHE_DIR, `${hostname}.ext`);
+
+  try {
+    if (!fs.existsSync(crtPath) || !fs.existsSync(keyPath)) {
+      const extContent = `authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = ${hostname}
+DNS.2 = *.${hostname}
+IP.1 = 127.0.0.1
+`;
+      fs.writeFileSync(extPath, extContent);
+
+      execSync(`openssl genrsa -out "${keyPath}" 2048`, { stdio: 'ignore' });
+      execSync(`openssl req -new -key "${keyPath}" -out "${csrPath}" -subj "/CN=${hostname}/O=Endly Mobile Proxy"`, { stdio: 'ignore' });
+      execSync(`openssl x509 -req -in "${csrPath}" -CA "${ROOT_CA_CERT}" -CAkey "${ROOT_CA_KEY}" -CAcreateserial -out "${crtPath}" -days 365 -sha256 -extfile "${extPath}"`, { stdio: 'ignore' });
+    }
+
+    const ctx = tls.createSecureContext({
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(crtPath),
+    });
+
+    secureContextCache.set(hostname, ctx);
+    return ctx;
+  } catch (err) {
+    console.error(`Failed to generate MITM certificate for ${hostname}:`, err.message);
+    return null;
+  }
+}
+
 // High-speed persistent connection agents
 const httpAgent = new http.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 100 });
-const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 100 });
+const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 100, rejectUnauthorized: false });
 
 let activeMocks = [];
 let activeBreakpoints = [];
@@ -26,6 +89,8 @@ let activeDomainFilter = { whitelist: [], blacklist: [], onlyWhitelisted: false 
 
 let isProxyRunning = false;
 let proxyServer = null;
+let mitmServer = null;
+let mitmPort = 0;
 let wsClients = new Set();
 
 // 1. Get Local LAN IP Addresses
@@ -57,31 +122,49 @@ function logConsole(level, stage, message) {
   broadcast({ type: 'CONSOLE_EVENT', level, stage, message });
 }
 
-// 3. Create High-Performance HTTP & CONNECT Proxy Server
-function startHttpProxy(port) {
-  if (proxyServer) {
-    try {
-      proxyServer.close();
-    } catch {}
+// Helper to decompress HTTP body for readable JSON viewing
+function decompressBody(buffer, encoding) {
+  if (!buffer || buffer.length === 0) return '';
+  try {
+    const enc = (encoding || '').toLowerCase();
+    let decompressed = buffer;
+    if (enc.includes('gzip')) {
+      decompressed = zlib.gunzipSync(buffer);
+    } else if (enc.includes('br')) {
+      decompressed = zlib.brotliDecompressSync(buffer);
+    } else if (enc.includes('deflate')) {
+      decompressed = zlib.inflateSync(buffer);
+    }
+    return decompressed.toString('utf8');
+  } catch {
+    return buffer.toString('utf8');
   }
+}
 
-  PROXY_PORT = port || 8888;
+// 3. Common Decrypted Request Processor (Handles both direct HTTP and decrypted HTTPS)
+async function handleDecryptedRequest(req, res, isHttps = false) {
+  if (req.socket) req.socket.setNoDelay(true);
 
-  proxyServer = http.createServer(async (req, res) => {
-    // Disable Nagle's algorithm for instant socket throughput
-    if (req.socket) req.socket.setNoDelay(true);
+  const startTime = Date.now();
+  const host = req.headers.host || (req.socket && req.socket.servername) || 'localhost';
+  const protocol = isHttps ? 'https' : 'http';
+  let fullUrl = req.url.startsWith('http') ? req.url : `${protocol}://${host}${req.url}`;
+  let isMappedRemote = false;
+  let originalUrl = undefined;
 
-    const startTime = Date.now();
-    let reqUrl = req.url.startsWith('http') ? req.url : `http://${req.headers.host}${req.url}`;
-    let isMappedRemote = false;
-    let originalUrl = undefined;
+  // Collect request body
+  const reqChunks = [];
+  req.on('data', (chunk) => reqChunks.push(chunk));
 
-    // Apply Simulated Throttling Delay ONLY if explicitly enabled
+  req.on('end', async () => {
+    const reqBodyBuf = Buffer.concat(reqChunks);
+    const reqBodyText = decompressBody(reqBodyBuf, req.headers['content-encoding']);
+
+    // Check Throttling
     if (activeThrottling && activeThrottling.enabled && activeThrottling.latencyMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, activeThrottling.latencyMs));
     }
 
-    // Apply Simulated Packet Loss
     if (activeThrottling && activeThrottling.enabled && activeThrottling.packetLossPercent > 0) {
       if (Math.random() * 100 < activeThrottling.packetLossPercent) {
         res.socket.destroy();
@@ -89,22 +172,22 @@ function startHttpProxy(port) {
       }
     }
 
-    // 1. Check Map Remote Rule
-    const matchedMapRemote = activeMapRemote.find((r) => r.enabled && reqUrl.toLowerCase().includes(r.fromPattern.toLowerCase()));
+    // 1. Check Map Remote
+    const matchedMapRemote = activeMapRemote.find((r) => r.enabled && fullUrl.toLowerCase().includes(r.fromPattern.toLowerCase()));
     if (matchedMapRemote) {
-      originalUrl = reqUrl;
-      reqUrl = reqUrl.replace(new RegExp(matchedMapRemote.fromPattern, 'i'), matchedMapRemote.toUrl);
+      originalUrl = fullUrl;
+      fullUrl = fullUrl.replace(new RegExp(matchedMapRemote.fromPattern, 'i'), matchedMapRemote.toUrl);
       isMappedRemote = true;
     }
 
-    const parsedUrl = url.parse(reqUrl);
+    const parsedUrl = url.parse(fullUrl);
 
-    // 2. Check Map Local Rule
+    // 2. Check Map Local
     const matchedMapLocal = activeMapLocal.find((l) => {
       if (!l.enabled) return false;
       const targetPath = (parsedUrl.pathname || '').toLowerCase();
       const match = (l.matchPattern || '').toLowerCase();
-      return targetPath === match || targetPath.endsWith(match) || reqUrl.toLowerCase().includes(match);
+      return targetPath === match || targetPath.endsWith(match) || fullUrl.toLowerCase().includes(match);
     });
 
     if (matchedMapLocal) {
@@ -125,34 +208,36 @@ function startHttpProxy(port) {
       res.writeHead(matchedMapLocal.statusCode || 200, responseHeaders);
       res.end(matchedMapLocal.responseBody || '{}');
 
-      const logItem = {
-        id: Math.random().toString(36).substring(2, 9),
-        timestamp: Date.now(),
-        method: req.method,
-        url: reqUrl,
-        path: parsedUrl.pathname || '/',
-        statusCode: matchedMapLocal.statusCode || 200,
-        statusText: 'OK (Map Local)',
-        isMocked: true,
-        timeMs: Date.now() - startTime,
-        sizeBytes: Buffer.byteLength(matchedMapLocal.responseBody || ''),
-        requestHeaders: req.headers,
-        responseHeaders,
-        responseBody: matchedMapLocal.responseBody,
-        clientIp: req.socket ? req.socket.remoteAddress : '',
-      };
-
-      broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
+      broadcast({
+        type: 'TRAFFIC_EVENT',
+        log: {
+          id: Math.random().toString(36).substring(2, 9),
+          timestamp: Date.now(),
+          method: req.method,
+          url: fullUrl,
+          path: parsedUrl.path || '/',
+          statusCode: matchedMapLocal.statusCode || 200,
+          statusText: 'OK (Map Local)',
+          isMocked: true,
+          timeMs: Date.now() - startTime,
+          sizeBytes: Buffer.byteLength(matchedMapLocal.responseBody || ''),
+          requestHeaders: req.headers,
+          responseHeaders,
+          requestBody: reqBodyText,
+          responseBody: matchedMapLocal.responseBody,
+          clientIp: req.socket ? req.socket.remoteAddress : '',
+        },
+      });
       return;
     }
 
-    // 3. Check for Matching Mock Rule
+    // 3. Check Mock Rules
     const matchedMock = activeMocks.find((m) => {
       if (!m.enabled) return false;
       if (m.method && m.method !== req.method) return false;
       const targetPath = (parsedUrl.pathname || '').toLowerCase();
       const mockPath = (m.path || '').toLowerCase();
-      return targetPath === mockPath || targetPath.endsWith(mockPath) || reqUrl.toLowerCase().includes(mockPath);
+      return targetPath === mockPath || targetPath.endsWith(mockPath) || fullUrl.toLowerCase().includes(mockPath);
     });
 
     if (matchedMock) {
@@ -173,92 +258,150 @@ function startHttpProxy(port) {
       res.writeHead(matchedMock.statusCode || 200, responseHeaders);
       res.end(matchedMock.body || '{}');
 
-      const logItem = {
-        id: Math.random().toString(36).substring(2, 9),
-        timestamp: Date.now(),
-        method: req.method,
-        url: reqUrl,
-        path: parsedUrl.pathname || '/',
-        statusCode: matchedMock.statusCode || 200,
-        statusText: 'OK (Endly Mock)',
-        isMocked: true,
-        mockId: matchedMock.id,
-        timeMs: Date.now() - startTime,
-        sizeBytes: Buffer.byteLength(matchedMock.body || ''),
-        requestHeaders: req.headers,
-        responseHeaders,
-        responseBody: matchedMock.body,
-        clientIp: req.socket ? req.socket.remoteAddress : '',
-      };
-
-      broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
-      return;
-    }
-
-    // 4. Pass-through to Remote Server with DIRECT STREAMING (Zero Buffering Delay)
-    const options = {
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port || 80,
-      path: parsedUrl.path,
-      method: req.method,
-      headers: { ...req.headers },
-      agent: httpAgent,
-    };
-    delete options.headers['proxy-connection'];
-
-    const proxyReq = http.request(options, (proxyRes) => {
-      // Send response headers to phone immediately!
-      res.writeHead(proxyRes.statusCode, proxyRes.headers);
-
-      let totalBytes = 0;
-      let bodyPreview = '';
-
-      proxyRes.on('data', (chunk) => {
-        // Stream chunk immediately to phone with zero latency
-        res.write(chunk);
-        totalBytes += chunk.length;
-        if (bodyPreview.length < 15000) {
-          bodyPreview += chunk.toString('utf8');
-        }
-      });
-
-      proxyRes.on('end', () => {
-        res.end();
-
-        const logItem = {
+      broadcast({
+        type: 'TRAFFIC_EVENT',
+        log: {
           id: Math.random().toString(36).substring(2, 9),
           timestamp: Date.now(),
           method: req.method,
-          url: reqUrl,
-          path: parsedUrl.pathname || '/',
-          statusCode: proxyRes.statusCode,
-          statusText: proxyRes.statusMessage || 'OK',
-          isMocked: false,
-          isMappedRemote,
-          originalUrl,
+          url: fullUrl,
+          path: parsedUrl.path || '/',
+          statusCode: matchedMock.statusCode || 200,
+          statusText: 'OK (Endly Mock)',
+          isMocked: true,
+          mockId: matchedMock.id,
           timeMs: Date.now() - startTime,
-          sizeBytes: totalBytes,
+          sizeBytes: Buffer.byteLength(matchedMock.body || ''),
           requestHeaders: req.headers,
-          responseHeaders: proxyRes.headers,
-          responseBody: bodyPreview.slice(0, 10000),
+          responseHeaders,
+          requestBody: reqBodyText,
+          responseBody: matchedMock.body,
           clientIp: req.socket ? req.socket.remoteAddress : '',
-        };
+        },
+      });
+      return;
+    }
 
-        broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
+    // 4. Forward to Upstream Server
+    const isTargetHttps = parsedUrl.protocol === 'https:' || isHttps;
+    const clientModule = isTargetHttps ? https : http;
+    const targetPort = parsedUrl.port || (isTargetHttps ? 443 : 80);
+
+    const fwdHeaders = { ...req.headers };
+    fwdHeaders.host = parsedUrl.host || host;
+    delete fwdHeaders['proxy-connection'];
+
+    const options = {
+      hostname: parsedUrl.hostname,
+      port: targetPort,
+      path: parsedUrl.path,
+      method: req.method,
+      headers: fwdHeaders,
+      agent: isTargetHttps ? httpsAgent : httpAgent,
+      rejectUnauthorized: false,
+    };
+
+    const upstreamReq = clientModule.request(options, (upstreamRes) => {
+      res.writeHead(upstreamRes.statusCode, upstreamRes.headers);
+
+      const resChunks = [];
+      let totalBytes = 0;
+
+      upstreamRes.on('data', (chunk) => {
+        res.write(chunk);
+        resChunks.push(chunk);
+        totalBytes += chunk.length;
+      });
+
+      upstreamRes.on('end', () => {
+        res.end();
+
+        const rawResBuf = Buffer.concat(resChunks);
+        const decodedResponseBody = decompressBody(rawResBuf, upstreamRes.headers['content-encoding']);
+
+        broadcast({
+          type: 'TRAFFIC_EVENT',
+          log: {
+            id: Math.random().toString(36).substring(2, 9),
+            timestamp: Date.now(),
+            method: req.method,
+            url: fullUrl,
+            path: parsedUrl.path || '/',
+            statusCode: upstreamRes.statusCode,
+            statusText: upstreamRes.statusMessage || 'OK',
+            isMocked: false,
+            isMappedRemote,
+            originalUrl,
+            timeMs: Date.now() - startTime,
+            sizeBytes: totalBytes,
+            requestHeaders: req.headers,
+            responseHeaders: upstreamRes.headers,
+            requestBody: reqBodyText,
+            responseBody: decodedResponseBody.slice(0, 100000), // Full decompressed body
+            clientIp: req.socket ? req.socket.remoteAddress : '',
+          },
+        });
       });
     });
 
-    proxyReq.on('error', (err) => {
+    upstreamReq.on('error', (err) => {
       if (!res.headersSent) {
         res.writeHead(502, { 'Content-Type': 'text/plain' });
       }
-      res.end(`Proxy Error: ${err.message}`);
+      res.end(`Endly Proxy Error: ${err.message}`);
     });
 
-    req.pipe(proxyReq);
+    if (reqBodyBuf.length > 0) {
+      upstreamReq.write(reqBodyBuf);
+    }
+    upstreamReq.end();
+  });
+}
+
+// 4. Start Internal HTTPS MITM Server
+function startMitmServer() {
+  if (mitmServer) {
+    try { mitmServer.close(); } catch {}
+  }
+
+  const defaultContext = tls.createSecureContext({
+    key: fs.readFileSync(ROOT_CA_KEY),
+    cert: fs.readFileSync(ROOT_CA_CERT),
   });
 
-  // HTTPS CONNECT Tunneling (Direct Zero-Latency TCP Pipe)
+  mitmServer = https.createServer(
+    {
+      SNICallback: (servername, cb) => {
+        try {
+          const ctx = getOrCreateSecureContext(servername);
+          cb(null, ctx || defaultContext);
+        } catch (e) {
+          cb(e, defaultContext);
+        }
+      },
+    },
+    (req, res) => handleDecryptedRequest(req, res, true)
+  );
+
+  mitmServer.listen(0, '127.0.0.1', () => {
+    mitmPort = mitmServer.address().port;
+    console.log(`🔒 Endly SSL Decryption MITM Engine listening on 127.0.0.1:${mitmPort}`);
+  });
+}
+
+// 5. Create High-Performance HTTP & CONNECT Proxy Server
+function startHttpProxy(port) {
+  if (proxyServer) {
+    try { proxyServer.close(); } catch {}
+  }
+
+  startMitmServer();
+
+  PROXY_PORT = port || 8888;
+
+  proxyServer = http.createServer((req, res) => handleDecryptedRequest(req, res, false));
+
+  // HTTPS CONNECT Tunneling with Automated SSL MITM Decryption
   proxyServer.on('connect', (req, clientSocket, head) => {
     clientSocket.setNoDelay(true);
     clientSocket.setKeepAlive(true, 10000);
@@ -266,43 +409,37 @@ function startHttpProxy(port) {
     const [host, portStr] = req.url.split(':');
     const port = parseInt(portStr, 10) || 443;
 
-    const serverSocket = net.connect(port, host, () => {
-      serverSocket.setNoDelay(true);
-      serverSocket.setKeepAlive(true, 10000);
+    // Apple / System pinned services that refuse MITM certs -> transparent TCP bypass
+    const isPinnedHost = ['apple.com', 'icloud.com', 'push.apple.com'].some((d) => host.endsWith(d));
 
+    if (isPinnedHost) {
+      const serverSocket = net.connect(port, host, () => {
+        clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+        if (head && head.length > 0) serverSocket.write(head);
+        serverSocket.pipe(clientSocket);
+        clientSocket.pipe(serverSocket);
+      });
+      serverSocket.on('error', () => clientSocket.end());
+      clientSocket.on('error', () => serverSocket.destroy());
+      return;
+    }
+
+    // Intercept with MITM Server for full URL, query param & body inspection
+    const mitmSocket = net.connect(mitmPort, '127.0.0.1', () => {
       clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
       if (head && head.length > 0) {
-        serverSocket.write(head);
+        mitmSocket.write(head);
       }
-      serverSocket.pipe(clientSocket);
-      clientSocket.pipe(serverSocket);
-
-      broadcast({
-        type: 'TRAFFIC_EVENT',
-        log: {
-          id: Math.random().toString(36).substring(2, 9),
-          timestamp: Date.now(),
-          method: 'CONNECT',
-          url: `https://${host}:${port}`,
-          path: `https://${host}:${port}`,
-          statusCode: 200,
-          statusText: 'Tunnel Established',
-          isMocked: false,
-          timeMs: 1,
-          sizeBytes: 0,
-          requestHeaders: req.headers,
-          responseHeaders: {},
-          clientIp: clientSocket.remoteAddress || '',
-        },
-      });
+      serverSocketPiping(clientSocket, mitmSocket);
     });
 
-    serverSocket.on('error', () => {
-      clientSocket.end('HTTP/1.1 502 Bad Gateway\r\n\r\n');
+    mitmSocket.on('error', (err) => {
+      logConsole('error', 'tunnel', `MITM Tunnel error for ${host}: ${err.message}`);
+      clientSocket.end();
     });
 
     clientSocket.on('error', () => {
-      serverSocket.destroy();
+      mitmSocket.destroy();
     });
   });
 
@@ -317,7 +454,12 @@ function startHttpProxy(port) {
   });
 }
 
-// 4. WebSocket Control Server for Endly Web UI
+function serverSocketPiping(clientSocket, mitmSocket) {
+  clientSocket.pipe(mitmSocket);
+  mitmSocket.pipe(clientSocket);
+}
+
+// 6. WebSocket Control Server for Endly Web UI
 try {
   const wss = new WebSocketServer({ port: WS_PORT });
 
@@ -356,6 +498,7 @@ try {
           );
         } else if (data.type === 'STOP_PROXY') {
           if (proxyServer) proxyServer.close();
+          if (mitmServer) mitmServer.close();
           isProxyRunning = false;
           ws.send(
             JSON.stringify({

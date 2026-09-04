@@ -201,19 +201,24 @@ cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
 
   const filteredLogs = trafficLogs.filter((log) => {
     if (filterMethod !== 'ALL' && log.method !== filterMethod) return false;
+
+    if (domainFilter.onlyWhitelisted && domainFilter.whitelist.length > 0) {
+      const matches = domainFilter.whitelist.some((d) => log.url.toLowerCase().includes(d.toLowerCase()));
+      if (!matches) return false;
+    }
+
+    if (domainFilter.blacklist.some((d) => log.url.toLowerCase().includes(d.toLowerCase()))) {
+      return false;
+    }
+
     if (filterQuery.trim()) {
-      const q = filterQuery.toLowerCase();
-      return (
-        log.url.toLowerCase().includes(q) ||
-        log.path.toLowerCase().includes(q) ||
-        String(log.statusCode).includes(q) ||
-        (log.responseBody && log.responseBody.toLowerCase().includes(q))
-      );
+      const q = filterQuery.trim().toLowerCase();
+      return log.url.toLowerCase().includes(q) || log.path.toLowerCase().includes(q);
     }
     return true;
   });
 
-  const selectedLog = trafficLogs.find((l) => l.id === selectedLogId) || (filteredLogs.length > 0 ? filteredLogs[0] : null);
+  const selectedLog = filteredLogs.find((l) => l.id === selectedLogId) || (filteredLogs.length > 0 ? filteredLogs[0] : null);
 
   // Diff Logs
   const diffLog1 = trafficLogs.find((l) => l.id === diffLogIds[0]) || (trafficLogs.length > 0 ? trafficLogs[0] : null);
@@ -239,9 +244,9 @@ cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
                   PRO ENGINE
                 </span>
               </div>
-              <span className="text-[11px] text-text-muted">
-                Proxyman-tier HTTPS inspection, breakpoints, URL rewrite, and network throttling
-              </span>
+              <p className="text-[11px] text-text-muted">
+                Native HTTPS inspection, live breakpoints, URL rewrite, and network throttling
+              </p>
             </div>
           </div>
 
@@ -547,7 +552,7 @@ cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
                         type="text"
                         value={filterQuery}
                         onChange={(e) => setFilterQuery(e.target.value)}
-                        placeholder="Filter by URL, path, status, body..."
+                        placeholder="Filter URLs (e.g. api.myapp.com, /auth)..."
                         className="w-full bg-transparent text-xs text-text placeholder-text-muted focus:outline-hidden font-mono"
                       />
                       {filterQuery && (
@@ -667,8 +672,8 @@ cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
                               {log.statusCode}
                             </span>
 
-                            <span className="text-xs text-text font-sans truncate" title={log.url}>
-                              {log.path || log.url}
+                            <span className="text-xs text-text font-mono truncate select-all" title={log.url}>
+                              {log.url}
                             </span>
                           </div>
 
