@@ -114,16 +114,26 @@ export const TabBar: React.FC = () => {
               }`}
               title={tab.name}
             >
-              {/* Method Pill */}
-              <span
-                className={`text-[9px] font-bold px-1.5 py-0.2 rounded mr-1.5 uppercase tracking-wide font-mono ${methodStyle.bg} ${methodStyle.text}`}
-              >
-                {tab.method}
-              </span>
+              {/* Method / Protocol Pill */}
+              {tab.tabType === 'websocket' ? (
+                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded mr-1.5 uppercase tracking-wide font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  WS
+                </span>
+              ) : tab.tabType === 'sse' ? (
+                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded mr-1.5 uppercase tracking-wide font-mono bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                  SSE
+                </span>
+              ) : (
+                <span
+                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded mr-1.5 uppercase tracking-wide font-mono ${methodStyle.bg} ${methodStyle.text}`}
+                >
+                  {tab.method}
+                </span>
+              )}
 
               {/* Tab Title */}
               <span className="truncate text-xs flex-1 min-w-0 font-sans">
-                {tab.name || 'Untitled Request'}
+                {tab.name || (tab.tabType === 'websocket' ? 'WebSocket Stream' : tab.tabType === 'sse' ? 'SSE Stream' : 'Untitled Request')}
               </span>
 
               {/* Dirty indicator */}
@@ -161,14 +171,16 @@ export const TabBar: React.FC = () => {
           );
         })}
 
-        {/* Add Tab Button */}
-        <button
-          onClick={() => openTab()}
-          className="flex items-center justify-center w-8 h-full text-text-secondary hover:text-text hover:bg-background-tertiary transition-colors shrink-0"
-          title="New Request (Cmd/Ctrl + N)"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+        {/* Add Tab Button & Quick Menu */}
+        <div className="flex items-center h-full shrink-0">
+          <button
+            onClick={() => openTab()}
+            className="flex items-center justify-center w-7 h-full text-text-secondary hover:text-text hover:bg-background-tertiary transition-colors"
+            title="New HTTP Request (Cmd/Ctrl + N)"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Scroll Right Arrow */}

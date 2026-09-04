@@ -7,12 +7,13 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
 }
 
-function createTabFromRequest(request: RequestItem): TabItem {
+function createTabFromRequest(request: RequestItem, tabType: TabItem['tabType'] = 'http'): TabItem {
   return {
     id: generateId(),
     requestId: request.id,
     name: request.name || 'Untitled Request',
     method: request.method,
+    tabType,
     isDirty: false,
     request: JSON.parse(JSON.stringify(request)),
     response: null,
@@ -43,6 +44,7 @@ interface WorkspaceState {
 
   // Tab Operations
   openTab: (request?: RequestItem) => string;
+  openRealtimeTab: (type: 'websocket' | 'sse', initialUrl?: string) => string;
   closeTab: (tabId: string) => void;
   closeOtherTabs: (tabId: string) => void;
   closeAllTabs: () => void;
@@ -123,6 +125,20 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
     const req = request || createDefaultRequest('Untitled Request', 'GET', '');
     const newTab = createTabFromRequest(req);
+
+    set((state) => ({
+      tabs: [...state.tabs, newTab],
+      activeTabId: newTab.id,
+    }));
+
+    return newTab.id;
+  },
+
+  openRealtimeTab: (type, initialUrl) => {
+    const defaultUrl = initialUrl || (type === 'websocket' ? 'wss://echo.websocket.events' : 'https://stream.wikimedia.org/v2/stream/recentchange');
+    const name = type === 'websocket' ? 'WebSocket Stream' : 'SSE Stream';
+    const req = createDefaultRequest(name, 'GET', defaultUrl);
+    const newTab = createTabFromRequest(req, type);
 
     set((state) => ({
       tabs: [...state.tabs, newTab],

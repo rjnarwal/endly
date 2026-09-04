@@ -14,10 +14,12 @@ import { CodeSnippetModal } from './components/modals/CodeSnippetModal';
 import { DocumentationViewer } from './components/docs/DocumentationViewer';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { MobileInterceptorModal } from './components/proxy/MobileInterceptorModal';
+import { RealtimeClient } from './components/realtime/RealtimeClient';
 import { useWorkspaceStore } from './store/useWorkspaceStore';
 
 export const App: React.FC = () => {
   const {
+    tabs,
     openTab,
     closeTab,
     activeTabId,
@@ -120,65 +122,84 @@ export const App: React.FC = () => {
           {/* Multi-Tab Bar */}
           <TabBar />
 
-          {/* Request / Response Split Pane with Sliders & Responsive View */}
-          {isMobile ? (
-            /* Mobile View: Switches smoothly between Request and Response */
-            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-              {mobileActivePane === 'request' ? <RequestBuilder /> : <ResponseViewer />}
-            </div>
-          ) : paneOrientation === 'horizontal' ? (
-            /* Side-by-Side Horizontal View with Vertical Resizer Slider */
-            <div className="flex-1 flex min-h-0 overflow-hidden relative">
-              <div
-                style={{ width: `${splitRatio}%` }}
-                className="h-full min-w-[220px] overflow-hidden flex flex-col shrink-0"
-              >
-                <RequestBuilder />
-              </div>
+          {/* Workspace Content: Stream Client OR Request/Response Split View */}
+          {(() => {
+            const activeTab = tabs.find((t) => t.id === activeTabId);
+            if (activeTab?.tabType === 'websocket' || activeTab?.tabType === 'sse') {
+              return (
+                <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                  <RealtimeClient />
+                </div>
+              );
+            }
 
-              <SplitResizer
-                direction="horizontal"
-                currentRatio={splitRatio}
-                onResize={setSplitRatio}
-                onReset={() => setSplitRatio(50)}
-                orientation={paneOrientation}
-                onToggleOrientation={() => setPaneOrientation('vertical')}
-              />
+            if (isMobile) {
+              /* Mobile View: Switches smoothly between Request and Response */
+              return (
+                <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                  {mobileActivePane === 'request' ? <RequestBuilder /> : <ResponseViewer />}
+                </div>
+              );
+            }
 
-              <div
-                style={{ width: `${100 - splitRatio}%` }}
-                className="h-full min-w-[220px] overflow-hidden flex flex-col flex-1"
-              >
-                <ResponseViewer />
-              </div>
-            </div>
-          ) : (
+            if (paneOrientation === 'horizontal') {
+              /* Side-by-Side Horizontal View with Vertical Resizer Slider */
+              return (
+                <div className="flex-1 flex min-h-0 overflow-hidden relative">
+                  <div
+                    style={{ width: `${splitRatio}%` }}
+                    className="h-full min-w-[220px] overflow-hidden flex flex-col shrink-0"
+                  >
+                    <RequestBuilder />
+                  </div>
+
+                  <SplitResizer
+                    direction="horizontal"
+                    currentRatio={splitRatio}
+                    onResize={setSplitRatio}
+                    onReset={() => setSplitRatio(50)}
+                    orientation={paneOrientation}
+                    onToggleOrientation={() => setPaneOrientation('vertical')}
+                  />
+
+                  <div
+                    style={{ width: `${100 - splitRatio}%` }}
+                    className="h-full min-w-[220px] overflow-hidden flex flex-col flex-1"
+                  >
+                    <ResponseViewer />
+                  </div>
+                </div>
+              );
+            }
+
             /* Stacked Vertical View with Horizontal Resizer Slider */
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
-              <div
-                style={{ height: `${splitRatio}%` }}
-                className="w-full min-h-[160px] overflow-hidden flex flex-col shrink-0"
-              >
-                <RequestBuilder />
-              </div>
+            return (
+              <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+                <div
+                  style={{ height: `${splitRatio}%` }}
+                  className="w-full min-h-[160px] overflow-hidden flex flex-col shrink-0"
+                >
+                  <RequestBuilder />
+                </div>
 
-              <SplitResizer
-                direction="vertical"
-                currentRatio={splitRatio}
-                onResize={setSplitRatio}
-                onReset={() => setSplitRatio(50)}
-                orientation={paneOrientation}
-                onToggleOrientation={() => setPaneOrientation('horizontal')}
-              />
+                <SplitResizer
+                  direction="vertical"
+                  currentRatio={splitRatio}
+                  onResize={setSplitRatio}
+                  onReset={() => setSplitRatio(50)}
+                  orientation={paneOrientation}
+                  onToggleOrientation={() => setPaneOrientation('horizontal')}
+                />
 
-              <div
-                style={{ height: `${100 - splitRatio}%` }}
-                className="w-full min-h-[160px] overflow-hidden flex flex-col flex-1"
-              >
-                <ResponseViewer />
+                <div
+                  style={{ height: `${100 - splitRatio}%` }}
+                  className="w-full min-h-[160px] overflow-hidden flex flex-col flex-1"
+                >
+                  <ResponseViewer />
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 

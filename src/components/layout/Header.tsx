@@ -21,6 +21,7 @@ import {
   Smartphone,
   Home,
   ExternalLink,
+  Radio,
 } from 'lucide-react';
 import { useWorkspaceStore } from '../../store/useWorkspaceStore';
 import { useEnvironmentStore } from '../../store/useEnvironmentStore';
@@ -35,6 +36,7 @@ export const Header: React.FC = () => {
     openSnippetModal,
     openDocsModal,
     openSettingsModal,
+    openRealtimeTab,
     toggleQuickEnv,
     toggleSidebar,
     isSidebarOpen,
@@ -177,6 +179,16 @@ export const Header: React.FC = () => {
           >
             <FileCode className="w-3.5 h-3.5 text-purple-400" />
             <span className="font-medium">Snippets</span>
+          </button>
+
+          {/* Real-Time Stream Launcher */}
+          <button
+            onClick={() => openRealtimeTab('websocket')}
+            className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs text-text-secondary hover:text-text hover:bg-background-tertiary transition-colors"
+            title="Launch WebSocket / Server-Sent Events (SSE) Live Stream Inspector"
+          >
+            <Radio className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-medium">Real-Time Stream</span>
           </button>
 
           {/* Mobile Proxy Interceptor Button */}

@@ -162,11 +162,14 @@ export interface TestResultSummary {
   assertions: TestAssertion[];
 }
 
+export type TabType = 'http' | 'websocket' | 'sse';
+
 export interface TabItem {
   id: string;
   requestId: string;
   name: string;
   method: HttpRequestMethod;
+  tabType?: TabType;
   isDirty: boolean;
   request: RequestItem;
   response?: ResponseData | null;
