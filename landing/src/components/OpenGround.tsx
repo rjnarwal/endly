@@ -73,8 +73,8 @@ const INITIAL_POSTS: ForumPost[] = [
     tags: ['Mobile Architecture', 'Endly', 'Networking', 'Reverse Proxy', 'Kotlin'],
     publishedAt: 'Yesterday',
     readTime: '6 min read',
-    upvotes: 48,
-    commentsCount: 9,
+    upvotes: 0,
+    commentsCount: 0,
     isPinned: true,
     summary:
       'A technical breakdown of how Endly provisions an embedded, lightweight Wi-Fi proxy server on your local machine to capture raw HTTP/HTTPS payloads from physical mobile devices with zero external cloud dependencies.',
@@ -86,26 +86,7 @@ const INITIAL_POSTS: ForumPost[] = [
       '2. Corporate Firewall & VPN Immunity: Because all traffic stays on your local subnet (192.168.x.x / 10.x.x.x), aggressive corporate proxies like Zscaler and Cisco AnyConnect never block or throttle mobile inspection.',
       '3. Live Mocking & Breakpoint Injection: The local daemon can intercept incoming requests and return synthetic JSON fixtures before reaching downstream staging servers.',
     ],
-    comments: [
-      {
-        id: 'c-1',
-        author: 'Marcus Vance',
-        role: 'Senior Android Engineer',
-        time: '18 hours ago',
-        content:
-          'This solves our exact issue with Zscaler blocking Charles Proxy on corporate MacBooks. Tested Endly over the office Wi-Fi with a Samsung S23 and intercepting gRPC/JSON was instantaneous.',
-        upvotes: 12,
-      },
-      {
-        id: 'c-2',
-        author: 'Elena Rostova',
-        role: 'Security Researcher',
-        time: '12 hours ago',
-        content:
-          'Appreciate that the CA certificate is generated locally per installation and not hardcoded. Great security posture.',
-        upvotes: 8,
-      },
-    ],
+    comments: [],
   },
   {
     id: 'post-2',
@@ -121,8 +102,8 @@ const INITIAL_POSTS: ForumPost[] = [
     tags: ['Security', 'TokenLens', 'WebCrypto', 'Privacy', 'Compliance'],
     publishedAt: '3 days ago',
     readTime: '5 min read',
-    upvotes: 62,
-    commentsCount: 14,
+    upvotes: 0,
+    commentsCount: 0,
     isPinned: true,
     summary:
       'How we use the W3C WebCrypto API in TokenLens and CipherLab to verify RS256, ES256, and HMAC signatures directly in browser memory without sending a single byte to an external server.',
@@ -131,17 +112,7 @@ const INITIAL_POSTS: ForumPost[] = [
       'For engineers working in fintech, defense, healthcare, or strictly regulated enterprises, pasting a JWT containing internal user IDs or private RSA keys into a web tool is a severe compliance violation.',
       'In the Grassroot Digital suite, we adopted a strict architectural mandate: 100% of compute must execute in the browser using the W3C WebCrypto API (window.crypto.subtle) or in native standalone binaries. When you decode or verify a JWT in TokenLens, your keys never touch a network socket.',
     ],
-    comments: [
-      {
-        id: 'c-3',
-        author: 'Devin Thorne',
-        role: 'Fintech Tech Lead',
-        time: '2 days ago',
-        content:
-          'We banned jwt.io at our company due to data leakage concerns. TokenLens is now our team’s official internal standard for JWT inspection.',
-        upvotes: 19,
-      },
-    ],
+    comments: [],
   },
   {
     id: 'post-3',
@@ -157,8 +128,8 @@ const INITIAL_POSTS: ForumPost[] = [
     tags: ['RFC', 'Endly', 'WebSockets', 'SSE', 'Feature Proposal'],
     publishedAt: '2 days ago',
     readTime: '4 min read',
-    upvotes: 35,
-    commentsCount: 11,
+    upvotes: 0,
+    commentsCount: 0,
     isPinned: false,
     summary:
       'Proposing bidirectional WebSocket frame inspection, message filtering, and manual frame injection for Endly v1.1. Share your feedback and RFC votes.',
@@ -171,26 +142,7 @@ const INITIAL_POSTS: ForumPost[] = [
       '• Local filter by opcode or payload substring regex',
       'Please leave your thoughts on what features matter most for your real-time debugging workflow!',
     ],
-    comments: [
-      {
-        id: 'c-4',
-        author: 'Alex Kumar',
-        role: 'Full Stack Engineer',
-        time: '1 day ago',
-        content:
-          'A filter for heartbeat/ping-pong frames would be huge! It gets super noisy when debugging real chat apps.',
-        upvotes: 14,
-      },
-      {
-        id: 'c-5',
-        author: 'Sarah Jenkins',
-        role: 'AI Platform Eng',
-        time: '14 hours ago',
-        content:
-          'For SSE, please support parsing markdown/JSON streams in real time as OpenAI and Claude chunks come in.',
-        upvotes: 11,
-      },
-    ],
+    comments: [],
   },
   {
     id: 'post-4',
@@ -206,8 +158,8 @@ const INITIAL_POSTS: ForumPost[] = [
     tags: ['TokenLens', 'JWT', 'JWKS', 'Cryptography', 'RS256'],
     publishedAt: '4 days ago',
     readTime: '4 min read',
-    upvotes: 29,
-    commentsCount: 6,
+    upvotes: 0,
+    commentsCount: 0,
     isPinned: false,
     summary:
       'How TokenLens parses OpenID Connect and Auth0/Okta .well-known/jwks.json public keys to verify asymmetric signatures completely on client devices.',
@@ -231,8 +183,8 @@ const INITIAL_POSTS: ForumPost[] = [
     tags: ['JSONLens', 'Algorithms', 'Web Workers', 'Performance'],
     publishedAt: '5 days ago',
     readTime: '5 min read',
-    upvotes: 31,
-    commentsCount: 4,
+    upvotes: 0,
+    commentsCount: 0,
     isPinned: false,
     summary:
       'Why line-by-line text diffing fails for JSON, and how JSONLens implements recursive AST comparison and Web Workers to diff 50MB+ payloads smoothly.',
@@ -250,13 +202,25 @@ interface OpenGroundProps {
 }
 
 export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectProduct }) => {
+  const [userUpvotedPostIds, setUserUpvotedPostIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('grassroot_user_upvotes');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [posts, setPosts] = useState<ForumPost[]>(() => {
-    const saved = localStorage.getItem('grassroot_openground_posts');
+    const saved = localStorage.getItem('grassroot_openground_posts_real');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
       } catch {
-        return INITIAL_POSTS;
+        // Fall back to clean INITIAL_POSTS
       }
     }
     return INITIAL_POSTS;
@@ -277,10 +241,14 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostAuthor, setNewPostAuthor] = useState('');
 
-  // Persist posts
+  // Persist real posts and user upvotes
   useEffect(() => {
-    localStorage.setItem('grassroot_openground_posts', JSON.stringify(posts));
+    localStorage.setItem('grassroot_openground_posts_real', JSON.stringify(posts));
   }, [posts]);
+
+  useEffect(() => {
+    localStorage.setItem('grassroot_user_upvotes', JSON.stringify(userUpvotedPostIds));
+  }, [userUpvotedPostIds]);
 
   // Filter posts
   const filteredPosts = posts.filter((post) => {
@@ -307,11 +275,24 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
 
   const handleUpvotePost = (postId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, upvotes: p.upvotes + 1 } : p))
+
+    const isAlreadyUpvoted = userUpvotedPostIds.includes(postId);
+    const delta = isAlreadyUpvoted ? -1 : 1;
+
+    setUserUpvotedPostIds((prev) =>
+      isAlreadyUpvoted ? prev.filter((id) => id !== postId) : [...prev, postId]
     );
+
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId ? { ...p, upvotes: Math.max(0, p.upvotes + delta) } : p
+      )
+    );
+
     if (selectedPost && selectedPost.id === postId) {
-      setSelectedPost((prev) => (prev ? { ...prev, upvotes: prev.upvotes + 1 } : null));
+      setSelectedPost((prev) =>
+        prev ? { ...prev, upvotes: Math.max(0, prev.upvotes + delta) } : null
+      );
     }
   };
 
@@ -320,12 +301,12 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
     if (!selectedPost || !newCommentText.trim()) return;
 
     const newComment: ForumComment = {
-      id: `c-${Date.now()}`,
+      id: `comment-${Date.now()}`,
       author: commenterName.trim() || 'Anonymous Engineer',
       role: 'Community Member',
       time: 'Just now',
       content: newCommentText.trim(),
-      upvotes: 1,
+      upvotes: 0,
     };
 
     const updatedPosts = posts.map((p) => {
@@ -378,7 +359,7 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
       tags: tagsArray.length > 0 ? tagsArray : ['Community', 'Discussion'],
       publishedAt: 'Just now',
       readTime: '3 min read',
-      upvotes: 1,
+      upvotes: 0,
       commentsCount: 0,
       isPinned: false,
       summary: newPostSummary.trim(),
@@ -591,10 +572,14 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
                     <div className="flex items-center space-x-4 text-xs text-text-muted">
                       <button
                         onClick={(e) => handleUpvotePost(post.id, e)}
-                        className="flex items-center space-x-1.5 hover:text-orange-400 transition-colors p-1 cursor-pointer"
-                        title="Upvote Discussion"
+                        className={`flex items-center space-x-1.5 transition-all p-1.5 rounded-lg cursor-pointer ${
+                          userUpvotedPostIds.includes(post.id)
+                            ? 'text-orange-400 bg-orange-500/15 font-bold'
+                            : 'text-text-muted hover:text-orange-400 hover:bg-background-elevated'
+                        }`}
+                        title={userUpvotedPostIds.includes(post.id) ? 'Remove upvote' : 'Upvote discussion'}
                       >
-                        <ThumbsUp className="w-3.5 h-3.5" />
+                        <ThumbsUp className={`w-3.5 h-3.5 ${userUpvotedPostIds.includes(post.id) ? 'fill-orange-400' : ''}`} />
                         <span className="font-semibold">{post.upvotes}</span>
                       </button>
 
@@ -722,9 +707,14 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleUpvotePost(selectedPost.id)}
-                  className="flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-background-elevated hover:bg-accent hover:text-white text-xs font-bold transition-colors cursor-pointer"
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    userUpvotedPostIds.includes(selectedPost.id)
+                      ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25'
+                      : 'bg-background-elevated hover:bg-background-tertiary text-text-secondary hover:text-text-primary'
+                  }`}
+                  title={userUpvotedPostIds.includes(selectedPost.id) ? 'Remove upvote' : 'Upvote discussion'}
                 >
-                  <ThumbsUp className="w-3.5 h-3.5" />
+                  <ThumbsUp className={`w-3.5 h-3.5 ${userUpvotedPostIds.includes(selectedPost.id) ? 'fill-white' : ''}`} />
                   <span>{selectedPost.upvotes}</span>
                 </button>
 
