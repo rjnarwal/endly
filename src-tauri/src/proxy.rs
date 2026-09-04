@@ -67,8 +67,6 @@ pub struct ProxyManager {
     pub shutdown_tx: Option<broadcast::Sender<()>>,
 }
 
-lazy_static_proxy();
-
 fn get_manager() -> Arc<Mutex<ProxyManager>> {
     static mut MANAGER: Option<Arc<Mutex<ProxyManager>>> = None;
     static INIT: std::sync::Once = std::sync::Once::new();
@@ -84,8 +82,6 @@ fn get_manager() -> Arc<Mutex<ProxyManager>> {
         MANAGER.as_ref().unwrap().clone()
     }
 }
-
-fn lazy_static_proxy() {}
 
 pub fn get_local_ip_addresses() -> Vec<String> {
     let mut ips = Vec::new();
