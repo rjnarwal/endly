@@ -52,16 +52,16 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   };
 
   return (
-    <section id="products" className="py-16 md:py-24 bg-background-primary relative">
+    <section id="products" className="py-10 md:py-14 bg-background-primary relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-2.5">
               <Layers className="w-3.5 h-3.5" />
               <span>Full Ecosystem</span>
             </div>
-            <h2 className="font-heading font-extrabold text-3xl sm:text-5xl text-text-primary tracking-tight">
+            <h2 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-text-primary tracking-tight">
               Developer Toolbox
             </h2>
             <p className="text-text-secondary text-base mt-2">

@@ -21,29 +21,29 @@ interface PrivacyManifestoProps {
 
 export const PrivacyManifesto: React.FC<PrivacyManifestoProps> = ({ onOpenDownload }) => {
   return (
-    <section id="manifesto" className="py-16 md:py-24 relative overflow-hidden">
+    <section id="manifesto" className="py-10 md:py-14 relative overflow-hidden">
       {/* Background Orbs */}
       <div className="ambient-glow w-96 h-96 -bottom-20 -left-20 bg-emerald-500/15" />
       <div className="ambient-glow w-96 h-96 -top-20 -right-20 bg-blue-500/15" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-10">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2.5">
             <ShieldCheck className="w-3.5 h-3.5" />
             <span>Core Philosophy</span>
           </div>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-5xl text-text-primary tracking-tight">
+          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-text-primary tracking-tight">
             The Grassroot Digital Privacy Promise
           </h2>
-          <p className="text-text-secondary text-base sm:text-lg mt-3">
+          <p className="text-text-secondary text-base sm:text-lg mt-2.5">
             Modern SaaS developer tools have turned into cloud data vacuums. We build local-first software
             where your data remains yours alone.
           </p>
         </div>
 
         {/* 4 Architecture Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="p-6 rounded-2xl bg-background-secondary border border-border shadow-xl space-y-3">
             <div className="w-10 h-10 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center">
               <Lock className="w-5 h-5" />
@@ -90,7 +90,7 @@ export const PrivacyManifesto: React.FC<PrivacyManifestoProps> = ({ onOpenDownlo
         </div>
 
         {/* Endly Desktop Downloads Card */}
-        <div id="downloads" className="rounded-3xl bg-gradient-to-br from-background-secondary to-background-tertiary border border-border shadow-2xl p-8 sm:p-12 relative overflow-hidden">
+        <div id="downloads" className="rounded-3xl bg-gradient-to-br from-background-secondary to-background-tertiary border border-border shadow-2xl p-6 sm:p-10 relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-7 space-y-4">
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/15 border border-accent/30 text-accent text-xs font-semibold">
@@ -104,13 +104,13 @@ export const PrivacyManifesto: React.FC<PrivacyManifestoProps> = ({ onOpenDownlo
                 integrated mobile HTTP/HTTPS LAN interceptor without opening a browser.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-4">
+              <div className="flex flex-wrap items-center gap-3 pt-3">
                 {/* Launch Endly Web App */}
                 <a
                   href="https://endly.grassroot.digital"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-2 px-6 py-3 rounded-2xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/20 transition-all"
+                  className="min-h-[44px] flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-extrabold text-sm shadow-md shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer"
                 >
                   <span>Launch Web App</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -119,10 +119,11 @@ export const PrivacyManifesto: React.FC<PrivacyManifestoProps> = ({ onOpenDownlo
                 {/* Download Desktop App Modal */}
                 <button
                   onClick={() => onOpenDownload && onOpenDownload('endly')}
-                  className="flex items-center space-x-2 px-6 py-3 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs font-bold shadow-md transition-all cursor-pointer"
+                  className="min-h-[44px] flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border-2 border-border/80 hover:border-accent/50 text-text-primary font-extrabold text-sm shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer group"
                 >
-                  <Monitor className="w-4 h-4 text-accent" />
-                  <span>Download Desktop ▾</span>
+                  <Monitor className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                  <span>Download Desktop</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
                 </button>
               </div>
             </div>

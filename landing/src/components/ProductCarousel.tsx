@@ -84,24 +84,24 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   };
 
   return (
-    <section id="showcase" className="relative py-16 md:py-24 overflow-hidden">
+    <section id="showcase" className="relative py-10 md:py-14 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-8">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-2.5">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Interactive Product Suite</span>
           </div>
-          <h2 className="font-heading font-extrabold text-3xl sm:text-5xl text-text-primary tracking-tight">
+          <h2 className="font-heading font-extrabold text-3xl sm:text-4xl lg:text-5xl text-text-primary tracking-tight">
             Engineered for High-Velocity Developers
           </h2>
-          <p className="text-text-secondary text-base sm:text-lg mt-3">
+          <p className="text-text-secondary text-base sm:text-lg mt-2.5">
             Explore our ecosystem of zero-cloud engineering utilities designed to replace bloated SaaS tools.
           </p>
         </div>
 
         {/* Carousel Top Tab Navigators */}
-        <div className="flex items-center justify-center space-x-1 sm:space-x-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+        <div className="flex items-center justify-center space-x-1 sm:space-x-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
           {PRODUCTS.map((product, idx) => (
             <button
               key={product.id}

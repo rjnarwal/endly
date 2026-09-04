@@ -8,9 +8,9 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onSelectProduct }) => {
   return (
-    <footer className="bg-background-secondary border-t border-border pt-16 pb-12 text-xs text-text-muted">
+    <footer className="bg-background-secondary border-t border-border pt-12 pb-10 text-xs text-text-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-border/60">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-border/60">
           {/* Brand Col */}
           <div className="md:col-span-4 space-y-4">
             <div className="flex items-center space-x-3">

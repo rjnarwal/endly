@@ -18,14 +18,14 @@ import {
 
 export const AboutMe: React.FC = () => {
   return (
-    <section id="about" className="py-24 relative overflow-hidden bg-background-primary select-none">
+    <section id="about" className="py-12 md:py-16 relative overflow-hidden bg-background-primary select-none">
       {/* Ambient background glow orbs */}
       <div className="ambient-glow w-[550px] h-[550px] bg-emerald-500/10 -top-24 right-0" />
       <div className="ambient-glow w-[550px] h-[550px] bg-blue-500/10 bottom-0 -left-20" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold tracking-wide uppercase">
             <User className="w-3.5 h-3.5" />
             <span>Founder & Architect Profile</span>

@@ -22,7 +22,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) => {
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
+    <section className="relative pt-24 pb-10 md:pt-32 md:pb-12 overflow-hidden">
       {/* Background Ambient Glow Orbs */}
       <div className="ambient-glow w-[550px] h-[550px] bg-orange-500/20 -top-32 -left-32" />
       <div className="ambient-glow w-[600px] h-[600px] bg-blue-500/20 top-40 -right-40" />
@@ -33,7 +33,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) =>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* Top Floating Badge */}
-        <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-background-elevated/80 border border-border text-xs text-text-secondary shadow-md mb-8 hover:border-accent/40 transition-colors">
+        <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-background-elevated/80 border border-border text-xs text-text-secondary shadow-md mb-6 hover:border-accent/40 transition-colors">
           <span className="flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -44,7 +44,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) =>
         </div>
 
         {/* Hero Main Headline */}
-        <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight text-text-primary max-w-5xl mx-auto leading-[1.1] mb-6">
+        <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight text-text-primary max-w-5xl mx-auto leading-[1.1] mb-5">
           Privacy-First Developer Tools. <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">
             100% Client-Side.
@@ -53,13 +53,13 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) =>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-base sm:text-xl text-text-secondary max-w-3xl mx-auto font-normal leading-relaxed mb-10">
+        <p className="text-base sm:text-xl text-text-secondary max-w-3xl mx-auto font-normal leading-relaxed mb-8">
           Grassroot Digital builds ultra-fast, local-first engineering utilities for developers who value
           uncompromising speed, zero telemetry, and seamless operation behind strict corporate firewalls.
         </p>
 
         {/* Hero CTA Buttons - Generous, Bold, Premium Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto mb-16">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto mb-10">
           {/* Launch Endly Web App */}
           <a
             href="https://endly.grassroot.digital"

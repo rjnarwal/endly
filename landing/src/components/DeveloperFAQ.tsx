@@ -88,10 +88,10 @@ export const DeveloperFAQ: React.FC = () => {
   };
 
   return (
-    <section id="faq" className="py-24 relative overflow-hidden bg-background-secondary/40 border-t border-border select-none">
+    <section id="faq" className="py-12 md:py-16 relative overflow-hidden bg-background-secondary/40 border-t border-border select-none">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono font-bold tracking-wide uppercase">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Developer Knowledge Base & FAQ</span>
