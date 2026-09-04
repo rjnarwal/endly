@@ -1,5 +1,5 @@
 /**
- * Endly Mobile Proxy Interceptor & Proxyman Engine (Companion Runner)
+ * Endly Mobile Proxy Interceptor & Proxyman Engine (High-Performance Turbo Edition)
  * Run with: npm run proxy
  */
 
@@ -12,6 +12,10 @@ const { WebSocketServer } = require('ws');
 
 let PROXY_PORT = 8888;
 const WS_PORT = 8889;
+
+// High-speed persistent connection agents
+const httpAgent = new http.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 100 });
+const httpsAgent = new https.Agent({ keepAlive: true, keepAliveMsecs: 10000, maxSockets: 100 });
 
 let activeMocks = [];
 let activeBreakpoints = [];
@@ -49,7 +53,7 @@ function broadcast(data) {
   }
 }
 
-// 3. Create HTTP & CONNECT Proxy Server
+// 3. Create High-Performance HTTP & CONNECT Proxy Server
 function startHttpProxy(port) {
   if (proxyServer) {
     try {
@@ -60,18 +64,21 @@ function startHttpProxy(port) {
   PROXY_PORT = port || 8888;
 
   proxyServer = http.createServer(async (req, res) => {
+    // Disable Nagle's algorithm for instant socket throughput
+    if (req.socket) req.socket.setNoDelay(true);
+
     const startTime = Date.now();
     let reqUrl = req.url.startsWith('http') ? req.url : `http://${req.headers.host}${req.url}`;
     let isMappedRemote = false;
     let originalUrl = undefined;
 
-    // Apply Simulated Throttling Delay if active
-    if (activeThrottling.enabled && activeThrottling.latencyMs > 0) {
+    // Apply Simulated Throttling Delay ONLY if explicitly enabled
+    if (activeThrottling && activeThrottling.enabled && activeThrottling.latencyMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, activeThrottling.latencyMs));
     }
 
-    // Apply Simulated Packet Loss (drop connection randomly)
-    if (activeThrottling.enabled && activeThrottling.packetLossPercent > 0) {
+    // Apply Simulated Packet Loss
+    if (activeThrottling && activeThrottling.enabled && activeThrottling.packetLossPercent > 0) {
       if (Math.random() * 100 < activeThrottling.packetLossPercent) {
         res.socket.destroy();
         return;
@@ -84,7 +91,6 @@ function startHttpProxy(port) {
       originalUrl = reqUrl;
       reqUrl = reqUrl.replace(new RegExp(matchedMapRemote.fromPattern, 'i'), matchedMapRemote.toUrl);
       isMappedRemote = true;
-      console.log(`[MAP REMOTE] Rewrote ${originalUrl} -> ${reqUrl}`);
     }
 
     const parsedUrl = url.parse(reqUrl);
@@ -129,11 +135,10 @@ function startHttpProxy(port) {
         requestHeaders: req.headers,
         responseHeaders,
         responseBody: matchedMapLocal.responseBody,
-        clientIp: req.socket.remoteAddress,
+        clientIp: req.socket ? req.socket.remoteAddress : '',
       };
 
       broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
-      console.log(`[MAP LOCAL ${matchedMapLocal.statusCode}] ${req.method} ${reqUrl} (${logItem.timeMs}ms)`);
       return;
     }
 
@@ -179,31 +184,42 @@ function startHttpProxy(port) {
         requestHeaders: req.headers,
         responseHeaders,
         responseBody: matchedMock.body,
-        clientIp: req.socket.remoteAddress,
+        clientIp: req.socket ? req.socket.remoteAddress : '',
       };
 
       broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
-      console.log(`[MOCKED ${matchedMock.statusCode}] ${req.method} ${reqUrl} (${logItem.timeMs}ms)`);
       return;
     }
 
-    // 4. Pass-through to Remote Server
+    // 4. Pass-through to Remote Server with DIRECT STREAMING (Zero Buffering Delay)
     const options = {
       hostname: parsedUrl.hostname,
       port: parsedUrl.port || 80,
       path: parsedUrl.path,
       method: req.method,
       headers: { ...req.headers },
+      agent: httpAgent,
     };
     delete options.headers['proxy-connection'];
 
     const proxyReq = http.request(options, (proxyRes) => {
-      const chunks = [];
-      proxyRes.on('data', (chunk) => chunks.push(chunk));
+      // Send response headers to phone immediately!
+      res.writeHead(proxyRes.statusCode, proxyRes.headers);
+
+      let totalBytes = 0;
+      let bodyPreview = '';
+
+      proxyRes.on('data', (chunk) => {
+        // Stream chunk immediately to phone with zero latency
+        res.write(chunk);
+        totalBytes += chunk.length;
+        if (bodyPreview.length < 15000) {
+          bodyPreview += chunk.toString('utf8');
+        }
+      });
+
       proxyRes.on('end', () => {
-        const bodyBuf = Buffer.concat(chunks);
-        res.writeHead(proxyRes.statusCode, proxyRes.headers);
-        res.end(bodyBuf);
+        res.end();
 
         const logItem = {
           id: Math.random().toString(36).substring(2, 9),
@@ -217,38 +233,46 @@ function startHttpProxy(port) {
           isMappedRemote,
           originalUrl,
           timeMs: Date.now() - startTime,
-          sizeBytes: bodyBuf.length,
+          sizeBytes: totalBytes,
           requestHeaders: req.headers,
           responseHeaders: proxyRes.headers,
-          responseBody: bodyBuf.toString('utf8').slice(0, 10000),
-          clientIp: req.socket.remoteAddress,
+          responseBody: bodyPreview.slice(0, 10000),
+          clientIp: req.socket ? req.socket.remoteAddress : '',
         };
 
         broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
-        console.log(`[PASS ${proxyRes.statusCode}] ${req.method} ${reqUrl} (${logItem.timeMs}ms)`);
       });
     });
 
     proxyReq.on('error', (err) => {
-      res.writeHead(502, { 'Content-Type': 'text/plain' });
+      if (!res.headersSent) {
+        res.writeHead(502, { 'Content-Type': 'text/plain' });
+      }
       res.end(`Proxy Error: ${err.message}`);
     });
 
     req.pipe(proxyReq);
   });
 
-  // HTTPS CONNECT Tunneling
+  // HTTPS CONNECT Tunneling (Direct Zero-Latency TCP Pipe)
   proxyServer.on('connect', (req, clientSocket, head) => {
+    clientSocket.setNoDelay(true);
+    clientSocket.setKeepAlive(true, 10000);
+
     const [host, portStr] = req.url.split(':');
     const port = parseInt(portStr, 10) || 443;
 
     const serverSocket = net.connect(port, host, () => {
+      serverSocket.setNoDelay(true);
+      serverSocket.setKeepAlive(true, 10000);
+
       clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
-      serverSocket.write(head);
+      if (head && head.length > 0) {
+        serverSocket.write(head);
+      }
       serverSocket.pipe(clientSocket);
       clientSocket.pipe(serverSocket);
 
-      console.log(`[HTTPS TUNNEL] CONNECT ${host}:${port}`);
       broadcast({
         type: 'TRAFFIC_EVENT',
         log: {
@@ -264,7 +288,7 @@ function startHttpProxy(port) {
           sizeBytes: 0,
           requestHeaders: req.headers,
           responseHeaders: {},
-          clientIp: req.socket.remoteAddress,
+          clientIp: clientSocket.remoteAddress || '',
         },
       });
     });
@@ -272,12 +296,16 @@ function startHttpProxy(port) {
     serverSocket.on('error', () => {
       clientSocket.end('HTTP/1.1 502 Bad Gateway\r\n\r\n');
     });
+
+    clientSocket.on('error', () => {
+      serverSocket.destroy();
+    });
   });
 
   proxyServer.listen(PROXY_PORT, '0.0.0.0', () => {
     isProxyRunning = true;
-    console.log(`\n🚀 Endly Mobile Interceptor listening on 0.0.0.0:${PROXY_PORT}`);
-    console.log(`📱 Configure your phone Wi-Fi proxy to:`);
+    console.log(`\n⚡ Endly Turbo Proxy listening on 0.0.0.0:${PROXY_PORT}`);
+    console.log(`📱 Phone Wi-Fi proxy:`);
     getLocalIps().forEach((ip) => {
       console.log(`   👉 Host: ${ip}  Port: ${PROXY_PORT}`);
     });

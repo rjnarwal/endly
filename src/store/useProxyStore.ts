@@ -204,11 +204,30 @@ const THROTTLING_PROFILES: Record<ThrottlingProfile, Partial<ThrottlingConfig>> 
   custom: { downloadKbps: 1000, uploadKbps: 1000, latencyMs: 200, packetLossPercent: 0, enabled: true },
 };
 
+const savedIp = typeof window !== 'undefined' ? localStorage.getItem('endly_proxy_ip') || '192.168.68.62' : '192.168.68.62';
+
+function autoDetectLocalIp(callback: (ip: string) => void) {
+  if (typeof window === 'undefined' || !window.RTCPeerConnection) return;
+  try {
+    const pc = new RTCPeerConnection({ iceServers: [] });
+    pc.createDataChannel('');
+    pc.createOffer().then((offer) => pc.setLocalDescription(offer)).catch(() => {});
+    pc.onicecandidate = (ice) => {
+      if (!ice || !ice.candidate || !ice.candidate.candidate) return;
+      const match = ice.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+      if (match && match[1] && !match[1].startsWith('127.')) {
+        callback(match[1]);
+        try { pc.close(); } catch {}
+      }
+    };
+  } catch {}
+}
+
 export const useProxyStore = create<ProxyState>((set, get) => ({
   isOpen: false,
   isRunning: false,
   port: 8888,
-  localIps: ['127.0.0.1'],
+  localIps: [savedIp],
   trafficLogs: [],
   selectedLogId: null,
   activeStudioTab: 'traffic',
@@ -240,6 +259,12 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
 
   openModal: () => {
     set({ isOpen: true });
+    autoDetectLocalIp((detectedIp) => {
+      if (detectedIp) {
+        set({ localIps: [detectedIp] });
+        if (typeof window !== 'undefined') localStorage.setItem('endly_proxy_ip', detectedIp);
+      }
+    });
     if (!isTauriEnvironment() && !wsConnection) {
       connectToLocalProxyBridge(get);
     }
@@ -247,7 +272,12 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
 
   closeModal: () => set({ isOpen: false }),
   setPort: (port) => set({ port }),
-  setLocalIps: (localIps) => set({ localIps }),
+  setLocalIps: (localIps) => {
+    if (localIps && localIps.length > 0 && typeof window !== 'undefined') {
+      localStorage.setItem('endly_proxy_ip', localIps[0]);
+    }
+    set({ localIps });
+  },
   setActiveStudioTab: (tab) => set({ activeStudioTab: tab }),
   setActiveGuideTab: (tab) => set({ activeGuideTab: tab }),
   setSelectedLogId: (id) => set({ selectedLogId: id }),
