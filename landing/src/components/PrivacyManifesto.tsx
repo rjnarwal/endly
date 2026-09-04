@@ -13,6 +13,7 @@ import {
   Download,
   CheckCircle,
   ExternalLink,
+  ChevronDown,
 } from 'lucide-react';
 
 interface PrivacyManifestoProps {
