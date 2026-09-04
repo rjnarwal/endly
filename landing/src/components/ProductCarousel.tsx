@@ -17,6 +17,7 @@ import {
   ShieldAlert,
   Apple,
   Monitor,
+  ChevronDown,
 } from 'lucide-react';
 import { ProductItem } from '../types';
 import { PRODUCTS } from '../data/products';
@@ -58,11 +59,11 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
   const currentProduct = PRODUCTS[currentIndex];
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + PRODUCTS.length) % PRODUCTS.length);
+    setCurrentIndex((prev) => (prev === 0 ? PRODUCTS.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % PRODUCTS.length);
+    setCurrentIndex((prev) => (prev === PRODUCTS.length - 1 ? 0 : prev + 1));
   };
 
   const renderIcon = (iconName: string) => {
@@ -211,10 +212,11 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                     {/* Download Desktop App Modal */}
                     <button
                       onClick={() => onOpenDownload && onOpenDownload(currentProduct)}
-                      className="flex items-center space-x-2 px-5 py-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary font-bold text-xs border border-border hover:border-accent/40 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                      className="flex items-center space-x-2 px-5 py-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary font-bold text-sm border border-border hover:border-accent/40 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group"
                     >
-                      <Monitor className="w-4 h-4 text-accent" />
-                      <span>Download Desktop ▾</span>
+                      <Monitor className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                      <span>Download Desktop</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
                     </button>
                   </>
                 ) : (

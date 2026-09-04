@@ -11,6 +11,7 @@ import {
   Layers,
   Filter,
   Monitor,
+  ChevronDown,
 } from 'lucide-react';
 import { ProductCategory, ProductItem } from '../types';
 import { PRODUCTS } from '../data/products';
@@ -51,41 +52,41 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   };
 
   return (
-    <section id="products" className="py-16 md:py-24 bg-background-primary/60 border-t border-border/50">
+    <section id="products" className="py-16 md:py-24 bg-background-primary relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-3">
               <Layers className="w-3.5 h-3.5" />
               <span>Full Ecosystem</span>
             </div>
-            <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-text-primary tracking-tight">
-              Developer Productivity Toolkit
+            <h2 className="font-heading font-extrabold text-3xl sm:text-5xl text-text-primary tracking-tight">
+              Developer Toolbox
             </h2>
-            <p className="text-text-secondary text-sm sm:text-base mt-1.5">
-              High-performance utilities built with zero telemetry and 100% browser-local execution.
+            <p className="text-text-secondary text-base mt-2">
+              Every tool is 100% client-side, zero cloud telemetry, and offline-capable.
             </p>
           </div>
 
           {/* Category Filter Pills */}
-          <div className="flex items-center space-x-1.5 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex items-center space-x-2 overflow-x-auto pt-4 md:pt-0 scrollbar-thin">
             {(
               [
                 { id: 'all', label: 'All Tools' },
-                { id: 'api', label: 'API & Networking' },
-                { id: 'security', label: 'Security & Auth' },
-                { id: 'formatters', label: 'Formatters' },
-                { id: 'utilities', label: 'Utilities' },
+                { id: 'api', label: 'API & Mobile' },
+                { id: 'security', label: 'JWT & Auth' },
+                { id: 'formatters', label: 'JSON & Diff' },
+                { id: 'utilities', label: 'Regex & Crypto' },
               ] as const
             ).map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                   activeCategory === cat.id
                     ? 'bg-accent text-white shadow-md shadow-accent/20'
-                    : 'bg-background-secondary text-text-muted hover:text-text hover:bg-background-tertiary border border-border/70'
+                    : 'bg-background-secondary hover:bg-background-elevated text-text-secondary hover:text-text-primary border border-border'
                 }`}
               >
                 {cat.label}
@@ -94,50 +95,54 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           </div>
         </div>
 
-        {/* Product Cards Grid */}
+        {/* 3-Column Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="group relative rounded-2xl bg-background-secondary border border-border p-6 shadow-xl hover:shadow-2xl hover:border-accent/40 transition-all flex flex-col justify-between"
+              className="group rounded-3xl bg-background-secondary hover:bg-background-secondary/90 border border-border hover:border-accent/40 shadow-lg hover:shadow-2xl transition-all p-6 flex flex-col justify-between relative overflow-hidden"
             >
+              {/* Top Row: Icon + Badges */}
               <div>
-                {/* Card Top: Icon & Status Badge */}
                 <div className="flex items-start justify-between mb-4">
                   <div
-                    className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${product.gradient} flex items-center justify-center shadow-md shadow-orange-500/10 group-hover:scale-110 transition-transform`}
+                    className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${product.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform`}
                   >
                     {renderIcon(product.iconName)}
                   </div>
-                  {product.status === 'live' ? (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-[10px] font-bold border border-emerald-500/30 flex items-center space-x-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>LIVE</span>
-                    </span>
-                  ) : (
-                    <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 font-mono text-[10px] font-bold border border-purple-500/30">
-                      COMING SOON
-                    </span>
-                  )}
+
+                  <div className="flex items-center space-x-1.5">
+                    {product.status === 'live' ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold tracking-wider">
+                        LIVE
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[10px] font-mono font-bold tracking-wider">
+                        SOON
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Product Name & Tagline */}
+                {/* Title & Tagline */}
                 <h3 className="font-heading font-bold text-xl text-text-primary group-hover:text-accent transition-colors">
                   {product.name}
                 </h3>
-                <p className="text-xs font-semibold text-accent mt-0.5 mb-3">
+                <p className="text-xs font-semibold text-text-muted mt-1 mb-3">
                   {product.tagline}
                 </p>
-                <p className="text-xs text-text-secondary leading-relaxed mb-4">
+
+                {/* Description */}
+                <p className="text-xs text-text-secondary leading-relaxed line-clamp-3 mb-6">
                   {product.description}
                 </p>
 
-                {/* Tags */}
+                {/* Mini Feature Chips */}
                 <div className="flex flex-wrap gap-1.5 mb-6">
-                  {product.previewMockup.tags.map((tag, i) => (
+                  {product.previewMockup.tags.slice(0, 3).map((tag, idx) => (
                     <span
-                      key={i}
-                      className="px-2 py-0.5 rounded-md bg-background-tertiary text-text-muted text-[10px] font-mono border border-border/50"
+                      key={idx}
+                      className="px-2 py-0.5 rounded-md bg-background-elevated border border-border/50 text-[10px] text-text-muted font-mono"
                     >
                       {tag}
                     </span>
@@ -145,7 +150,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 </div>
               </div>
 
-              {/* Card Footer Actions - Exactly 2 Options: Launch Web App & Download Desktop */}
+              {/* Card Footer Actions */}
               <div className="pt-4 border-t border-border/60 flex items-center justify-between gap-2">
                 {product.status === 'live' ? (
                   <>
@@ -154,30 +159,31 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                       href={product.actions.primaryUrl || 'https://endly.grassroot.digital'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/20 transition-all"
+                      className="flex-1 h-9 px-3 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/20 transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer"
                     >
                       <span>Launch Web App</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
                     </a>
 
                     {/* Download Desktop App Modal */}
                     <button
                       onClick={() => onOpenDownload && onOpenDownload(product)}
-                      className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 rounded-xl bg-background-tertiary hover:bg-background-elevated text-text-primary text-xs font-semibold border border-border hover:border-accent/40 transition-all cursor-pointer"
+                      className="flex-1 h-9 px-3 rounded-xl bg-background-tertiary hover:bg-background-elevated text-text-primary text-xs font-semibold border border-border hover:border-accent/40 transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer group"
                       title={`Download ${product.name} Desktop App (Mac / Windows / Linux)`}
                     >
-                      <Monitor className="w-3.5 h-3.5 text-accent" />
-                      <span>Desktop App ▾</span>
+                      <Monitor className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                      <span>Desktop App</span>
+                      <ChevronDown className="w-3 h-3 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={() => onOpenEarlyAccess(product)}
-                    className="w-full flex items-center justify-center space-x-1.5 px-3 py-2 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary text-xs font-semibold border border-border transition-colors"
+                    className="w-full h-9 flex items-center justify-center space-x-1.5 px-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary text-xs font-semibold border border-border transition-colors whitespace-nowrap"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                     <span>Join Early Access & Preview</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-text-muted" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-text-muted shrink-0" />
                   </button>
                 )}
               </div>
