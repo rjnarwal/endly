@@ -34,13 +34,13 @@ interface DownloadDesktopModalProps {
 const DEFAULT_ENDLY_CONFIG: AppDownloadConfig = {
   appName: 'Endly',
   tagline: 'Modern Cross-Platform API Client & Proxy',
-  version: 'v1.0.0',
+  version: 'v1.0.1',
   downloads: {
-    macArm: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0-arm64.dmg',
-    macIntel: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0.dmg',
-    winX64: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly.Setup.1.0.0.exe',
-    linuxAppImage: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0.AppImage',
-    linuxDeb: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/endly_1.0.0_amd64.deb',
+    macArm: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1-arm64.dmg',
+    macIntel: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.dmg',
+    winX64: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly.Setup.1.0.1.exe',
+    linuxAppImage: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.AppImage',
+    linuxDeb: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/endly_1.0.1_amd64.deb',
   },
 };
 
@@ -95,21 +95,21 @@ export const DownloadDesktopModal: React.FC<DownloadDesktopModalProps> = ({
       case 'mac-arm':
         return {
           label: 'macOS (Apple Silicon M1/M2/M3/M4)',
-          file: `${config.appName}-1.0.0-arm64.dmg`,
+          file: `${config.appName}-1.0.1-arm64.dmg`,
           url: config.downloads.macArm,
           icon: <Apple className="w-5 h-5 text-white" />,
         };
       case 'mac-intel':
         return {
           label: 'macOS (Intel Core x64)',
-          file: `${config.appName}-1.0.0.dmg`,
+          file: `${config.appName}-1.0.1.dmg`,
           url: config.downloads.macIntel,
           icon: <Apple className="w-5 h-5 text-white" />,
         };
       case 'win':
         return {
           label: 'Windows 10 / 11 (64-bit)',
-          file: `${config.appName}.Setup.1.0.0.exe`,
+          file: `${config.appName}.Setup.1.0.1.exe`,
           url: config.downloads.winX64,
           icon: (
             <svg className="w-5 h-5 fill-current text-blue-400" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ export const DownloadDesktopModal: React.FC<DownloadDesktopModalProps> = ({
       case 'linux':
         return {
           label: 'Linux (.AppImage 64-bit)',
-          file: `${config.appName}-1.0.0.AppImage`,
+          file: `${config.appName}-1.0.1.AppImage`,
           url: config.downloads.linuxAppImage,
           icon: <Terminal className="w-5 h-5 text-emerald-400" />,
         };
