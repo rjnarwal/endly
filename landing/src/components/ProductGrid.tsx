@@ -151,7 +151,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               </div>
 
               {/* Card Footer Actions */}
-              <div className="pt-4 border-t border-border/60 flex items-center justify-between gap-2">
+              <div className="pt-4 border-t border-border/60 flex items-center justify-between gap-2.5">
                 {product.status === 'live' ? (
                   <>
                     {/* Launch Web App */}
@@ -159,29 +159,29 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                       href={product.actions.primaryUrl || 'https://endly.grassroot.digital'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 h-9 px-3 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-md shadow-accent/20 transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer"
+                      className="flex-1 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs sm:text-[13px] font-bold shadow-md shadow-accent/20 transition-all flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer"
                     >
                       <span>Launch Web App</span>
-                      <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
+                      <ExternalLink className="w-3.5 h-3.5 opacity-90 shrink-0" />
                     </a>
 
                     {/* Download Desktop App Modal */}
                     <button
                       onClick={() => onOpenDownload && onOpenDownload(product)}
-                      className="flex-1 h-9 px-3 rounded-xl bg-background-tertiary hover:bg-background-elevated text-text-primary text-xs font-semibold border border-border hover:border-accent/40 transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer group"
+                      className="flex-1 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs sm:text-[13px] font-bold shadow-sm transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer group"
                       title={`Download ${product.name} Desktop App (Mac / Windows / Linux)`}
                     >
                       <Monitor className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
                       <span>Desktop App</span>
-                      <ChevronDown className="w-3 h-3 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
+                      <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={() => onOpenEarlyAccess(product)}
-                    className="w-full h-9 flex items-center justify-center space-x-1.5 px-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary text-xs font-semibold border border-border transition-colors whitespace-nowrap"
+                    className="w-full min-h-[44px] flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary text-xs sm:text-[13px] font-bold border border-border transition-colors whitespace-nowrap"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />
                     <span>Join Early Access & Preview</span>
                     <ArrowUpRight className="w-3.5 h-3.5 text-text-muted shrink-0" />
                   </button>

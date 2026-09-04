@@ -202,21 +202,21 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                       href={currentProduct.actions.primaryUrl || 'https://endly.grassroot.digital'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      className="min-h-[48px] flex items-center space-x-2.5 px-6 py-3.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-extrabold text-sm shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer"
                     >
-                      <Zap className="w-4 h-4 fill-white" />
+                      <Zap className="w-4 h-4 fill-white shrink-0" />
                       <span>{currentProduct.actions.primaryLabel}</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-4 h-4 opacity-90 shrink-0" />
                     </a>
 
                     {/* Download Desktop App Modal */}
                     <button
                       onClick={() => onOpenDownload && onOpenDownload(currentProduct)}
-                      className="flex items-center space-x-2 px-5 py-3 rounded-xl bg-background-elevated hover:bg-background-tertiary text-text-primary font-bold text-sm border border-border hover:border-accent/40 shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer group"
+                      className="min-h-[48px] flex items-center space-x-2.5 px-6 py-3.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border-2 border-border/80 hover:border-accent/50 text-text-primary font-extrabold text-sm shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer group"
                     >
                       <Monitor className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
                       <span>Download Desktop</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
+                      <ChevronDown className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
                     </button>
                   </>
                 ) : (

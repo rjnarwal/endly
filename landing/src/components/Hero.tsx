@@ -58,28 +58,28 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) =>
           uncompromising speed, zero telemetry, and seamless operation behind strict corporate firewalls.
         </p>
 
-        {/* Hero CTA Buttons - Only 2 Options: Launch Web App & Download Desktop */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-2xl mx-auto mb-16">
+        {/* Hero CTA Buttons - Generous, Bold, Premium Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto mb-16">
           {/* Launch Endly Web App */}
           <a
             href="https://endly.grassroot.digital"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto h-13 px-6 sm:px-7 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-bold text-sm sm:text-base shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-2.5 whitespace-nowrap group cursor-pointer"
+            className="w-full sm:w-auto min-h-[54px] px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-extrabold text-base shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-3 whitespace-nowrap cursor-pointer group"
           >
-            <Zap className="w-4 h-4 fill-white group-hover:animate-pulse shrink-0" />
+            <Zap className="w-5 h-5 fill-white group-hover:animate-pulse shrink-0" />
             <span>Launch Endly (Web)</span>
-            <ExternalLink className="w-3.5 h-3.5 opacity-80 shrink-0" />
+            <ExternalLink className="w-4 h-4 opacity-90 shrink-0" />
           </a>
 
           {/* Download Desktop App Modal */}
           <button
             onClick={() => onOpenDownload && onOpenDownload('endly')}
-            className="w-full sm:w-auto h-13 px-6 sm:px-7 rounded-2xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary font-bold text-sm sm:text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-2.5 whitespace-nowrap cursor-pointer group"
+            className="w-full sm:w-auto min-h-[54px] px-8 py-3.5 rounded-2xl bg-background-elevated hover:bg-background-tertiary border-2 border-border/80 hover:border-accent/60 text-text-primary font-extrabold text-base shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-3 whitespace-nowrap cursor-pointer group"
           >
-            <Monitor className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+            <Monitor className="w-5 h-5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
             <span>Download Desktop</span>
-            <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
+            <ChevronDown className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
           </button>
         </div>
 
