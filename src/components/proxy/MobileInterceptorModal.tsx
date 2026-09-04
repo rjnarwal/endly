@@ -1,39 +1,44 @@
 import React, { useState } from 'react';
 import {
-  Smartphone,
-  Play,
-  Square,
-  Copy,
+  Activity,
+  AlertTriangle,
+  ArrowDownLeft,
+  ArrowUpRight,
   Check,
-  X,
-  Wifi,
-  Radio,
-  Server,
-  Sparkles,
-  ArrowRight,
-  Trash2,
-  Filter,
-  CheckCircle2,
-  Info,
-  Clock,
-  Layers,
   ChevronRight,
-  FileJson,
+  Clock,
+  Columns,
+  Copy,
+  Download,
+  Filter,
+  Flame,
+  Globe,
+  Info,
+  Layers,
+  Maximize2,
+  Minimize2,
+  Pause,
+  Play,
+  Plus,
+  Radio,
+  RefreshCw,
+  Search,
+  Send,
+  Settings,
+  Shield,
+  ShieldAlert,
   ShieldCheck,
+  Smartphone,
+  Split,
+  Trash2,
+  Wifi,
+  WifiOff,
+  X,
+  Zap,
 } from 'lucide-react';
-import { useProxyStore, TrafficLogItem } from '../../store/useProxyStore';
-import { useMockStore } from '../../store/useMockStore';
-import { HttpRequestMethod } from '../../types';
-
-const METHOD_COLORS: Record<HttpRequestMethod, { text: string; bg: string }> = {
-  GET: { text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-  POST: { text: 'text-amber-400', bg: 'bg-amber-500/10' },
-  PUT: { text: 'text-blue-400', bg: 'bg-blue-500/10' },
-  PATCH: { text: 'text-purple-400', bg: 'bg-purple-500/10' },
-  DELETE: { text: 'text-rose-400', bg: 'bg-rose-500/10' },
-  HEAD: { text: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  OPTIONS: { text: 'text-pink-400', bg: 'bg-pink-500/10' },
-};
+import { useProxyStore, BreakpointRule, MapRemoteRule, MapLocalRule, ThrottlingProfile } from '../../store/useProxyStore';
+import { useWorkspaceStore } from '../../store/useWorkspaceStore';
+import { createDefaultRequest } from '../../store/useCollectionStore';
 
 export const MobileInterceptorModal: React.FC = () => {
   const {
@@ -46,409 +51,1295 @@ export const MobileInterceptorModal: React.FC = () => {
     trafficLogs,
     selectedLogId,
     setSelectedLogId,
+    activeStudioTab,
+    setActiveStudioTab,
     activeGuideTab,
     setActiveGuideTab,
     startProxy,
     stopProxy,
     clearTrafficLogs,
+    breakpointRules,
+    pausedBreakpoints,
+    activePausedId,
+    setActivePausedId,
+    addBreakpointRule,
+    updateBreakpointRule,
+    deleteBreakpointRule,
+    resumeBreakpoint,
+    abortBreakpoint,
+    mapRemoteRules,
+    mapLocalRules,
+    addMapRemoteRule,
+    updateMapRemoteRule,
+    deleteMapRemoteRule,
+    addMapLocalRule,
+    updateMapLocalRule,
+    deleteMapLocalRule,
+    throttling,
+    setThrottlingProfile,
+    updateThrottling,
+    domainFilter,
+    updateDomainFilter,
+    diffLogIds,
+    setDiffLogIds,
   } = useProxyStore();
 
-  const { mocks, addMock } = useMockStore();
+  const { openTab } = useWorkspaceStore();
 
-  const [copiedIp, setCopiedIp] = useState<string | null>(null);
-  const [filterText, setFilterText] = useState('');
-  const [isStarting, setIsStarting] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [filterQuery, setFilterQuery] = useState('');
+  const [filterMethod, setFilterMethod] = useState<string>('ALL');
+  const [copiedLogId, setCopiedLogId] = useState<string | null>(null);
+
+  // New Rule Form States
+  const [newBpPattern, setNewBpPattern] = useState('');
+  const [newBpMethod, setNewBpMethod] = useState('ALL');
+  const [newBpPhase, setNewBpPhase] = useState<'request' | 'response' | 'both'>('both');
+
+  const [newMrName, setNewMrName] = useState('');
+  const [newMrFrom, setNewMrFrom] = useState('');
+  const [newMrTo, setNewMrTo] = useState('');
+
+  const [newMlName, setNewMlName] = useState('');
+  const [newMlMatch, setNewMlMatch] = useState('');
+  const [newMlBody, setNewMlBody] = useState('{\n  "status": "success",\n  "mocked": true\n}');
+  const [newMlStatus, setNewMlStatus] = useState(200);
+
+  const [newWhitelistDomain, setNewWhitelistDomain] = useState('');
+
+  // Active Paused Breakpoint Edit State
+  const activePaused = pausedBreakpoints.find((p) => p.id === activePausedId) || pausedBreakpoints[0];
+  const [bpEditStatus, setBpEditStatus] = useState<number>(200);
+  const [bpEditBody, setBpEditBody] = useState<string>('');
+
+  React.useEffect(() => {
+    if (activePaused) {
+      setBpEditStatus(activePaused.statusCode);
+      setBpEditBody(activePaused.body || '');
+    }
+  }, [activePaused?.id]);
 
   if (!isOpen) return null;
 
-  const primaryIp = localIps[0] || '127.0.0.1';
-  const selectedLog = trafficLogs.find((l) => l.id === selectedLogId);
-
-  const handleCopy = (text: string, key: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedIp(key);
-    setTimeout(() => setCopiedIp(null), 1500);
+  const handleDownloadCaCert = () => {
+    const fakeCaPem = `-----BEGIN CERTIFICATE-----
+MIICljCCAX4CCQDU3g1+Jp2z2jANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJV
+UzEUMBIGA1UECAwLRW5kbHkgUHJveHkxEzARBgNVBAoMCkdyYXNzcm9vdDEhMB8G
+A1UEAwwYRW5kbHkgUm9vdCBDZXJ0aWZpY2F0ZSBDQTAeFw0yNjA5MDEwMDAwMDBa
+Fw0zNjA5MDEwMDAwMDBaMA0xCzAJBgNVBAYTAlVTMRQwEgYDVQQIDAtFbmRseSBQ
+cm94eTETMBEGA1UECgwKR3Jhc3Nyb290MSEwHwYDVQQDDBhFbmRseSBSb290IENl
+cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
+-----END CERTIFICATE-----`;
+    const blob = new Blob([fakeCaPem], { type: 'application/x-x509-ca-cert' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'endly-root-ca.crt';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const handleToggleProxy = async () => {
-    setIsStarting(true);
-    if (isRunning) {
-      await stopProxy();
-    } else {
-      await startProxy();
+  const handleReplayInTab = (log: any) => {
+    const req = createDefaultRequest(
+      `${log.method} ${log.path}`,
+      log.method,
+      log.url
+    );
+    if (log.requestHeaders) {
+      req.headers = Object.entries(log.requestHeaders).map(([key, value]) => ({
+        id: Math.random().toString(36).substring(2, 7),
+        key,
+        value: String(value),
+        enabled: true,
+      }));
     }
-    setIsStarting(false);
+    if (log.requestBody) {
+      req.body = {
+        type: 'raw',
+        raw: log.requestBody,
+        rawLanguage: 'json',
+      };
+    }
+    openTab(req);
+    closeModal();
   };
 
-  const handleCreateMockFromLog = (log: TrafficLogItem) => {
-    addMock({
-      name: `Mock: ${log.method} ${log.path}`,
-      method: log.method,
-      path: log.path,
-      statusCode: log.statusCode || 200,
-      body: log.responseBody || JSON.stringify({ message: 'Auto-captured from mobile' }, null, 2),
-      delayMs: log.timeMs || 100,
-      enabled: true,
-    });
+  const handleCopyCurl = (log: any) => {
+    let curl = `curl -X ${log.method} "${log.url}"`;
+    if (log.requestHeaders) {
+      Object.entries(log.requestHeaders).forEach(([k, v]) => {
+        if (!['host', 'content-length'].includes(k.toLowerCase())) {
+          curl += ` \\\n  -H "${k}: ${v}"`;
+        }
+      });
+    }
+    if (log.requestBody) {
+      curl += ` \\\n  --data '${log.requestBody}'`;
+    }
+    navigator.clipboard.writeText(curl);
+    setCopiedLogId(log.id);
+    setTimeout(() => setCopiedLogId(null), 1800);
   };
 
-  const filteredLogs = trafficLogs.filter(
-    (l) =>
-      !filterText ||
-      l.url.toLowerCase().includes(filterText.toLowerCase()) ||
-      l.method.toLowerCase().includes(filterText.toLowerCase())
-  );
+  const filteredLogs = trafficLogs.filter((log) => {
+    if (filterMethod !== 'ALL' && log.method !== filterMethod) return false;
+    if (filterQuery.trim()) {
+      const q = filterQuery.toLowerCase();
+      return (
+        log.url.toLowerCase().includes(q) ||
+        log.path.toLowerCase().includes(q) ||
+        String(log.statusCode).includes(q) ||
+        (log.responseBody && log.responseBody.toLowerCase().includes(q))
+      );
+    }
+    return true;
+  });
+
+  const selectedLog = trafficLogs.find((l) => l.id === selectedLogId) || (filteredLogs.length > 0 ? filteredLogs[0] : null);
+
+  // Diff Logs
+  const diffLog1 = trafficLogs.find((l) => l.id === diffLogIds[0]) || (trafficLogs.length > 0 ? trafficLogs[0] : null);
+  const diffLog2 = trafficLogs.find((l) => l.id === diffLogIds[1]) || (trafficLogs.length > 1 ? trafficLogs[1] : null);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm select-none">
-      <div className="flex flex-col w-full max-w-5xl h-[92vh] bg-background-secondary border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        {/* Modal Top Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background-tertiary/40">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center shadow-md shadow-emerald-500/20">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-2 sm:p-4 select-none">
+      <div
+        className={`bg-background-secondary border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ${
+          isFullScreen ? 'w-full h-full rounded-none' : 'w-full max-w-6xl h-[92vh]'
+        }`}
+      >
+        {/* Top Studio Header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-background border-b border-border select-none">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-md shadow-emerald-500/20">
               <Smartphone className="w-4 h-4 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-sm font-bold text-text">Mobile HTTP Proxy Interceptor</h2>
-                <span
-                  className={`flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    isRunning
-                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                      : 'bg-background-elevated text-text-muted border-border'
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isRunning ? 'bg-emerald-400 animate-pulse' : 'bg-text-muted'
-                    }`}
-                  />
-                  <span>{isRunning ? 'INTERCEPTOR ACTIVE' : 'INACTIVE'}</span>
+                <span className="text-sm font-bold text-text">Mobile & LAN Interceptor Studio</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 font-mono font-bold border border-emerald-500/30">
+                  PRO ENGINE
                 </span>
               </div>
-              <p className="text-[11px] text-text-secondary">
-                Intercept and mock requests directly from your mobile apps over Wi-Fi without code changes.
-              </p>
+              <span className="text-[11px] text-text-muted">
+                Proxyman-tier HTTPS inspection, breakpoints, URL rewrite, and network throttling
+              </span>
             </div>
           </div>
 
+          {/* Proxy Controls & IP Badge */}
           <div className="flex items-center space-x-2">
-            {/* Start / Stop Toggle */}
+            {/* Live Breakpoint Notification Alert */}
+            {pausedBreakpoints.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveStudioTab('breakpoints')}
+                className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 text-xs font-bold animate-pulse"
+              >
+                <Pause className="w-3.5 h-3.5" />
+                <span>{pausedBreakpoints.length} Paused Breakpoint{pausedBreakpoints.length > 1 ? 's' : ''}</span>
+              </button>
+            )}
+
+            {/* LAN IP & Port Config */}
+            <div className="flex items-center space-x-1 bg-background-secondary px-2.5 py-1 rounded-lg border border-border text-xs font-mono">
+              <Globe className="w-3.5 h-3.5 text-accent mr-1" />
+              <span className="text-text-muted">IP:</span>
+              <span className="font-semibold text-text">{localIps[0] || '127.0.0.1'}</span>
+              <span className="text-text-muted ml-1.5">Port:</span>
+              <input
+                type="number"
+                disabled={isRunning}
+                value={port}
+                onChange={(e) => setPort(parseInt(e.target.value, 10) || 8888)}
+                className="w-14 bg-background border border-border rounded px-1.5 py-0.5 text-xs text-text font-mono text-center disabled:opacity-60"
+              />
+            </div>
+
+            {/* Root CA Certificate Download */}
             <button
-              onClick={handleToggleProxy}
-              disabled={isStarting}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white shadow-md transition-all ${
-                isRunning
-                  ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
-                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
-              }`}
+              type="button"
+              onClick={handleDownloadCaCert}
+              className="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-background-secondary hover:bg-background-tertiary border border-border text-text-secondary hover:text-text text-xs font-medium transition-colors"
+              title="Download Endly Root CA Certificate (.crt) for iOS/Android SSL Decryption"
             >
-              {isRunning ? (
-                <>
-                  <Square className="w-3.5 h-3.5 fill-white" />
-                  <span>Stop Interceptor</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5 fill-white" />
-                  <span>Start Interceptor</span>
-                </>
-              )}
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden sm:inline">Root CA (.crt)</span>
+            </button>
+
+            {/* Start / Stop Proxy Server Button */}
+            {isRunning ? (
+              <button
+                type="button"
+                onClick={stopProxy}
+                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md transition-all active:scale-98 cursor-pointer"
+              >
+                <WifiOff className="w-3.5 h-3.5" />
+                <span>Stop Proxy</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={startProxy}
+                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all active:scale-98 cursor-pointer"
+              >
+                <Wifi className="w-3.5 h-3.5" />
+                <span>Start Proxy</span>
+              </button>
+            )}
+
+            {/* Fullscreen & Close Controls */}
+            <button
+              type="button"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              className="p-1.5 text-text-muted hover:text-text rounded-lg hover:bg-background-secondary transition-colors"
+              title={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+            >
+              {isFullScreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
 
             <button
+              type="button"
               onClick={closeModal}
-              className="p-1.5 text-text-muted hover:text-text rounded-md hover:bg-background-elevated transition-colors"
+              className="p-1.5 text-text-muted hover:text-rose-400 rounded-lg hover:bg-background-secondary transition-colors"
+              title="Close Interceptor"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Body Content Grid */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0 overflow-hidden">
-          {/* Left Column (5 cols): Connection Info & Device Setup */}
-          <div className="lg:col-span-5 flex flex-col border-b lg:border-b-0 lg:border-r border-border bg-background-secondary p-3 space-y-3 overflow-y-auto">
-            {/* 1. Wi-Fi IP & Proxy Settings Box */}
-            <div className="p-3 rounded-lg bg-background-tertiary border border-border flex flex-col space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-1.5 text-xs font-semibold text-text">
-                  <Wifi className="w-3.5 h-3.5 text-accent" />
-                  <span>Your Computer Wi-Fi Address</span>
-                </div>
-                <div className="flex items-center space-x-1 text-[11px] text-text-muted">
-                  <span>Port:</span>
-                  <input
-                    type="number"
-                    value={port}
-                    onChange={(e) => setPort(parseInt(e.target.value, 10) || 8888)}
-                    disabled={isRunning}
-                    className="w-14 bg-background border border-border rounded px-1 py-0.5 text-center font-mono text-xs text-text focus:outline-none focus:border-accent"
-                  />
-                </div>
-              </div>
+        {/* Studio Navigation Tabs */}
+        <div className="flex items-center px-3 border-b border-border bg-background-secondary text-xs shrink-0 overflow-x-auto no-scrollbar">
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('traffic')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'traffic'
+                ? 'border-emerald-400 text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Traffic Stream ({trafficLogs.length})</span>
+          </button>
 
-              {/* IP Address Pills */}
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {localIps.map((ip) => (
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('breakpoints')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'breakpoints'
+                ? 'border-amber-400 text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Pause className="w-3.5 h-3.5 text-amber-400" />
+            <span>Breakpoints</span>
+            {pausedBreakpoints.length > 0 && (
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('map')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'map'
+                ? 'border-accent text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Split className="w-3.5 h-3.5 text-accent" />
+            <span>Map Remote & Local</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('throttling')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'throttling'
+                ? 'border-cyan-400 text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Throttling {throttling.enabled && `(${throttling.profile})`}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('domains')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'domains'
+                ? 'border-purple-400 text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5 text-purple-400" />
+            <span>Domain Whitelist</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('diff')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'diff'
+                ? 'border-blue-400 text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Columns className="w-3.5 h-3.5 text-blue-400" />
+            <span>Traffic Diff</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveStudioTab('guide')}
+            className={`flex items-center space-x-1.5 py-2.5 px-3 border-b-2 font-medium transition-colors ${
+              activeStudioTab === 'guide'
+                ? 'border-amber-400 text-text'
+                : 'border-transparent text-text-muted hover:text-text'
+            }`}
+          >
+            <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+            <span>Device Setup Guides</span>
+          </button>
+        </div>
+
+        {/* Studio Body */}
+        <div className="flex-1 flex min-h-0 overflow-hidden bg-background">
+          {/* 1. TRAFFIC STREAM TAB */}
+          {activeStudioTab === 'traffic' && (
+            <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
+              {/* Left Column: Traffic Log Table */}
+              <div className="w-full md:w-[50%] flex flex-col border-r border-border min-h-0 bg-background-secondary/30">
+                {/* Traffic Filters Bar */}
+                <div className="flex items-center space-x-2 p-2.5 bg-background-secondary border-b border-border shrink-0">
+                  <div className="flex items-center bg-background rounded-lg border border-border p-0.5 text-xs">
+                    {['ALL', 'GET', 'POST', 'PUT', 'DELETE'].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setFilterMethod(m)}
+                        className={`px-2 py-0.5 rounded text-[11px] font-bold font-mono transition-colors ${
+                          filterMethod === m ? 'bg-accent text-white' : 'text-text-muted hover:text-text'
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex-1 flex items-center bg-background rounded-lg border border-border px-2 py-1 text-xs">
+                    <Search className="w-3.5 h-3.5 text-text-muted mr-1.5 shrink-0" />
+                    <input
+                      type="text"
+                      value={filterQuery}
+                      onChange={(e) => setFilterQuery(e.target.value)}
+                      placeholder="Search URL, status, JSON body..."
+                      className="w-full bg-transparent text-xs text-text placeholder-text-muted focus:outline-hidden"
+                    />
+                  </div>
+
                   <button
-                    key={ip}
-                    onClick={() => handleCopy(`${ip}:${port}`, ip)}
-                    className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-background border border-border hover:border-accent hover:text-accent transition-colors text-xs font-mono font-medium"
-                    title="Click to copy host:port"
-                  >
-                    <span>{ip}:{port}</span>
-                    {copiedIp === ip ? (
-                      <Check className="w-3 h-3 text-emerald-400" />
-                    ) : (
-                      <Copy className="w-3 h-3 text-text-muted" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 2. Device Setup Guide Tabs */}
-            <div className="flex-1 flex flex-col rounded-lg bg-background-tertiary border border-border overflow-hidden">
-              <div className="flex border-b border-border bg-background-secondary text-xs">
-                <button
-                  onClick={() => setActiveGuideTab('ios')}
-                  className={`flex-1 py-1.5 text-center font-medium border-b-2 transition-colors ${
-                    activeGuideTab === 'ios'
-                      ? 'border-accent text-accent bg-background-tertiary'
-                      : 'border-transparent text-text-secondary hover:text-text'
-                  }`}
-                >
-                  🍎 iOS (iPhone)
-                </button>
-                <button
-                  onClick={() => setActiveGuideTab('android')}
-                  className={`flex-1 py-1.5 text-center font-medium border-b-2 transition-colors ${
-                    activeGuideTab === 'android'
-                      ? 'border-accent text-accent bg-background-tertiary'
-                      : 'border-transparent text-text-secondary hover:text-text'
-                  }`}
-                >
-                  🤖 Android
-                </button>
-                <button
-                  onClick={() => setActiveGuideTab('flutter')}
-                  className={`flex-1 py-1.5 text-center font-medium border-b-2 transition-colors ${
-                    activeGuideTab === 'flutter'
-                      ? 'border-accent text-accent bg-background-tertiary'
-                      : 'border-transparent text-text-secondary hover:text-text'
-                  }`}
-                >
-                  💙 Flutter
-                </button>
-                <button
-                  onClick={() => setActiveGuideTab('react-native')}
-                  className={`flex-1 py-1.5 text-center font-medium border-b-2 transition-colors ${
-                    activeGuideTab === 'react-native'
-                      ? 'border-accent text-accent bg-background-tertiary'
-                      : 'border-transparent text-text-secondary hover:text-text'
-                  }`}
-                >
-                  ⚛️ RN
-                </button>
-              </div>
-
-              <div className="p-3 text-xs leading-relaxed text-text-secondary flex-1 overflow-y-auto space-y-2">
-                {activeGuideTab === 'ios' && (
-                  <div className="space-y-2">
-                    <p className="font-semibold text-text">iPhone / iPad Setup:</p>
-                    <ol className="list-decimal pl-4 space-y-1.5">
-                      <li>Make sure your iPhone and computer are on the <strong>same Wi-Fi</strong>.</li>
-                      <li>Go to <strong>Settings</strong> &gt; <strong>Wi-Fi</strong> &gt; Tap the <strong>(i)</strong> next to your Wi-Fi name.</li>
-                      <li>Scroll to the bottom and tap <strong>Configure Proxy</strong> &gt; <strong>Manual</strong>.</li>
-                      <li>
-                        Set <strong>Server</strong>: <code className="text-accent font-mono">{primaryIp}</code> and <strong>Port</strong>: <code className="text-accent font-mono">{port}</code>.
-                      </li>
-                      <li>Open your mobile app — requests will be intercepted automatically!</li>
-                    </ol>
-                  </div>
-                )}
-
-                {activeGuideTab === 'android' && (
-                  <div className="space-y-2">
-                    <p className="font-semibold text-text">Android Setup (Physical & Emulator):</p>
-                    <ol className="list-decimal pl-4 space-y-1.5">
-                      <li>
-                        <strong>Physical Phone</strong>: Wi-Fi Settings &gt; Tap your Wi-Fi &gt; Advanced Options &gt; Proxy Manual &gt; Host: <code className="text-accent font-mono">{primaryIp}</code>, Port: <code className="text-accent font-mono">{port}</code>.
-                      </li>
-                      <li>
-                        <strong>Android Emulator</strong>: Extended Controls (...) &gt; Settings &gt; Proxy &gt; Manual Proxy &gt; Host: <code className="text-accent font-mono">10.0.2.2</code>, Port: <code className="text-accent font-mono">{port}</code>.
-                      </li>
-                    </ol>
-                  </div>
-                )}
-
-                {activeGuideTab === 'flutter' && (
-                  <div className="space-y-2">
-                    <p className="font-semibold text-text">Flutter (Dio / HttpProxy):</p>
-                    <pre className="p-2 rounded bg-background font-mono text-[11px] text-emerald-400 overflow-x-auto">
-{`// Configure Dio HTTP proxy
-(dio.httpClientAdapter as DefaultHttpClientAdapter)
-  .onHttpClientCreate = (client) {
-    client.findProxy = (uri) {
-      return "PROXY ${primaryIp}:${port}";
-    };
-    client.badCertificateCallback = (cert, host, port) => true;
-  };`}
-                    </pre>
-                  </div>
-                )}
-
-                {activeGuideTab === 'react-native' && (
-                  <div className="space-y-2">
-                    <p className="font-semibold text-text">React Native Configuration:</p>
-                    <p>React Native automatically respects your device's Wi-Fi proxy settings.</p>
-                    <pre className="p-2 rounded bg-background font-mono text-[11px] text-amber-400 overflow-x-auto">
-{`// Or run the companion runner in terminal:
-npm run proxy`}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 3. Active Mocks Counter */}
-            <div className="p-2.5 rounded-lg bg-background-tertiary/60 border border-border flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-1.5 text-text">
-                <Sparkles className="w-3.5 h-3.5 text-accent" />
-                <span>Active Mock Routes</span>
-              </div>
-              <span className="font-mono font-bold text-accent px-1.5 py-0.2 rounded bg-accent/15">
-                {mocks.filter((m) => m.enabled).length} Enabled
-              </span>
-            </div>
-          </div>
-
-          {/* Right Column (7 cols): Live Mobile Traffic Stream & Inspector */}
-          <div className="lg:col-span-7 flex flex-col min-h-0 bg-background overflow-hidden">
-            {/* Traffic Stream Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-background-secondary">
-              <div className="flex items-center space-x-2 flex-1">
-                <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
-                <span className="text-xs font-bold text-text">Live Mobile Traffic</span>
-                <span className="text-[10px] font-mono text-text-muted">({filteredLogs.length} events)</span>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center bg-background-tertiary border border-border rounded px-2 py-0.5 text-xs">
-                  <Filter className="w-3 h-3 text-text-muted mr-1" />
-                  <input
-                    type="text"
-                    value={filterText}
-                    onChange={(e) => setFilterText(e.target.value)}
-                    placeholder="Filter URL/path..."
-                    className="bg-transparent text-text placeholder:text-text-muted text-xs focus:outline-none w-28 sm:w-36"
-                  />
-                </div>
-
-                {trafficLogs.length > 0 && (
-                  <button
+                    type="button"
                     onClick={clearTrafficLogs}
-                    className="p-1 rounded text-text-muted hover:text-red-400 transition-colors"
-                    title="Clear Traffic Logs"
+                    className="p-1.5 bg-background hover:bg-rose-500/20 hover:text-rose-400 border border-border text-text-muted rounded-lg transition-colors"
+                    title="Clear Traffic Stream"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
-                )}
-              </div>
-            </div>
-
-            {/* Traffic Table */}
-            <div className="flex-1 overflow-y-auto divide-y divide-border/40">
-              {filteredLogs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-text-muted text-xs space-y-2 p-6 text-center">
-                  <Radio className="w-8 h-8 opacity-40 text-accent animate-pulse" />
-                  <span className="font-medium text-text">Waiting for requests from mobile...</span>
-                  <p className="text-[11px] max-w-sm leading-relaxed">
-                    Start the interceptor and make API requests from your mobile app. Any matching mock rules will respond instantly!
-                  </p>
                 </div>
-              ) : (
-                filteredLogs.map((log) => {
-                  const isSelected = log.id === selectedLogId;
-                  const methodStyle = METHOD_COLORS[log.method] || METHOD_COLORS.GET;
 
-                  return (
-                    <div
-                      key={log.id}
-                      onClick={() => setSelectedLogId(isSelected ? null : log.id)}
-                      className={`flex flex-col p-2.5 cursor-pointer transition-colors text-xs ${
-                        isSelected
-                          ? 'bg-accent/10 border-l-4 border-l-accent'
-                          : 'hover:bg-background-secondary/60'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 min-w-0 flex-1">
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded uppercase font-mono ${methodStyle.bg} ${methodStyle.text}`}
-                          >
-                            {log.method}
-                          </span>
+                {/* Log Rows */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 font-mono text-xs select-text no-scrollbar">
+                  {filteredLogs.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-text-muted">
+                      <Wifi className="w-10 h-10 text-border mb-2" />
+                      <p className="text-xs font-semibold text-text-secondary">Waiting for Mobile HTTP/HTTPS Traffic</p>
+                      <p className="text-[11px] max-w-xs mt-1">
+                        Connect your mobile device to Wi-Fi proxy <code className="text-accent">{localIps[0] || '127.0.0.1'}:{port}</code> to inspect live traffic.
+                      </p>
+                    </div>
+                  ) : (
+                    filteredLogs.map((log) => {
+                      const isSelected = selectedLog?.id === log.id;
+                      const isSuccess = log.statusCode >= 200 && log.statusCode < 300;
+                      const isRedirect = log.statusCode >= 300 && log.statusCode < 400;
+                      const isClientError = log.statusCode >= 400 && log.statusCode < 500;
+                      const isServerError = log.statusCode >= 500;
 
-                          <span className="truncate font-mono text-text font-medium">{log.path}</span>
-
-                          {log.isMocked && (
-                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-400 font-semibold uppercase tracking-wider shrink-0">
-                              Mocked
+                      return (
+                        <div
+                          key={log.id}
+                          onClick={() => setSelectedLogId(log.id)}
+                          className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                            isSelected
+                              ? 'border-emerald-500/60 bg-emerald-500/10 shadow-xs'
+                              : 'border-border/60 bg-background-secondary/40 hover:bg-background-secondary hover:border-border'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2 min-w-0 flex-1 pr-2">
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${
+                                log.method === 'GET'
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : log.method === 'POST'
+                                  ? 'bg-amber-500/20 text-amber-400'
+                                  : log.method === 'PUT'
+                                  ? 'bg-blue-500/20 text-blue-400'
+                                  : 'bg-rose-500/20 text-rose-400'
+                              }`}
+                            >
+                              {log.method}
                             </span>
-                          )}
-                        </div>
 
-                        <div className="flex items-center space-x-2 text-[11px] shrink-0 font-mono">
-                          <span
-                            className={`font-semibold ${
-                              log.statusCode >= 200 && log.statusCode < 300
-                                ? 'text-emerald-400'
-                                : 'text-rose-400'
-                            }`}
-                          >
-                            {log.statusCode}
-                          </span>
-                          <span className="text-text-muted">{log.timeMs}ms</span>
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${
+                                isSuccess
+                                  ? 'text-emerald-400 bg-emerald-500/15'
+                                  : isRedirect
+                                  ? 'text-cyan-400 bg-cyan-500/15'
+                                  : isClientError
+                                  ? 'text-amber-400 bg-amber-500/15'
+                                  : 'text-rose-400 bg-rose-500/15'
+                              }`}
+                            >
+                              {log.statusCode}
+                            </span>
+
+                            <span className="text-xs text-text font-sans truncate" title={log.url}>
+                              {log.path || log.url}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center space-x-2 text-[10px] text-text-muted shrink-0">
+                            {log.isMocked && (
+                              <span className="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-400 font-sans font-bold">
+                                MOCKED
+                              </span>
+                            )}
+                            {log.isMappedRemote && (
+                              <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-400 font-sans font-bold">
+                                MAPPED
+                              </span>
+                            )}
+                            <span>{log.timeMs}ms</span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Detailed Request & Response Inspector */}
+              <div className="w-full md:w-[50%] flex flex-col min-h-0 bg-background overflow-hidden">
+                {selectedLog ? (
+                  <div className="flex-1 flex flex-col min-h-0">
+                    {/* Selected Item Action Bar */}
+                    <div className="p-3 bg-background-secondary border-b border-border flex items-center justify-between shrink-0">
+                      <div className="min-w-0 pr-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-bold text-text">{selectedLog.method}</span>
+                          <span className="text-xs font-mono text-emerald-400 font-bold">{selectedLog.statusCode}</span>
+                          <span className="text-[11px] text-text-muted">({selectedLog.timeMs}ms • {selectedLog.sizeBytes} bytes)</span>
+                        </div>
+                        <p className="text-[11px] text-text-secondary font-mono truncate mt-0.5" title={selectedLog.url}>
+                          {selectedLog.url}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCurl(selectedLog)}
+                          className="flex items-center space-x-1 px-2 py-1 rounded bg-background hover:bg-background-tertiary border border-border text-xs font-medium text-text-secondary hover:text-text transition-colors"
+                          title="Copy as cURL command"
+                        >
+                          {copiedLogId === selectedLog.id ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                          <span>cURL</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleReplayInTab(selectedLog)}
+                          className="flex items-center space-x-1 px-2.5 py-1 rounded bg-accent hover:bg-accent-hover text-white text-xs font-semibold shadow-xs transition-colors"
+                          title="Replay / Edit in Endly Request Tab"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Replay in Tab</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Inspector Scroll Body */}
+                    <div className="flex-1 overflow-y-auto p-3 space-y-4 no-scrollbar">
+                      {/* Response Body */}
+                      <div>
+                        <span className="text-xs font-bold text-text mb-1 block">Response Body</span>
+                        <div className="p-3 bg-background-secondary/80 rounded-xl border border-border font-mono text-xs max-h-72 overflow-y-auto no-scrollbar select-text leading-relaxed">
+                          <pre className="whitespace-pre-wrap break-all text-text">
+                            {(() => {
+                              try {
+                                const parsed = JSON.parse(selectedLog.responseBody || '');
+                                return JSON.stringify(parsed, null, 2);
+                              } catch {
+                                return selectedLog.responseBody || '(Empty response body)';
+                              }
+                            })()}
+                          </pre>
                         </div>
                       </div>
 
-                      {/* Log details expansion */}
-                      {isSelected && (
-                        <div className="mt-2 pt-2 border-t border-border/50 flex flex-col space-y-2 bg-background-elevated/50 p-2 rounded-md">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] text-text-muted font-mono truncate">{log.url}</span>
-                            {!log.isMocked && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCreateMockFromLog(log);
-                                }}
-                                className="flex items-center space-x-1 px-2 py-0.5 rounded bg-accent/15 text-accent hover:bg-accent hover:text-white transition-colors text-[10px] font-medium"
-                              >
-                                <Sparkles className="w-2.5 h-2.5" />
-                                <span>Create Mock Rule</span>
-                              </button>
-                            )}
+                      {/* Request Body (if any) */}
+                      {selectedLog.requestBody && (
+                        <div>
+                          <span className="text-xs font-bold text-text mb-1 block">Request Body</span>
+                          <div className="p-3 bg-background-secondary/80 rounded-xl border border-border font-mono text-xs max-h-48 overflow-y-auto no-scrollbar select-text leading-relaxed">
+                            <pre className="whitespace-pre-wrap break-all text-text">
+                              {(() => {
+                                try {
+                                  const parsed = JSON.parse(selectedLog.requestBody);
+                                  return JSON.stringify(parsed, null, 2);
+                                } catch {
+                                  return selectedLog.requestBody;
+                                }
+                              })()}
+                            </pre>
                           </div>
-
-                          {log.responseBody && (
-                            <div className="flex flex-col space-y-1">
-                              <span className="text-[10px] font-semibold text-text-secondary">Response Payload:</span>
-                              <pre className="p-2 rounded bg-background font-mono text-[10px] text-emerald-400 max-h-32 overflow-y-auto overflow-x-auto">
-                                {log.responseBody}
-                              </pre>
-                            </div>
-                          )}
                         </div>
                       )}
+
+                      {/* Request & Response Headers */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="p-3 bg-background-secondary/60 rounded-xl border border-border">
+                          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1.5">
+                            Request Headers
+                          </span>
+                          <div className="space-y-1 font-mono text-[11px]">
+                            {selectedLog.requestHeaders &&
+                              Object.entries(selectedLog.requestHeaders).map(([k, v]) => (
+                                <div key={k} className="flex justify-between border-b border-border/40 pb-0.5">
+                                  <span className="text-text-muted truncate pr-2">{k}</span>
+                                  <span className="text-text font-medium truncate">{String(v)}</span>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-background-secondary/60 rounded-xl border border-border">
+                          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider block mb-1.5">
+                            Response Headers
+                          </span>
+                          <div className="space-y-1 font-mono text-[11px]">
+                            {selectedLog.responseHeaders &&
+                              Object.entries(selectedLog.responseHeaders).map(([k, v]) => (
+                                <div key={k} className="flex justify-between border-b border-border/40 pb-0.5">
+                                  <span className="text-text-muted truncate pr-2">{k}</span>
+                                  <span className="text-text font-medium truncate">{String(v)}</span>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  );
-                })
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-text-muted p-6 text-center">
+                    <Activity className="w-10 h-10 text-border mb-2" />
+                    <p className="text-xs font-medium">Select a captured request to inspect its payload</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 2. BREAKPOINTS STUDIO TAB */}
+          {activeStudioTab === 'breakpoints' && (
+            <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
+              {/* Left Column: Breakpoint Rules & Paused Queue */}
+              <div className="w-full md:w-[45%] flex flex-col border-r border-border min-h-0 bg-background-secondary/30 p-3 space-y-4 overflow-y-auto no-scrollbar">
+                {/* Paused Items Banner */}
+                {pausedBreakpoints.length > 0 && (
+                  <div className="p-3 bg-amber-500/15 border border-amber-500/30 rounded-xl space-y-2">
+                    <div className="flex items-center space-x-2 text-amber-400 font-bold text-xs">
+                      <Pause className="w-4 h-4 animate-bounce" />
+                      <span>{pausedBreakpoints.length} Live Paused Request(s)</span>
+                    </div>
+                    <div className="space-y-1">
+                      {pausedBreakpoints.map((p) => (
+                        <div
+                          key={p.id}
+                          onClick={() => setActivePausedId(p.id)}
+                          className={`p-2 rounded-lg cursor-pointer flex items-center justify-between text-xs font-mono transition-colors ${
+                            activePaused?.id === p.id
+                              ? 'bg-amber-500 text-black font-bold'
+                              : 'bg-background hover:bg-background-tertiary text-text'
+                          }`}
+                        >
+                          <span className="truncate pr-2">{p.method} {p.url}</span>
+                          <span className="text-[10px] uppercase font-sans tracking-wide">{p.phase}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Add New Breakpoint Rule */}
+                <div className="p-3 bg-background rounded-xl border border-border space-y-3">
+                  <span className="text-xs font-bold text-text block">Add Breakpoint Rule</span>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newBpPattern}
+                      onChange={(e) => setNewBpPattern(e.target.value)}
+                      placeholder="URL pattern (e.g. /api/v1/user or *.example.com)"
+                      className="w-full bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-xs text-text font-mono"
+                    />
+
+                    <div className="flex items-center space-x-2">
+                      <select
+                        value={newBpMethod}
+                        onChange={(e) => setNewBpMethod(e.target.value)}
+                        className="bg-background-secondary border border-border rounded-lg px-2 py-1.5 text-xs text-text font-bold"
+                      >
+                        <option value="ALL">ALL Methods</option>
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                      </select>
+
+                      <select
+                        value={newBpPhase}
+                        onChange={(e) => setNewBpPhase(e.target.value as any)}
+                        className="bg-background-secondary border border-border rounded-lg px-2 py-1.5 text-xs text-text font-medium"
+                      >
+                        <option value="both">Both Request & Response</option>
+                        <option value="request">Request Only</option>
+                        <option value="response">Response Only</option>
+                      </select>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newBpPattern.trim()) return;
+                          addBreakpointRule({
+                            name: `Breakpoint ${newBpPattern}`,
+                            urlPattern: newBpPattern.trim(),
+                            method: newBpMethod,
+                            phase: newBpPhase,
+                            enabled: true,
+                          });
+                          setNewBpPattern('');
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent-hover transition-colors shrink-0"
+                      >
+                        Add Rule
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Active Rules List */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-text block">Active Breakpoint Rules ({breakpointRules.length})</span>
+                  {breakpointRules.map((rule) => (
+                    <div
+                      key={rule.id}
+                      className="p-2.5 bg-background rounded-xl border border-border flex items-center justify-between group hover:border-accent/60 transition-colors"
+                    >
+                      <div className="flex items-center space-x-2 min-w-0 pr-2">
+                        <input
+                          type="checkbox"
+                          checked={rule.enabled}
+                          onChange={(e) => updateBreakpointRule(rule.id, { enabled: e.target.checked })}
+                          className="rounded border-border accent-accent w-4 h-4"
+                        />
+                        <div className="min-w-0">
+                          <span className="text-xs font-semibold text-text truncate block">{rule.name}</span>
+                          <span className="text-[11px] text-text-muted font-mono truncate block">{rule.method} • {rule.urlPattern} ({rule.phase})</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteBreakpointRule(rule.id)}
+                        className="p-1 text-text-muted hover:text-rose-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column: Live Paused Breakpoint Editor */}
+              <div className="w-full md:w-[55%] flex flex-col min-h-0 bg-background p-4 overflow-y-auto no-scrollbar">
+                {activePaused ? (
+                  <div className="flex-1 flex flex-col space-y-4 min-h-0">
+                    <div className="p-3 bg-amber-500/15 border border-amber-500/30 rounded-xl flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-amber-400 block uppercase">
+                          PAUSED {activePaused.phase} BREAKPOINT
+                        </span>
+                        <span className="text-xs text-text font-mono truncate block mt-0.5">
+                          {activePaused.method} {activePaused.url}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => abortBreakpoint(activePaused.id)}
+                          className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-colors"
+                        >
+                          Abort / Drop
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            resumeBreakpoint(activePaused.id, {
+                              statusCode: bpEditStatus,
+                              body: bpEditBody,
+                            })
+                          }
+                          className="flex items-center space-x-1.5 px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-colors"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          <span>Execute & Resume</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Status Code Override */}
+                    <div>
+                      <label className="text-xs font-bold text-text block mb-1">Status Code</label>
+                      <input
+                        type="number"
+                        value={bpEditStatus}
+                        onChange={(e) => setBpEditStatus(parseInt(e.target.value, 10) || 200)}
+                        className="w-24 bg-background-secondary border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-text"
+                      />
+                    </div>
+
+                    {/* Payload Body Override */}
+                    <div className="flex-1 flex flex-col min-h-[220px]">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-bold text-text">Payload Body (Modify on the fly)</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            try {
+                              const parsed = JSON.parse(bpEditBody);
+                              setBpEditBody(JSON.stringify(parsed, null, 2));
+                            } catch {}
+                          }}
+                          className="text-[11px] text-accent hover:underline font-medium"
+                        >
+                          Beautify JSON
+                        </button>
+                      </div>
+                      <textarea
+                        value={bpEditBody}
+                        onChange={(e) => setBpEditBody(e.target.value)}
+                        className="flex-1 w-full p-3 bg-background-secondary rounded-xl border border-border text-xs font-mono text-text focus:outline-hidden resize-none no-scrollbar leading-relaxed"
+                        spellCheck={false}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center text-text-muted p-6">
+                    <Pause className="w-10 h-10 text-border mb-2" />
+                    <p className="text-xs font-semibold text-text-secondary">No Active Breakpoint Pauses</p>
+                    <p className="text-[11px] max-w-sm mt-1">
+                      Add a breakpoint rule on the left. When a mobile request matches, it will pause here in real time so you can modify headers, status codes, and JSON bodies before resuming.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 3. MAP REMOTE & LOCAL TAB */}
+          {activeStudioTab === 'map' && (
+            <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-y-auto no-scrollbar p-4 gap-4">
+              {/* Map Remote Section */}
+              <div className="flex-1 bg-background-secondary/40 rounded-2xl border border-border p-4 flex flex-col space-y-4">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <Split className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-bold text-text">Map Remote (URL Redirector)</span>
+                  </div>
+                  <p className="text-[11px] text-text-muted mt-0.5">
+                    Redirect production API calls from your phone to local development backends.
+                  </p>
+                </div>
+
+                <div className="space-y-2 p-3 bg-background rounded-xl border border-border">
+                  <input
+                    type="text"
+                    value={newMrName}
+                    onChange={(e) => setNewMrName(e.target.value)}
+                    placeholder="Rule Name (e.g. Redirect Staging to Local)"
+                    className="w-full bg-background-secondary border border-border rounded px-2.5 py-1 text-xs text-text"
+                  />
+                  <input
+                    type="text"
+                    value={newMrFrom}
+                    onChange={(e) => setNewMrFrom(e.target.value)}
+                    placeholder="From URL Pattern (e.g. https://api.prod.com)"
+                    className="w-full bg-background-secondary border border-border rounded px-2.5 py-1 text-xs font-mono text-text"
+                  />
+                  <input
+                    type="text"
+                    value={newMrTo}
+                    onChange={(e) => setNewMrTo(e.target.value)}
+                    placeholder="To URL (e.g. http://localhost:3000)"
+                    className="w-full bg-background-secondary border border-border rounded px-2.5 py-1 text-xs font-mono text-text"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newMrFrom.trim() || !newMrTo.trim()) return;
+                      addMapRemoteRule({
+                        name: newMrName.trim() || 'Map Remote Rule',
+                        fromPattern: newMrFrom.trim(),
+                        toUrl: newMrTo.trim(),
+                        enabled: true,
+                      });
+                      setNewMrName('');
+                      setNewMrFrom('');
+                      setNewMrTo('');
+                    }}
+                    className="w-full py-1.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent-hover transition-colors"
+                  >
+                    Add Map Remote Rule
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {mapRemoteRules.map((rule) => (
+                    <div
+                      key={rule.id}
+                      className="p-2.5 bg-background rounded-xl border border-border flex items-center justify-between group"
+                    >
+                      <div className="flex items-center space-x-2 min-w-0 pr-2">
+                        <input
+                          type="checkbox"
+                          checked={rule.enabled}
+                          onChange={(e) => updateMapRemoteRule(rule.id, { enabled: e.target.checked })}
+                          className="rounded border-border accent-accent w-4 h-4"
+                        />
+                        <div className="min-w-0 font-mono text-xs">
+                          <span className="font-semibold text-text font-sans block">{rule.name}</span>
+                          <span className="text-text-muted truncate block">{rule.fromPattern} ➔ <span className="text-accent">{rule.toUrl}</span></span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteMapRemoteRule(rule.id)}
+                        className="p-1 text-text-muted hover:text-rose-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Map Local Section */}
+              <div className="flex-1 bg-background-secondary/40 rounded-2xl border border-border p-4 flex flex-col space-y-4">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <Flame className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-bold text-text">Map Local (Instant JSON Mock)</span>
+                  </div>
+                  <p className="text-[11px] text-text-muted mt-0.5">
+                    Intercept requests and serve static JSON files or mock responses without touching the network.
+                  </p>
+                </div>
+
+                <div className="space-y-2 p-3 bg-background rounded-xl border border-border">
+                  <input
+                    type="text"
+                    value={newMlName}
+                    onChange={(e) => setNewMlName(e.target.value)}
+                    placeholder="Rule Name (e.g. Mock Auth Session)"
+                    className="w-full bg-background-secondary border border-border rounded px-2.5 py-1 text-xs text-text"
+                  />
+                  <input
+                    type="text"
+                    value={newMlMatch}
+                    onChange={(e) => setNewMlMatch(e.target.value)}
+                    placeholder="Match Pattern (e.g. /api/auth/session)"
+                    className="w-full bg-background-secondary border border-border rounded px-2.5 py-1 text-xs font-mono text-text"
+                  />
+                  <textarea
+                    value={newMlBody}
+                    onChange={(e) => setNewMlBody(e.target.value)}
+                    placeholder="Mock JSON response..."
+                    className="w-full h-24 p-2 bg-background-secondary rounded border border-border text-xs font-mono text-text resize-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newMlMatch.trim()) return;
+                      addMapLocalRule({
+                        name: newMlName.trim() || 'Map Local Mock',
+                        matchPattern: newMlMatch.trim(),
+                        statusCode: newMlStatus,
+                        headers: [{ id: 'h1', key: 'Content-Type', value: 'application/json', enabled: true }],
+                        responseBody: newMlBody,
+                        delayMs: 20,
+                        enabled: true,
+                      });
+                      setNewMlName('');
+                      setNewMlMatch('');
+                    }}
+                    className="w-full py-1.5 rounded-lg bg-purple-600 text-white text-xs font-bold hover:bg-purple-500 transition-colors"
+                  >
+                    Add Map Local Rule
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {mapLocalRules.map((rule) => (
+                    <div
+                      key={rule.id}
+                      className="p-2.5 bg-background rounded-xl border border-border flex items-center justify-between group"
+                    >
+                      <div className="flex items-center space-x-2 min-w-0 pr-2">
+                        <input
+                          type="checkbox"
+                          checked={rule.enabled}
+                          onChange={(e) => updateMapLocalRule(rule.id, { enabled: e.target.checked })}
+                          className="rounded border-border accent-accent w-4 h-4"
+                        />
+                        <div className="min-w-0 font-mono text-xs">
+                          <span className="font-semibold text-text font-sans block">{rule.name}</span>
+                          <span className="text-text-muted truncate block">{rule.matchPattern} (Status: {rule.statusCode})</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteMapLocalRule(rule.id)}
+                        className="p-1 text-text-muted hover:text-rose-400 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 4. NETWORK THROTTLING TAB */}
+          {activeStudioTab === 'throttling' && (
+            <div className="flex-1 p-6 overflow-y-auto no-scrollbar max-w-3xl space-y-6">
+              <div>
+                <h3 className="text-base font-bold text-text">Network Bandwidth Throttling</h3>
+                <p className="text-xs text-text-muted mt-1">
+                  Simulate real-world poor mobile connections, packet drops, and high latency to test how your app behaves.
+                </p>
+              </div>
+
+              {/* Profiles Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { id: 'none', title: 'No Throttling', desc: 'Direct LAN speed' },
+                  { id: 'slow3g', title: 'Slow 3G', desc: '400 Kbps • 400ms latency' },
+                  { id: 'fast3g', title: 'Fast 3G', desc: '1.6 Mbps • 150ms latency' },
+                  { id: '4g', title: '4G LTE', desc: '10 Mbps • 40ms latency' },
+                  { id: 'highlatency', title: 'High Latency', desc: '1000ms delay • 2% loss' },
+                  { id: 'offline', title: 'Airplane Mode', desc: '100% packet loss (Offline)' },
+                ].map((prof) => (
+                  <button
+                    key={prof.id}
+                    type="button"
+                    onClick={() => setThrottlingProfile(prof.id as ThrottlingProfile)}
+                    className={`p-4 rounded-xl border text-left transition-all ${
+                      throttling.profile === prof.id
+                        ? 'border-accent bg-accent/15 shadow-md'
+                        : 'border-border bg-background-secondary/60 hover:bg-background-secondary'
+                    }`}
+                  >
+                    <span className="text-xs font-bold text-text block">{prof.title}</span>
+                    <span className="text-[11px] text-text-muted mt-1 block">{prof.desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom Controls */}
+              <div className="p-4 bg-background-secondary rounded-2xl border border-border space-y-4">
+                <span className="text-xs font-bold text-text block">Custom Network Simulation</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-text-secondary block mb-1">Injected Latency Delay (ms)</label>
+                    <input
+                      type="number"
+                      value={throttling.latencyMs}
+                      onChange={(e) => updateThrottling({ latencyMs: parseInt(e.target.value, 10) || 0 })}
+                      className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-text font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-text-secondary block mb-1">Simulated Packet Loss (%)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={throttling.packetLossPercent}
+                      onChange={(e) => updateThrottling({ packetLossPercent: parseInt(e.target.value, 10) || 0 })}
+                      className="w-full bg-background border border-border rounded-lg px-3 py-1.5 text-xs text-text font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 5. DOMAIN WHITELIST TAB */}
+          {activeStudioTab === 'domains' && (
+            <div className="flex-1 p-6 overflow-y-auto no-scrollbar max-w-2xl space-y-6">
+              <div>
+                <h3 className="text-base font-bold text-text">Domain Whitelisting & Noise Filter</h3>
+                <p className="text-xs text-text-muted mt-1">
+                  Filter out operating system analytics and certificate-pinned domains so you only inspect your app's actual APIs.
+                </p>
+              </div>
+
+              <div className="p-4 bg-background-secondary rounded-2xl border border-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-text">Only Inspect Whitelisted Domains</span>
+                    <p className="text-[11px] text-text-muted">Ignore all other background traffic</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={domainFilter.onlyWhitelisted}
+                    onChange={(e) => updateDomainFilter({ onlyWhitelisted: e.target.checked })}
+                    className="rounded border-border accent-accent w-4 h-4"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2 pt-2">
+                  <input
+                    type="text"
+                    value={newWhitelistDomain}
+                    onChange={(e) => setNewWhitelistDomain(e.target.value)}
+                    placeholder="Domain (e.g. api.cricketaustralia.com or *.myapp.dev)"
+                    className="flex-1 bg-background border border-border rounded-lg px-3 py-1.5 text-xs font-mono text-text"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newWhitelistDomain.trim()) return;
+                      updateDomainFilter({
+                        whitelist: [...domainFilter.whitelist, newWhitelistDomain.trim()],
+                      });
+                      setNewWhitelistDomain('');
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-bold hover:bg-accent-hover transition-colors"
+                  >
+                    Add Domain
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 pt-2">
+                  {domainFilter.whitelist.map((domain, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2 bg-background rounded-lg border border-border flex items-center justify-between font-mono text-xs"
+                    >
+                      <span className="text-text">{domain}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateDomainFilter({
+                            whitelist: domainFilter.whitelist.filter((_, i) => i !== idx),
+                          });
+                        }}
+                        className="p-1 text-text-muted hover:text-rose-400"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 6. TRAFFIC DIFF TAB */}
+          {activeStudioTab === 'diff' && (
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-text">Visual Request / Response Diff</h3>
+                  <p className="text-[11px] text-text-muted">Compare two captured API calls side-by-side to inspect payload differences.</p>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <select
+                    value={diffLog1?.id || ''}
+                    onChange={(e) => setDiffLogIds([e.target.value, diffLog2?.id || null])}
+                    className="bg-background-secondary border border-border rounded-lg px-2.5 py-1 text-xs text-text font-mono max-w-xs truncate"
+                  >
+                    {trafficLogs.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.method} {l.path} ({l.statusCode})
+                      </option>
+                    ))}
+                  </select>
+
+                  <span className="text-text-muted text-xs font-bold">vs</span>
+
+                  <select
+                    value={diffLog2?.id || ''}
+                    onChange={(e) => setDiffLogIds([diffLog1?.id || null, e.target.value])}
+                    className="bg-background-secondary border border-border rounded-lg px-2.5 py-1 text-xs text-text font-mono max-w-xs truncate"
+                  >
+                    {trafficLogs.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.method} {l.path} ({l.statusCode})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Side by Side Panes */}
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+                {/* Left Request */}
+                <div className="p-3 bg-background-secondary/60 rounded-2xl border border-border flex flex-col min-h-0">
+                  <div className="flex items-center justify-between pb-2 border-b border-border mb-2 text-xs font-mono">
+                    <span className="font-bold text-text">{diffLog1?.method} {diffLog1?.path}</span>
+                    <span className="text-emerald-400 font-bold">{diffLog1?.statusCode}</span>
+                  </div>
+                  <pre className="flex-1 p-2 bg-background rounded-xl border border-border text-xs font-mono text-text overflow-y-auto no-scrollbar whitespace-pre-wrap break-all leading-relaxed">
+                    {(() => {
+                      try {
+                        return JSON.stringify(JSON.parse(diffLog1?.responseBody || '{}'), null, 2);
+                      } catch {
+                        return diffLog1?.responseBody || '(Empty)';
+                      }
+                    })()}
+                  </pre>
+                </div>
+
+                {/* Right Request */}
+                <div className="p-3 bg-background-secondary/60 rounded-2xl border border-border flex flex-col min-h-0">
+                  <div className="flex items-center justify-between pb-2 border-b border-border mb-2 text-xs font-mono">
+                    <span className="font-bold text-text">{diffLog2?.method} {diffLog2?.path}</span>
+                    <span className="text-emerald-400 font-bold">{diffLog2?.statusCode}</span>
+                  </div>
+                  <pre className="flex-1 p-2 bg-background rounded-xl border border-border text-xs font-mono text-text overflow-y-auto no-scrollbar whitespace-pre-wrap break-all leading-relaxed">
+                    {(() => {
+                      try {
+                        return JSON.stringify(JSON.parse(diffLog2?.responseBody || '{}'), null, 2);
+                      } catch {
+                        return diffLog2?.responseBody || '(Empty)';
+                      }
+                    })()}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 7. SETUP GUIDES TAB */}
+          {activeStudioTab === 'guide' && (
+            <div className="flex-1 p-6 overflow-y-auto no-scrollbar max-w-3xl space-y-6">
+              {/* Guide Selector */}
+              <div className="flex items-center space-x-1 bg-background-secondary rounded-xl p-1 border border-border text-xs">
+                {(['ios', 'android', 'flutter', 'react-native'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveGuideTab(tab)}
+                    className={`flex-1 py-1.5 rounded-lg font-bold capitalize transition-colors ${
+                      activeGuideTab === tab ? 'bg-accent text-white shadow-xs' : 'text-text-muted hover:text-text'
+                    }`}
+                  >
+                    {tab.replace('-', ' ')}
+                  </button>
+                ))}
+              </div>
+
+              {activeGuideTab === 'ios' && (
+                <div className="space-y-4 text-xs leading-relaxed text-text-secondary">
+                  <h4 className="text-sm font-bold text-text">iOS (iPhone / iPad) Wi-Fi Proxy Setup</h4>
+                  <ol className="list-decimal pl-5 space-y-2">
+                    <li>Connect your iPhone to the <strong>same Wi-Fi network</strong> as your development computer.</li>
+                    <li>Open <strong>Settings ➔ Wi-Fi ➔ Click (i) on your connected network</strong>.</li>
+                    <li>Scroll to <strong>HTTP Proxy ➔ Configure Proxy ➔ Select Manual</strong>.</li>
+                    <li>
+                      Enter Server: <code className="text-accent font-bold">{localIps[0] || '127.0.0.1'}</code> and Port: <code className="text-accent font-bold">{port}</code>.
+                    </li>
+                    <li>
+                      Download the <button onClick={handleDownloadCaCert} className="text-accent underline font-bold">Endly Root CA Certificate</button> in Safari on your iPhone.
+                    </li>
+                    <li>Open <strong>Settings ➔ Profile Downloaded ➔ Install</strong>.</li>
+                    <li>Enable Full Trust: Go to <strong>Settings ➔ General ➔ About ➔ Certificate Trust Settings ➔ Toggle ON Endly Root Certificate</strong>.</li>
+                  </ol>
+                </div>
+              )}
+
+              {activeGuideTab === 'android' && (
+                <div className="space-y-4 text-xs leading-relaxed text-text-secondary">
+                  <h4 className="text-sm font-bold text-text">Android Wi-Fi Proxy & Security Config</h4>
+                  <ol className="list-decimal pl-5 space-y-2">
+                    <li>Go to <strong>Settings ➔ Network & Internet ➔ Wi-Fi ➔ Modify Network</strong>.</li>
+                    <li>Set Proxy to <strong>Manual</strong> with Host: <code className="text-accent font-bold">{localIps[0] || '127.0.0.1'}</code> and Port: <code className="text-accent font-bold">{port}</code>.</li>
+                    <li>Install CA Certificate via <strong>Settings ➔ Security ➔ Install from storage ➔ CA Certificate</strong>.</li>
+                    <li>For Android 7.0+ (API 24+), ensure your app includes a debug network security config:</li>
+                  </ol>
+                  <pre className="p-3 bg-background-secondary rounded-xl border border-border font-mono text-[11px] text-text">
+{`<!-- res/xml/network_security_config.xml -->
+<network-security-config>
+  <debug-overrides>
+    <trust-anchors>
+      <certificates src="user" />
+      <certificates src="system" />
+    </trust-anchors>
+  </debug-overrides>
+</network-security-config>`}
+                  </pre>
+                </div>
+              )}
+
+              {activeGuideTab === 'flutter' && (
+                <div className="space-y-4 text-xs leading-relaxed text-text-secondary">
+                  <h4 className="text-sm font-bold text-text">Flutter Mobile Setup</h4>
+                  <p>In your Flutter HTTP client setup (e.g. `HttpOverrides`):</p>
+                  <pre className="p-3 bg-background-secondary rounded-xl border border-border font-mono text-[11px] text-text">
+{`class EndlyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..findProxy = (uri) => "PROXY ${localIps[0] || '127.0.0.1'}:${port}"
+      ..badCertificateCallback = (cert, host, port) => true;
+  }
+}`}
+                  </pre>
+                </div>
+              )}
+
+              {activeGuideTab === 'react-native' && (
+                <div className="space-y-4 text-xs leading-relaxed text-text-secondary">
+                  <h4 className="text-sm font-bold text-text">React Native Setup</h4>
+                  <p>React Native automatically respects your physical phone's Wi-Fi proxy settings. Simply set the manual Wi-Fi proxy and install the Endly Root CA certificate!</p>
+                </div>
               )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

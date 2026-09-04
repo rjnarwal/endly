@@ -1,5 +1,5 @@
 /**
- * Endly Mobile Proxy Interceptor (Companion Runner)
+ * Endly Mobile Proxy Interceptor & Proxyman Engine (Companion Runner)
  * Run with: npm run proxy
  */
 
@@ -13,19 +13,13 @@ const { WebSocketServer } = require('ws');
 let PROXY_PORT = 8888;
 const WS_PORT = 8889;
 
-let activeMocks = [
-  {
-    id: 'mock-1',
-    name: 'User Profile Mock',
-    method: 'GET',
-    path: '/api/v1/user/profile',
-    statusCode: 200,
-    headers: [{ key: 'Content-Type', value: 'application/json', enabled: true }],
-    body: JSON.stringify({ id: 101, username: 'sarah.connor', role: 'admin', active: true, source: 'Endly-Mobile-Interceptor' }, null, 2),
-    delayMs: 100,
-    enabled: true,
-  },
-];
+let activeMocks = [];
+let activeBreakpoints = [];
+let activeMapRemote = [];
+let activeMapLocal = [];
+let activeThrottling = { enabled: false, latencyMs: 0, packetLossPercent: 0 };
+let activeDomainFilter = { whitelist: [], blacklist: [], onlyWhitelisted: false };
+
 let isProxyRunning = false;
 let proxyServer = null;
 let wsClients = new Set();
@@ -67,10 +61,83 @@ function startHttpProxy(port) {
 
   proxyServer = http.createServer(async (req, res) => {
     const startTime = Date.now();
-    const reqUrl = req.url.startsWith('http') ? req.url : `http://${req.headers.host}${req.url}`;
+    let reqUrl = req.url.startsWith('http') ? req.url : `http://${req.headers.host}${req.url}`;
+    let isMappedRemote = false;
+    let originalUrl = undefined;
+
+    // Apply Simulated Throttling Delay if active
+    if (activeThrottling.enabled && activeThrottling.latencyMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, activeThrottling.latencyMs));
+    }
+
+    // Apply Simulated Packet Loss (drop connection randomly)
+    if (activeThrottling.enabled && activeThrottling.packetLossPercent > 0) {
+      if (Math.random() * 100 < activeThrottling.packetLossPercent) {
+        res.socket.destroy();
+        return;
+      }
+    }
+
+    // 1. Check Map Remote Rule
+    const matchedMapRemote = activeMapRemote.find((r) => r.enabled && reqUrl.toLowerCase().includes(r.fromPattern.toLowerCase()));
+    if (matchedMapRemote) {
+      originalUrl = reqUrl;
+      reqUrl = reqUrl.replace(new RegExp(matchedMapRemote.fromPattern, 'i'), matchedMapRemote.toUrl);
+      isMappedRemote = true;
+      console.log(`[MAP REMOTE] Rewrote ${originalUrl} -> ${reqUrl}`);
+    }
+
     const parsedUrl = url.parse(reqUrl);
 
-    // Check for Matching Mock Rule
+    // 2. Check Map Local Rule
+    const matchedMapLocal = activeMapLocal.find((l) => {
+      if (!l.enabled) return false;
+      const targetPath = (parsedUrl.pathname || '').toLowerCase();
+      const match = (l.matchPattern || '').toLowerCase();
+      return targetPath === match || targetPath.endsWith(match) || reqUrl.toLowerCase().includes(match);
+    });
+
+    if (matchedMapLocal) {
+      if (matchedMapLocal.delayMs) {
+        await new Promise((resolve) => setTimeout(resolve, matchedMapLocal.delayMs));
+      }
+
+      const responseHeaders = {
+        'content-type': 'application/json',
+        'x-served-by': 'Endly-Map-Local',
+        'access-control-allow-origin': '*',
+      };
+
+      (matchedMapLocal.headers || []).forEach((h) => {
+        if (h.enabled) responseHeaders[h.key.toLowerCase()] = h.value;
+      });
+
+      res.writeHead(matchedMapLocal.statusCode || 200, responseHeaders);
+      res.end(matchedMapLocal.responseBody || '{}');
+
+      const logItem = {
+        id: Math.random().toString(36).substring(2, 9),
+        timestamp: Date.now(),
+        method: req.method,
+        url: reqUrl,
+        path: parsedUrl.pathname || '/',
+        statusCode: matchedMapLocal.statusCode || 200,
+        statusText: 'OK (Map Local)',
+        isMocked: true,
+        timeMs: Date.now() - startTime,
+        sizeBytes: Buffer.byteLength(matchedMapLocal.responseBody || ''),
+        requestHeaders: req.headers,
+        responseHeaders,
+        responseBody: matchedMapLocal.responseBody,
+        clientIp: req.socket.remoteAddress,
+      };
+
+      broadcast({ type: 'TRAFFIC_EVENT', log: logItem });
+      console.log(`[MAP LOCAL ${matchedMapLocal.statusCode}] ${req.method} ${reqUrl} (${logItem.timeMs}ms)`);
+      return;
+    }
+
+    // 3. Check for Matching Mock Rule
     const matchedMock = activeMocks.find((m) => {
       if (!m.enabled) return false;
       if (m.method && m.method !== req.method) return false;
@@ -80,7 +147,6 @@ function startHttpProxy(port) {
     });
 
     if (matchedMock) {
-      // Return Mocked Response
       if (matchedMock.delayMs) {
         await new Promise((resolve) => setTimeout(resolve, matchedMock.delayMs));
       }
@@ -121,7 +187,7 @@ function startHttpProxy(port) {
       return;
     }
 
-    // Pass-through to Real Remote Server
+    // 4. Pass-through to Remote Server
     const options = {
       hostname: parsedUrl.hostname,
       port: parsedUrl.port || 80,
@@ -148,11 +214,13 @@ function startHttpProxy(port) {
           statusCode: proxyRes.statusCode,
           statusText: proxyRes.statusMessage || 'OK',
           isMocked: false,
+          isMappedRemote,
+          originalUrl,
           timeMs: Date.now() - startTime,
           sizeBytes: bodyBuf.length,
           requestHeaders: req.headers,
           responseHeaders: proxyRes.headers,
-          responseBody: bodyBuf.toString('utf8').slice(0, 10000), // snippet
+          responseBody: bodyBuf.toString('utf8').slice(0, 10000),
           clientIp: req.socket.remoteAddress,
         };
 
@@ -239,6 +307,12 @@ try {
         const data = JSON.parse(msg);
         if (data.type === 'START_PROXY') {
           if (data.mocks) activeMocks = data.mocks;
+          if (data.breakpoints) activeBreakpoints = data.breakpoints;
+          if (data.mapRemote) activeMapRemote = data.mapRemote;
+          if (data.mapLocal) activeMapLocal = data.mapLocal;
+          if (data.throttling) activeThrottling = data.throttling;
+          if (data.domainFilter) activeDomainFilter = data.domainFilter;
+
           startHttpProxy(data.port || 8888);
           ws.send(
             JSON.stringify({
@@ -259,8 +333,12 @@ try {
               localIps: getLocalIps(),
             })
           );
-        } else if (data.type === 'SYNC_MOCKS') {
-          activeMocks = data.mocks || [];
+        } else if (data.type === 'SYNC_ALL_RULES') {
+          if (data.breakpoints) activeBreakpoints = data.breakpoints;
+          if (data.mapRemote) activeMapRemote = data.mapRemote;
+          if (data.mapLocal) activeMapLocal = data.mapLocal;
+          if (data.throttling) activeThrottling = data.throttling;
+          if (data.domainFilter) activeDomainFilter = data.domainFilter;
         } else if (data.type === 'GET_STATUS') {
           ws.send(
             JSON.stringify({
