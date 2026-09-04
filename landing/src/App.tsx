@@ -101,10 +101,10 @@ export const App: React.FC = () => {
         name: 'Endly',
         tagline: 'Cross-Platform API Client & Proxy',
         downloads: {
-          macArmUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0-arm64.dmg',
-          macIntelUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0.dmg',
-          winUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly.Setup.1.0.0.exe',
-          linuxUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.0/Endly-1.0.0.AppImage',
+          macArmUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1-arm64.dmg',
+          macIntelUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.dmg',
+          winUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly.Setup.1.0.1.exe',
+          linuxUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.AppImage',
         },
       } as any;
       setDownloadProduct(prod);
@@ -116,12 +116,12 @@ export const App: React.FC = () => {
   const getDownloadConfig = (product: ProductItem): AppDownloadConfig => ({
     appName: product.name,
     tagline: product.tagline,
-    version: 'v1.0.0',
+    version: 'v1.0.1',
     downloads: {
-      macArm: product.downloads?.macArmUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-1.0.0-arm64.dmg`,
-      macIntel: product.downloads?.macIntelUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-1.0.0.dmg`,
-      winX64: product.downloads?.winUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}.Setup.1.0.0.exe`,
-      linuxAppImage: product.downloads?.linuxUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.0/${product.name}-1.0.0.AppImage`,
+      macArm: product.downloads?.macArmUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.1/${product.name}-1.0.1-arm64.dmg`,
+      macIntel: product.downloads?.macIntelUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.1/${product.name}-1.0.1.dmg`,
+      winX64: product.downloads?.winUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.1/${product.name}.Setup.1.0.1.exe`,
+      linuxAppImage: product.downloads?.linuxUrl || `https://github.com/rjnarwal/${product.id}/releases/download/v1.0.1/${product.name}-1.0.1.AppImage`,
     },
   });
 
