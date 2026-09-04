@@ -1,4 +1,4 @@
-name: Release Native Desktop Apps
+name: Build and Release Desktop Apps
 
 on:
   push:
@@ -9,24 +9,31 @@ on:
 permissions:
   contents: write
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   release:
-    permissions:
-      contents: write
+    name: Build ${{ matrix.os }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-13'
-            args: '--target x86_64-apple-darwin'
-          - platform: 'windows-latest'
-            args: ''
-          - platform: 'ubuntu-22.04'
-            args: ''
+          - os: macos-latest
+            arch: arm64
+            target: --mac --arm64
+          - os: macos-13
+            arch: x64
+            target: --mac --x64
+          - os: windows-latest
+            arch: x64
+            target: --win --x64
+          - os: ubuntu-latest
+            arch: x64
+            target: --linux --x64
 
-    runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -36,25 +43,28 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install Linux System Dependencies
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libjavascriptcoregtk-4.1-dev
-
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Native Tauri App & Publish
-        uses: tauri-apps/tauri-action@v0
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Compile Desktop Binary
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npx electron-builder ${{ matrix.target }} --publish never
+
+      - name: Publish Public Release Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            release/*.dmg
+            release/*.exe
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
+            release/*.blockmap
+            release/latest*.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: v__VERSION__
-          releaseName: 'Endly v__VERSION__'
-          releaseDraft: false
-          prerelease: false
-          args: ${{ matrix.args }}
