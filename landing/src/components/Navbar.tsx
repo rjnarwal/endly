@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Zap,
   Sparkles,
-  ShieldCheck,
   LayoutGrid,
   Sun,
   Moon,
@@ -10,9 +9,9 @@ import {
   ChevronDown,
   Menu,
   X,
-  Compass,
   User,
-  HelpCircle,
+  MessageSquareCode,
+  Flame,
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 
@@ -20,9 +19,17 @@ interface NavbarProps {
   theme: 'dark' | 'midnight' | 'light';
   onThemeChange: (theme: 'dark' | 'midnight' | 'light') => void;
   onSelectProduct: (productId: string) => void;
+  activeView: 'home' | 'openground';
+  onNavigateView: (view: 'home' | 'openground') => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectProduct }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  theme,
+  onThemeChange,
+  onSelectProduct,
+  activeView,
+  onNavigateView,
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [productsDropdownOpen, setProductsDropdownOpen] = useState(false);
@@ -35,6 +42,26 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onNavigateView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAboutClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (activeView !== 'home') {
+      onNavigateView('home');
+      setTimeout(() => {
+        const el = document.getElementById('about');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById('about');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
@@ -45,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
-        <a href="#" className="flex items-center space-x-3 group">
+        <a href="#" onClick={handleLogoClick} className="flex items-center space-x-3 group cursor-pointer">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-amber-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
@@ -60,13 +87,13 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
         </a>
 
         {/* Desktop Nav Links */}
-        <nav className="hidden md:flex items-center space-x-1">
+        <nav className="hidden md:flex items-center space-x-1.5">
           {/* Products Dropdown */}
           <div className="relative">
             <button
               onClick={() => setProductsDropdownOpen(!productsDropdownOpen)}
               onMouseEnter={() => setProductsDropdownOpen(true)}
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors cursor-pointer"
             >
               <LayoutGrid className="w-4 h-4 text-accent" />
               <span>Products</span>
@@ -86,9 +113,10 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
                     key={product.id}
                     onClick={() => {
                       setProductsDropdownOpen(false);
+                      if (activeView !== 'home') onNavigateView('home');
                       onSelectProduct(product.id);
                     }}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-background-tertiary flex items-start space-x-3 transition-colors group"
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-background-tertiary flex items-start space-x-3 transition-colors group cursor-pointer"
                   >
                     <div
                       className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${product.gradient} flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm`}
@@ -120,37 +148,31 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
             )}
           </div>
 
+          {/* About The Builder */}
           <a
             href="#about"
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors"
+            onClick={handleAboutClick}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors cursor-pointer"
           >
             <User className="w-4 h-4 text-cyan-400" />
             <span>About The Builder</span>
           </a>
 
-          <a
-            href="#manifesto"
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors"
+          {/* Open Ground Forum Nav Tab */}
+          <button
+            onClick={() => onNavigateView('openground')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              activeView === 'openground'
+                ? 'bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 text-orange-400 border border-orange-500/40 shadow-sm'
+                : 'text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60'
+            }`}
           >
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Privacy</span>
-          </a>
-
-          <a
-            href="#faq"
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors"
-          >
-            <HelpCircle className="w-4 h-4 text-indigo-400" />
-            <span>FAQ</span>
-          </a>
-
-          <a
-            href="#showcase"
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm text-text-secondary hover:text-text-primary hover:bg-background-tertiary/60 transition-colors"
-          >
-            <Compass className="w-4 h-4 text-blue-400" />
-            <span>Showcase</span>
-          </a>
+            <MessageSquareCode className="w-4 h-4 text-orange-400" />
+            <span>Open Ground</span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-orange-500/15 text-orange-400 font-bold border border-orange-500/30">
+              FORUM
+            </span>
+          </button>
         </nav>
 
         {/* Right CTA Actions */}
@@ -215,13 +237,46 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-background-secondary border-b border-border px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top duration-200">
-          <div className="space-y-1">
+          {/* Open Ground Button on Mobile */}
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              onNavigateView('openground');
+            }}
+            className={`w-full text-left px-3.5 py-2.5 rounded-xl font-bold text-sm flex items-center justify-between transition-colors ${
+              activeView === 'openground'
+                ? 'bg-orange-500/20 text-orange-400 border border-orange-500/40'
+                : 'bg-background-tertiary text-text-primary'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <MessageSquareCode className="w-4 h-4 text-orange-400" />
+              <span>Open Ground Forum</span>
+            </div>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-orange-500/20 text-orange-300">
+              DISPATCHES
+            </span>
+          </button>
+
+          <a
+            href="#about"
+            onClick={(e) => {
+              setMobileMenuOpen(false);
+              handleAboutClick(e);
+            }}
+            className="block px-3 py-2 text-sm text-text-secondary hover:text-text font-medium"
+          >
+            About The Builder
+          </a>
+
+          <div className="space-y-1 pt-2 border-t border-border">
             <div className="text-[10px] uppercase font-bold text-text-muted px-2 py-1">Products</div>
             {PRODUCTS.map((p) => (
               <button
                 key={p.id}
                 onClick={() => {
                   setMobileMenuOpen(false);
+                  if (activeView !== 'home') onNavigateView('home');
                   onSelectProduct(p.id);
                 }}
                 className="w-full text-left px-3 py-2 rounded-lg hover:bg-background-tertiary flex items-center justify-between text-sm text-text-primary"
@@ -231,30 +286,6 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, onThemeChange, onSelectPr
               </button>
             ))}
           </div>
-
-          <a
-            href="#about"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm text-text-secondary hover:text-text font-medium"
-          >
-            About The Builder
-          </a>
-
-          <a
-            href="#manifesto"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm text-text-secondary hover:text-text font-medium"
-          >
-            Privacy Manifesto
-          </a>
-
-          <a
-            href="#faq"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 text-sm text-text-secondary hover:text-text font-medium"
-          >
-            Developer FAQ & Knowledge Base
-          </a>
 
           <div className="pt-2 border-t border-border flex items-center justify-between">
             <span className="text-xs text-text-muted">Theme</span>

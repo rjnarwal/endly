@@ -7,6 +7,7 @@ import { PrivacyManifesto } from './components/PrivacyManifesto';
 import { AboutMe } from './components/AboutMe';
 import { DeveloperFAQ } from './components/DeveloperFAQ';
 import { Footer } from './components/Footer';
+import { OpenGround } from './components/OpenGround';
 import { EarlyAccessModal } from './components/EarlyAccessModal';
 import { DownloadDesktopModal, AppDownloadConfig } from './components/DownloadDesktopModal';
 import { ProductItem } from './types';
@@ -14,6 +15,7 @@ import { PRODUCTS } from './data/products';
 
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'midnight' | 'light'>('dark');
+  const [activeView, setActiveView] = useState<'home' | 'openground'>('home');
   const [selectedProductId, setSelectedProductId] = useState<string>('endly');
   const [earlyAccessProduct, setEarlyAccessProduct] = useState<ProductItem | null>(null);
   const [downloadProduct, setDownloadProduct] = useState<ProductItem | null>(null);
@@ -23,7 +25,42 @@ export const App: React.FC = () => {
     setTheme(savedTheme);
     document.documentElement.classList.remove('dark', 'midnight', 'light');
     document.documentElement.classList.add(savedTheme);
-  }, []);
+
+    // Check URL hash on initial load
+    const hash = window.location.hash.toLowerCase();
+    if (hash === '#openground' || hash === '#open-ground' || hash === '#forum') {
+      setActiveView('openground');
+    }
+
+    const handleHashChange = () => {
+      const currentHash = window.location.hash.toLowerCase();
+      if (currentHash === '#openground' || currentHash === '#open-ground' || currentHash === '#forum') {
+        setActiveView('openground');
+      } else if (currentHash === '' || currentHash === '#home' || currentHash.startsWith('#')) {
+        if (currentHash !== '#openground' && currentHash !== '#open-ground' && currentHash !== '#forum') {
+          // If navigating to an anchor on home
+          if (activeView === 'openground') {
+            setActiveView('home');
+          }
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeView]);
+
+  const handleNavigateView = (view: 'home' | 'openground') => {
+    setActiveView(view);
+    if (view === 'openground') {
+      window.location.hash = 'open-ground';
+    } else {
+      if (window.location.hash.includes('open-ground') || window.location.hash.includes('openground')) {
+        history.pushState('', document.title, window.location.pathname + window.location.search);
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleThemeChange = (newTheme: 'dark' | 'midnight' | 'light') => {
     setTheme(newTheme);
@@ -34,17 +71,27 @@ export const App: React.FC = () => {
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProductId(productId);
-    const el = document.getElementById('showcase');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (activeView !== 'home') {
+      handleNavigateView('home');
     }
+    setTimeout(() => {
+      const el = document.getElementById('showcase');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleExploreClick = () => {
-    const el = document.getElementById('showcase');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (activeView !== 'home') {
+      handleNavigateView('home');
     }
+    setTimeout(() => {
+      const el = document.getElementById('showcase');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleOpenDownload = (productOrId: ProductItem | string) => {
@@ -85,42 +132,56 @@ export const App: React.FC = () => {
         theme={theme}
         onThemeChange={handleThemeChange}
         onSelectProduct={handleSelectProduct}
+        activeView={activeView}
+        onNavigateView={handleNavigateView}
       />
 
-      {/* Main Content Sections */}
+      {/* Main Content View Switcher */}
       <main className="flex-1">
-        {/* Hero Section */}
-        <Hero
-          onExploreClick={handleExploreClick}
-          onOpenDownload={handleOpenDownload}
-        />
+        {activeView === 'openground' ? (
+          <OpenGround
+            onBackToHome={() => handleNavigateView('home')}
+            onSelectProduct={handleSelectProduct}
+          />
+        ) : (
+          <>
+            {/* Hero Section */}
+            <Hero
+              onExploreClick={handleExploreClick}
+              onOpenDownload={handleOpenDownload}
+            />
 
-        {/* Interactive Carousel Showcase */}
-        <ProductCarousel
-          selectedProductId={selectedProductId}
-          onOpenEarlyAccess={(prod) => setEarlyAccessProduct(prod)}
-          onOpenDownload={handleOpenDownload}
-        />
+            {/* Interactive Carousel Showcase */}
+            <ProductCarousel
+              selectedProductId={selectedProductId}
+              onOpenEarlyAccess={(prod) => setEarlyAccessProduct(prod)}
+              onOpenDownload={handleOpenDownload}
+            />
 
-        {/* Full Product Grid Directory */}
-        <ProductGrid
-          onSelectProduct={handleSelectProduct}
-          onOpenEarlyAccess={(prod) => setEarlyAccessProduct(prod)}
-          onOpenDownload={handleOpenDownload}
-        />
+            {/* Full Product Grid Directory */}
+            <ProductGrid
+              onSelectProduct={handleSelectProduct}
+              onOpenEarlyAccess={(prod) => setEarlyAccessProduct(prod)}
+              onOpenDownload={handleOpenDownload}
+            />
 
-        {/* About The Builder Section */}
-        <AboutMe />
+            {/* About The Builder Section */}
+            <AboutMe />
 
-        {/* Privacy & Performance Manifesto + Desktop Downloads */}
-        <PrivacyManifesto onOpenDownload={handleOpenDownload} />
+            {/* Privacy & Performance Manifesto + Desktop Downloads */}
+            <PrivacyManifesto onOpenDownload={handleOpenDownload} />
 
-        {/* Developer FAQ & Knowledge Base for Search Ranking */}
-        <DeveloperFAQ />
+            {/* Developer FAQ & Knowledge Base for Search Ranking */}
+            <DeveloperFAQ />
+          </>
+        )}
       </main>
 
       {/* Footer */}
-      <Footer onSelectProduct={handleSelectProduct} />
+      <Footer
+        onSelectProduct={handleSelectProduct}
+        onNavigateView={handleNavigateView}
+      />
 
       {/* Early Access / Preview Modal */}
       <EarlyAccessModal
@@ -141,3 +202,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+

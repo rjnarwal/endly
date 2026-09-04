@@ -4,9 +4,10 @@ import { PRODUCTS } from '../data/products';
 
 interface FooterProps {
   onSelectProduct: (productId: string) => void;
+  onNavigateView?: (view: 'home' | 'openground') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onSelectProduct }) => {
+export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView }) => {
   return (
     <footer className="bg-background-secondary border-t border-border pt-12 pb-10 text-xs text-text-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,13 +86,22 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct }) => {
           {/* Ecosystem Col */}
           <div className="md:col-span-2 space-y-3">
             <div className="font-bold text-xs uppercase tracking-wider text-text-primary">
-              Live Hubs
+              Community & Hubs
             </div>
             <ul className="space-y-2">
               <li>
+                <button
+                  onClick={() => onNavigateView && onNavigateView('openground')}
+                  className="text-orange-400 hover:text-orange-300 flex items-center space-x-1 transition-colors font-bold text-left cursor-pointer"
+                >
+                  <span>🔥 Open Ground Forum</span>
+                </button>
+              </li>
+              <li>
                 <a
                   href="#about"
-                  className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors font-medium"
+                  onClick={() => onNavigateView && onNavigateView('home')}
+                  className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors font-medium cursor-pointer"
                 >
                   <span>About The Builder</span>
                 </a>
@@ -99,7 +109,8 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct }) => {
               <li>
                 <a
                   href="#faq"
-                  className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors font-medium"
+                  onClick={() => onNavigateView && onNavigateView('home')}
+                  className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors font-medium cursor-pointer"
                 >
                   <span>Developer FAQ</span>
                 </a>
