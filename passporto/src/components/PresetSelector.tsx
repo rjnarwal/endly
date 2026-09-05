@@ -24,36 +24,36 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
   });
 
   return (
-    <div className="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-4">
       {/* Header & Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-card-border">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
             Choose Standard Format
           </h3>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
             Select an official biometric or social profile size
           </p>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center space-x-1 bg-body-bg p-1 rounded-xl border border-card-border">
+        <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'all'
-                ? 'bg-brand text-white shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             All ({PHOTO_PRESETS.length})
           </button>
           <button
             onClick={() => setActiveTab('passport')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1 ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer ${
               activeTab === 'passport'
-                ? 'bg-brand text-white shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span>🛂</span>
@@ -61,10 +61,10 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('social')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1 ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer ${
               activeTab === 'social'
-                ? 'bg-brand text-white shadow-sm'
-                : 'text-text-secondary hover:text-text-primary'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <span>📱</span>
@@ -80,10 +80,10 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search country, format (e.g. US, UK, 35x45, LinkedIn)..."
-          className="w-full bg-body-bg border border-card-border rounded-xl px-3.5 py-2 text-xs text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:border-brand transition-all pl-9"
+          className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition-all pl-9"
         />
         <svg
-          className="w-4 h-4 text-text-secondary absolute left-3 top-2.5"
+          className="w-4 h-4 text-slate-500 absolute left-3 top-2.5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -105,15 +105,15 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
             <button
               key={preset.id}
               onClick={() => onSelectPreset(preset)}
-              className={`text-left p-3.5 rounded-xl border transition-all relative flex flex-col justify-between ${
+              className={`text-left p-3.5 rounded-xl border-2 transition-all relative flex flex-col justify-between cursor-pointer ${
                 isSelected
-                  ? 'border-brand bg-brand/5 ring-2 ring-brand/20 shadow-sm'
-                  : 'border-card-border bg-body-bg hover:border-brand/40 hover:bg-card-bg'
+                  ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 shadow-sm'
+                  : 'border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 hover:border-blue-400 dark:hover:border-blue-500'
               }`}
             >
               {/* Selected Checkmark Badge */}
               {isSelected && (
-                <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-brand text-white rounded-full flex items-center justify-center text-xs">
+                <div className="absolute top-2.5 right-2.5 w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs shadow-sm">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
@@ -123,27 +123,27 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">{preset.flag || '📷'}</span>
-                  <span className="font-semibold text-xs text-text-primary leading-tight line-clamp-1">
+                  <span className="font-bold text-xs text-slate-900 dark:text-white leading-tight line-clamp-1">
                     {preset.name}
                   </span>
                 </div>
 
-                <p className="text-[11px] text-text-secondary leading-normal line-clamp-2 pt-0.5">
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-normal line-clamp-2 pt-0.5">
                   {preset.description}
                 </p>
               </div>
 
-              <div className="mt-3 pt-2 border-t border-card-border/50 flex items-center justify-between text-[10px]">
-                <span className="font-mono font-medium text-text-primary">
+              <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-[10px]">
+                <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                   {preset.widthMm && preset.heightMm
                     ? `${preset.widthMm}×${preset.heightMm}mm`
                     : `${preset.widthPx}×${preset.heightPx}px`}
                 </span>
                 <span
-                  className={`px-1.5 py-0.5 rounded font-medium ${
+                  className={`px-2 py-0.5 rounded-md font-bold ${
                     preset.category === 'passport'
-                      ? 'bg-blue-500/10 text-blue-500'
-                      : 'bg-emerald-500/10 text-emerald-500'
+                      ? 'bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300'
+                      : 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300'
                   }`}
                 >
                   {preset.category === 'passport' ? 'Biometric' : 'Social'}
