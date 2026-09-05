@@ -356,9 +356,6 @@ async fn handle_proxy_client(
 
     // 3. Forward HTTP request with full query params & headers
     let client_res = reqwest::Client::builder()
-        .gzip(true)
-        .brotli(true)
-        .deflate(true)
         .danger_accept_invalid_certs(true)
         .build();
 
