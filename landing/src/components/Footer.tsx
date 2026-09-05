@@ -176,7 +176,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView 
           {/* Desktop Downloads Col */}
           <div className="md:col-span-3 space-y-3">
             <div className="font-bold text-xs uppercase tracking-wider text-text-primary">
-              Desktop Apps (Mac/Win)
+              Native Desktop App
             </div>
             <ul className="space-y-2">
               <li>
@@ -184,57 +184,16 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView 
                   href="https://github.com/rjnarwal/endly/releases"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-amber-400 flex items-center space-x-1 transition-colors font-medium"
+                  className="text-text-secondary hover:text-amber-400 flex items-center space-x-1.5 transition-colors font-medium"
                 >
-                  <span>⚡ Endly Desktop</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/rjnarwal/tokenlens/releases"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-purple-400 flex items-center space-x-1 transition-colors font-medium"
-                >
-                  <span>🔑 TokenLens Desktop</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/rjnarwal/jsonlens/releases"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-cyan-400 flex items-center space-x-1 transition-colors font-medium"
-                >
-                  <span>🗂️ JSONLens Desktop</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/rjnarwal/regexforge/releases"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-emerald-400 flex items-center space-x-1 transition-colors font-medium"
-                >
-                  <span>🎯 RegexForge Desktop</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/rjnarwal/cipherlab/releases"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-pink-400 flex items-center space-x-1 transition-colors font-medium"
-                >
-                  <span>🔐 CipherLab Desktop</span>
+                  <span>⚡ Endly Desktop (Mac/Win/Linux)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
             </ul>
+            <div className="pt-2 text-[11px] text-text-muted leading-relaxed">
+              💡 All other developer tools run 100% in-browser with zero install friction.
+            </div>
           </div>
         </div>
 

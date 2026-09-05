@@ -159,22 +159,26 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                       href={product.actions.primaryUrl || 'https://endly.grassroot.digital'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs sm:text-[13px] font-bold shadow-md shadow-accent/20 transition-all flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer"
+                      className={`min-h-[44px] px-3.5 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs sm:text-[13px] font-bold shadow-md shadow-accent/20 transition-all flex items-center justify-center space-x-2 whitespace-nowrap cursor-pointer ${
+                        product.id === 'endly' ? 'flex-1' : 'w-full'
+                      }`}
                     >
                       <span>Launch Web App</span>
                       <ExternalLink className="w-3.5 h-3.5 opacity-90 shrink-0" />
                     </a>
 
-                    {/* Download Desktop App Modal */}
-                    <button
-                      onClick={() => onOpenDownload && onOpenDownload(product)}
-                      className="flex-1 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs sm:text-[13px] font-bold shadow-sm transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer group"
-                      title={`Download ${product.name} Desktop App (Mac / Windows / Linux)`}
-                    >
-                      <Monitor className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
-                      <span>Desktop App</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
-                    </button>
+                    {/* Download Desktop App Modal - Only for Endly */}
+                    {product.id === 'endly' && (
+                      <button
+                        onClick={() => onOpenDownload && onOpenDownload(product)}
+                        className="flex-1 min-h-[44px] px-3.5 py-2.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border border-border hover:border-accent/40 text-text-primary text-xs sm:text-[13px] font-bold shadow-sm transition-all flex items-center justify-center space-x-1.5 whitespace-nowrap cursor-pointer group"
+                        title="Download Endly Desktop App (Mac / Windows / Linux)"
+                      >
+                        <Monitor className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                        <span>Desktop App</span>
+                        <ChevronDown className="w-3.5 h-3.5 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
+                      </button>
+                    )}
                   </>
                 ) : (
                   <button

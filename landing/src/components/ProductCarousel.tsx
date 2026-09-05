@@ -193,7 +193,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                 ))}
               </div>
 
-              {/* Action Buttons - Only 2 Options: Launch Web App & Download Desktop */}
+              {/* Action Buttons - Launch Web App for all tools, Desktop only for Endly */}
               <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-border/60">
                 {currentProduct.status === 'live' ? (
                   <>
@@ -209,15 +209,17 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
                       <ExternalLink className="w-4 h-4 opacity-90 shrink-0" />
                     </a>
 
-                    {/* Download Desktop App Modal */}
-                    <button
-                      onClick={() => onOpenDownload && onOpenDownload(currentProduct)}
-                      className="min-h-[48px] flex items-center space-x-2.5 px-6 py-3.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border-2 border-border/80 hover:border-accent/50 text-text-primary font-extrabold text-sm shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer group"
-                    >
-                      <Monitor className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
-                      <span>Download Desktop</span>
-                      <ChevronDown className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
-                    </button>
+                    {/* Download Desktop App Modal - Only for Endly */}
+                    {currentProduct.id === 'endly' && (
+                      <button
+                        onClick={() => onOpenDownload && onOpenDownload(currentProduct)}
+                        className="min-h-[48px] flex items-center space-x-2.5 px-6 py-3.5 rounded-xl bg-background-elevated hover:bg-background-tertiary border-2 border-border/80 hover:border-accent/50 text-text-primary font-extrabold text-sm shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer group"
+                      >
+                        <Monitor className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+                        <span>Download Desktop</span>
+                        <ChevronDown className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
+                      </button>
+                    )}
                   </>
                 ) : (
                   <button
