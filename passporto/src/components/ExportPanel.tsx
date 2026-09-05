@@ -117,25 +117,25 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   const outputHeight = Math.round(preset.heightPx * settings.targetScale);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm space-y-5">
+    <div className="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm space-y-5">
       {/* Header with Digital Specs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-card-border">
         <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+          <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
             <FileCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Digital Upload & Download</span>
           </h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-text-secondary font-medium mt-0.5">
             Optimized for online visa portals, government forms, resumes & ID systems
           </p>
         </div>
 
         {/* Live File Specs Badge */}
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shrink-0">
-          <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200">
+        <div className="flex items-center gap-2 bg-body-bg px-3 py-1.5 rounded-xl border border-card-border shrink-0">
+          <span className="font-mono text-xs font-bold text-text-primary">
             {outputWidth} × {outputHeight} px
           </span>
-          <span className="text-slate-400 text-xs">•</span>
+          <span className="text-text-muted text-xs">•</span>
           <span className="font-mono text-xs font-extrabold text-blue-600 dark:text-blue-400">
             {estimatedKb !== null ? `~${estimatedKb} KB` : '...'}
           </span>
@@ -144,12 +144,12 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 
       {/* Target File Size Optimization */}
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+        <label className="text-xs font-bold text-text-primary flex items-center justify-between">
           <span className="flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>Portal File Size Limit</span>
           </span>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">
+          <span className="text-[11px] text-text-muted font-normal">
             Auto-compresses to satisfy portal rules
           </span>
         </label>
@@ -161,20 +161,20 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               onClick={() => setSettings({ ...settings, maxSizeLimit: sp.id })}
               className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                 settings.maxSizeLimit === sp.id
-                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/60 ring-2 ring-blue-500/20'
-                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 hover:border-blue-400'
+                  ? 'border-blue-600 bg-blue-500/10 ring-2 ring-blue-500/20'
+                  : 'border-card-border bg-body-bg hover:border-blue-500/50'
               }`}
             >
               <div
                 className={`text-xs font-bold ${
                   settings.maxSizeLimit === sp.id
-                    ? 'text-blue-700 dark:text-blue-400'
-                    : 'text-slate-800 dark:text-slate-200'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-text-primary'
                 }`}
               >
                 {sp.label}
               </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+              <div className="text-[10px] text-text-muted leading-tight mt-0.5">
                 {sp.desc}
               </div>
             </button>
@@ -186,8 +186,8 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Format Selector */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Image Format</label>
-          <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+          <label className="text-xs font-bold text-text-primary">Image Format</label>
+          <div className="grid grid-cols-3 gap-1 bg-body-bg p-1 rounded-xl border border-card-border">
             {(['jpeg', 'png', 'webp'] as const).map((fmt) => (
               <button
                 key={fmt}
@@ -196,7 +196,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                 className={`py-1.5 text-xs font-bold rounded-lg uppercase transition-all cursor-pointer ${
                   settings.format === fmt
                     ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
                 {fmt === 'jpeg' ? 'JPG (Gov)' : fmt}
@@ -207,15 +207,15 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 
         {/* Resolution Scale */}
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-800 dark:text-slate-200">Resolution Scaling</label>
-          <div className="grid grid-cols-2 gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+          <label className="text-xs font-bold text-text-primary">Resolution Scaling</label>
+          <div className="grid grid-cols-2 gap-1 bg-body-bg p-1 rounded-xl border border-card-border">
             <button
               type="button"
               onClick={() => setSettings({ ...settings, targetScale: 1 })}
               className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 settings.targetScale === 1
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               1× Standard ({preset.dpi} DPI)
@@ -226,7 +226,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                 settings.targetScale === 2
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               2× Ultra HD (600 DPI)
@@ -237,10 +237,10 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 
       {/* Background Color Picker */}
       <div className="space-y-1.5">
-        <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
+        <label className="text-xs font-bold text-text-primary flex items-center justify-between">
           <span>Background Color Preset</span>
           {preset.bgRequirement && (
-            <span className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
               Req: {preset.bgRequirement}
             </span>
           )}
@@ -258,8 +258,8 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               }
               className={`p-2 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all cursor-pointer ${
                 settings.backgroundColor === opt.value
-                  ? 'border-blue-600 ring-2 ring-blue-500/20 bg-blue-50 dark:bg-blue-950/60 font-bold text-blue-700 dark:text-blue-300'
-                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+                  ? 'border-blue-600 ring-2 ring-blue-500/20 bg-blue-500/10 font-bold text-blue-600 dark:text-blue-400'
+                  : 'border-card-border bg-body-bg text-text-secondary hover:border-blue-500/50 hover:text-text-primary'
               }`}
             >
               <span
@@ -274,24 +274,24 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 
       {/* Custom Output Filename */}
       <div className="space-y-1">
-        <label className="text-xs font-bold text-slate-800 dark:text-slate-200">File Name</label>
-        <div className="flex items-center rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden">
+        <label className="text-xs font-bold text-text-primary">File Name</label>
+        <div className="flex items-center rounded-xl bg-body-bg border border-card-border focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-500/20 overflow-hidden">
           <input
             type="text"
             value={settings.filename}
             onChange={(e) => setSettings({ ...settings, filename: e.target.value })}
             placeholder="passport-photo"
-            className="flex-1 px-3.5 py-2.5 text-xs text-slate-900 dark:text-white bg-transparent focus:outline-none"
+            className="flex-1 px-3.5 py-2.5 text-xs text-text-primary bg-transparent focus:outline-none font-medium"
           />
-          <span className="px-3 py-2.5 text-xs font-mono font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/70 dark:bg-slate-900/60 border-l border-slate-300 dark:border-slate-700">
+          <span className="px-3 py-2.5 text-xs font-mono font-semibold text-text-muted bg-card-bg border-l border-card-border">
             .{settings.format === 'jpeg' ? 'jpg' : settings.format}
           </span>
         </div>
       </div>
 
-      {/* Primary Actions: Vibrant Blue Download Single Photo & Solid Copy to Clipboard */}
+      {/* Primary Actions */}
       <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-        {/* Solid Vibrant Blue Button with Crisp White Text and Icon */}
+        {/* Solid Vibrant Blue Button with Crisp White Text */}
         <button
           onClick={handleDownload}
           disabled={isExporting}
@@ -305,34 +305,34 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           </span>
         </button>
 
-        {/* Crisp Bordered Copy Button with Solid High-Contrast Dark Text in Light Mode */}
+        {/* Crisp Bordered Copy Button */}
         <button
           onClick={handleCopyToClipboard}
           disabled={isExporting}
           className={`w-full sm:w-auto py-3.5 px-4 rounded-xl border-2 text-xs font-bold transition-all flex items-center justify-center space-x-2 cursor-pointer shadow-sm ${
             copied
-              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-700 dark:text-emerald-300'
-              : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-blue-500'
+              ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400'
+              : 'bg-card-bg border-card-border text-text-primary hover:bg-body-bg hover:border-blue-500'
           }`}
           title="Copy photo directly to clipboard to paste into web applications or forms"
         >
           {copied ? (
             <Check className="w-4 h-4 text-emerald-600 stroke-[2.5]" />
           ) : (
-            <Copy className="w-4 h-4 text-slate-700 dark:text-slate-300 stroke-[2.5]" />
+            <Copy className="w-4 h-4 text-text-secondary stroke-[2.5]" />
           )}
           <span>{copied ? 'Copied Image!' : 'Copy to Clipboard'}</span>
         </button>
       </div>
 
       {/* Digital Upload Portal Tip */}
-      <div className="bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 p-3.5 text-xs text-slate-700 dark:text-slate-300 space-y-1">
-        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+      <div className="bg-body-bg rounded-xl border border-card-border p-3.5 text-xs text-text-secondary space-y-1">
+        <div className="font-bold text-text-primary flex items-center gap-1.5">
           <span>💡</span>
           <span>Online Portal Upload Tip</span>
         </div>
-        <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-          Most online visa portals (like US DS-160, Schengen, or Singapore ICA) require a square JPEG under 240 KB with equal width and height. Simply click <strong className="text-slate-900 dark:text-white">"Download Photo"</strong> to save a compliant file ready for instant upload.
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          Most online visa portals (like US DS-160, Schengen, or Singapore ICA) require a square JPEG under 240 KB with equal width and height. Simply click <strong className="text-text-primary">"Download Photo"</strong> to save a compliant file ready for instant upload.
         </p>
       </div>
     </div>

@@ -107,16 +107,16 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
   const isPassportType = preset.category === 'passport';
 
   return (
-    <div className="flex flex-col items-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
+    <div className="flex flex-col items-center bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm">
       {/* Header Bar */}
-      <div className="w-full flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
+      <div className="w-full flex items-center justify-between mb-4 pb-3 border-b border-card-border">
         <div className="flex items-center space-x-2">
           <span className="text-xl">{preset.flag || '📷'}</span>
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+            <h3 className="text-sm font-bold text-text-primary leading-tight">
               {preset.name}
             </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-text-secondary font-medium">
               {preset.widthMm && preset.heightMm
                 ? `${preset.widthMm} × ${preset.heightMm} mm`
                 : `${preset.widthPx} × ${preset.heightPx} px`}{' '}
@@ -132,8 +132,8 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onClick={() => setShowGuides(!showGuides)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all flex items-center space-x-1 cursor-pointer ${
                 showGuides
-                  ? 'bg-blue-50 dark:bg-blue-950/60 border-blue-600 text-blue-700 dark:text-blue-300'
-                  : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900'
+                  ? 'bg-blue-600/10 border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'bg-body-bg border-card-border text-text-secondary hover:text-text-primary'
               }`}
               title="Toggle Biometric Eye & Crown Guides"
             >
@@ -149,8 +149,8 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
             onClick={() => setShowGrid(!showGrid)}
             className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all flex items-center space-x-1 cursor-pointer ${
               showGrid
-                ? 'bg-blue-50 dark:bg-blue-950/60 border-blue-600 text-blue-700 dark:text-blue-300'
-                : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900'
+                ? 'bg-blue-600/10 border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'bg-body-bg border-card-border text-text-secondary hover:text-text-primary'
             }`}
             title="Toggle Rule-of-Thirds Grid"
           >
@@ -290,17 +290,17 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
       </div>
 
       {/* Adjustments & Fine Tuning Toolbar */}
-      <div className="w-full mt-5 space-y-3.5 bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+      <div className="w-full mt-5 space-y-3.5 bg-body-bg p-4 rounded-xl border border-card-border">
         {/* Zoom Slider */}
         <div className="space-y-1">
           <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-1.5">
+            <span className="font-bold text-text-primary flex items-center space-x-1.5">
               <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
               </svg>
               <span>Zoom</span>
             </span>
-            <span className="font-mono text-slate-900 dark:text-white text-xs font-bold">
+            <span className="font-mono text-text-primary text-xs font-bold">
               {crop.zoom.toFixed(2)}x
             </span>
           </div>
@@ -313,21 +313,21 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
             onChange={(e) =>
               onCropChange({ ...crop, zoom: parseFloat(e.target.value) })
             }
-            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="w-full h-1.5 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
           />
         </div>
 
         {/* Rotation Slider & 90-degree buttons */}
         <div className="space-y-1">
           <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-1.5">
+            <span className="font-bold text-text-primary flex items-center space-x-1.5">
               <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               <span>Straighten / Rotate</span>
             </span>
             <div className="flex items-center space-x-2">
-              <span className="font-mono text-slate-900 dark:text-white text-xs font-bold">
+              <span className="font-mono text-text-primary text-xs font-bold">
                 {crop.rotation}°
               </span>
               <button
@@ -346,7 +346,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
                   rotation: (crop.rotation - 90 + 360) % 360 > 180 ? ((crop.rotation - 90 + 360) % 360) - 360 : (crop.rotation - 90 + 360) % 360,
                 })
               }
-              className="p-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:border-blue-500 text-xs font-bold cursor-pointer"
+              className="p-1.5 rounded-lg bg-card-bg border border-card-border text-text-primary hover:border-blue-500 text-xs font-bold cursor-pointer"
               title="Rotate Left 90°"
             >
               ⤺ 90°
@@ -360,7 +360,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onChange={(e) =>
                 onCropChange({ ...crop, rotation: parseInt(e.target.value, 10) })
               }
-              className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="flex-1 h-1.5 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
             <button
               onClick={() =>
@@ -369,7 +369,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
                   rotation: (crop.rotation + 90) % 360 > 180 ? ((crop.rotation + 90) % 360) - 360 : (crop.rotation + 90) % 360,
                 })
               }
-              className="p-1.5 rounded-lg bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 hover:border-blue-500 text-xs font-bold cursor-pointer"
+              className="p-1.5 rounded-lg bg-card-bg border border-card-border text-text-primary hover:border-blue-500 text-xs font-bold cursor-pointer"
               title="Rotate Right 90°"
             >
               ⤻ 90°
@@ -378,11 +378,11 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
         </div>
 
         {/* Fine Lighting (Brightness & Contrast) */}
-        <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-700">
+        <div className="grid grid-cols-2 gap-3 pt-1 border-t border-card-border">
           <div className="space-y-1">
             <div className="flex justify-between items-center text-xs">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Brightness</span>
-              <span className="font-mono text-slate-900 dark:text-white font-bold">{crop.brightness > 0 ? `+${crop.brightness}` : crop.brightness}</span>
+              <span className="font-semibold text-text-secondary">Brightness</span>
+              <span className="font-mono text-text-primary font-bold">{crop.brightness > 0 ? `+${crop.brightness}` : crop.brightness}</span>
             </div>
             <input
               type="range"
@@ -393,14 +393,14 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onChange={(e) =>
                 onCropChange({ ...crop, brightness: parseInt(e.target.value, 10) })
               }
-              className="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="w-full h-1 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
           </div>
 
           <div className="space-y-1">
             <div className="flex justify-between items-center text-xs">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">Contrast</span>
-              <span className="font-mono text-slate-900 dark:text-white font-bold">{crop.contrast > 0 ? `+${crop.contrast}` : crop.contrast}</span>
+              <span className="font-semibold text-text-secondary">Contrast</span>
+              <span className="font-mono text-text-primary font-bold">{crop.contrast > 0 ? `+${crop.contrast}` : crop.contrast}</span>
             </div>
             <input
               type="range"
@@ -411,7 +411,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onChange={(e) =>
                 onCropChange({ ...crop, contrast: parseInt(e.target.value, 10) })
               }
-              className="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="w-full h-1 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
           </div>
         </div>

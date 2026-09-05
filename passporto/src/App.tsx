@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { PhotoUploader } from './components/PhotoUploader';
@@ -29,10 +29,18 @@ export function App() {
     contrast: 0,
   });
 
-  // Apply theme class to document body
+  // Apply theme class to document element (both theme-* and dark classes)
   useEffect(() => {
-    document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-midnight');
-    document.documentElement.classList.add(`theme-${theme}`);
+    const root = document.documentElement;
+    root.classList.remove('theme-light', 'theme-dark', 'theme-midnight', 'dark', 'midnight');
+    
+    if (theme === 'dark') {
+      root.classList.add('dark', 'theme-dark');
+    } else if (theme === 'midnight') {
+      root.classList.add('dark', 'midnight', 'theme-midnight');
+    } else {
+      root.classList.add('theme-light');
+    }
     localStorage.setItem('passporto_theme', theme);
   }, [theme]);
 
@@ -209,7 +217,7 @@ export function App() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={handleResetPhoto}
-                  className="p-2 rounded-xl bg-body-bg border border-card-border text-text-secondary hover:text-text-primary hover:border-brand transition-all text-xs font-semibold flex items-center space-x-1.5"
+                  className="p-2 rounded-xl bg-body-bg border border-card-border text-text-secondary hover:text-text-primary hover:border-brand transition-all text-xs font-semibold flex items-center space-x-1.5 cursor-pointer"
                   title="Upload another photo"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -231,17 +239,17 @@ export function App() {
               {/* Status Badge */}
               <div className="flex items-center space-x-2">
                 {isDetecting ? (
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse flex items-center space-x-1.5">
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-500 border border-amber-500/30 animate-pulse flex items-center space-x-1.5">
                     <span>⏳</span>
                     <span>Analyzing Face Geometry...</span>
                   </span>
                 ) : detectedFace ? (
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center space-x-1.5">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center space-x-1.5">
                     <span>✓</span>
                     <span>Biometric Face Aligned</span>
                   </span>
                 ) : (
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-500 border border-blue-500/30">
                     Manual Alignment Active
                   </span>
                 )}
@@ -267,7 +275,7 @@ export function App() {
                     <span>📋</span>
                     <span>Embassy Checklist for {selectedPreset.name}</span>
                   </h4>
-                  <ul className="space-y-1.5 text-text-secondary">
+                  <ul className="space-y-1.5 text-text-secondary font-medium">
                     <li className="flex items-start space-x-1.5">
                       <span className="text-emerald-500 font-bold">✓</span>
                       <span>Eyes centered directly on horizontal guide line</span>
