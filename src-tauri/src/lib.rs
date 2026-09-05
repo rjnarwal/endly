@@ -1,6 +1,5 @@
 mod proxy;
 
-use tauri::Manager;
 use proxy::{start_proxy_server, stop_proxy_server, sync_mock_rules, get_local_ips};
 
 #[tauri::command]

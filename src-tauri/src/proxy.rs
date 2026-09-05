@@ -1,4 +1,4 @@
-use rcgen::{CertificateParams, DnType, KeyPair, SanType};
+use rcgen::{BasicConstraints, CertificateParams, DnType, IsCa, KeyPair};
 use rustls_pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -210,19 +210,13 @@ fn get_or_create_tls_config(
     }
 
     let ca_key_pair = KeyPair::from_pem(CA_KEY_PEM).ok()?;
-    let ca_params = CertificateParams::from_ca_cert_pem(CA_CERT_PEM).ok()?;
+    let mut ca_params = CertificateParams::default();
+    ca_params.is_ca = IsCa::Ca(BasicConstraints::Unconstrained);
+    ca_params.distinguished_name.push(DnType::CommonName, "Endly Root CA");
+    ca_params.distinguished_name.push(DnType::OrganizationName, "Endly");
     let ca_cert = ca_params.self_signed(&ca_key_pair).ok()?;
 
-    let mut subject_alt_names = Vec::new();
-    if let Ok(san) = SanType::try_from(domain.to_string()) {
-        subject_alt_names.push(san);
-    }
-    if let Ok(san_wildcard) = SanType::try_from(format!("*.{}", domain)) {
-        subject_alt_names.push(san_wildcard);
-    }
-
-    let mut params = CertificateParams::new(vec![domain.to_string()]).ok()?;
-    params.subject_alt_names = subject_alt_names;
+    let mut params = CertificateParams::new(vec![domain.to_string(), format!("*.{}", domain)]).ok()?;
     params.distinguished_name.push(DnType::CommonName, domain);
 
     let server_key_pair = KeyPair::generate().ok()?;
@@ -302,7 +296,7 @@ async fn handle_proxy_client(
         let is_pinned = ["apple.com", "icloud.com", "push.apple.com"].iter().any(|d| raw_host.ends_with(d));
 
         if is_pinned {
-            if let Ok(mut target_stream) = TcpStream::connect(&target_host).await {
+            if let Ok(target_stream) = TcpStream::connect(&target_host).await {
                 let _ = stream.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await;
                 let (mut ri, mut wi) = stream.into_split();
                 let (mut ro, mut wo) = target_stream.into_split();
@@ -428,7 +422,7 @@ async fn handle_proxy_client(
         }
 
         // Fallback transparent tunnel if cert generation fails
-        if let Ok(mut target_stream) = TcpStream::connect(&target_host).await {
+        if let Ok(target_stream) = TcpStream::connect(&target_host).await {
             let _ = stream.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await;
             let (mut ri, mut wi) = stream.into_split();
             let (mut ro, mut wo) = target_stream.into_split();
