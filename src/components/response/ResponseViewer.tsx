@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   Copy,
   Check,
@@ -97,33 +97,29 @@ export const ResponseViewer: React.FC = () => {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  // Format JSON or apply JSONPath
-  let formattedJson: string | null = null;
-  let isJson = false;
-  if (response?.body) {
+  // Format JSON or apply JSONPath (Memoized to prevent blocking the UI thread on re-renders)
+  const { formattedJson, isJson } = useMemo(() => {
+    if (!response?.body) return { formattedJson: null, isJson: false };
     try {
       const parsed = JSON.parse(response.body);
-      isJson = true;
       if (jsonPathQuery.trim()) {
         try {
-          // Simple JSON path expression evaluator
           const cleanQuery = jsonPathQuery.trim().replace(/^\$\.?/, '');
           const parts = cleanQuery.split('.');
           let current = parsed;
           for (const p of parts) {
             if (p) current = current[p];
           }
-          formattedJson = JSON.stringify(current, null, 2);
+          return { formattedJson: JSON.stringify(current, null, 2), isJson: true };
         } catch {
-          formattedJson = JSON.stringify(parsed, null, 2);
+          return { formattedJson: JSON.stringify(parsed, null, 2), isJson: true };
         }
-      } else {
-        formattedJson = JSON.stringify(parsed, null, 2);
       }
+      return { formattedJson: JSON.stringify(parsed, null, 2), isJson: true };
     } catch {
-      formattedJson = null;
+      return { formattedJson: null, isJson: false };
     }
-  }
+  }, [response?.body, jsonPathQuery]);
 
   // Determine status style
   const getStatusColor = (status: number) => {

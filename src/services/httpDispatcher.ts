@@ -204,37 +204,31 @@ export async function dispatchHttpRequest(options: DispatchOptions): Promise<Res
   let ttfb = 0;
 
   try {
-    let fetchFn = window.fetch;
-
-    // If Tauri is available, dynamically use Tauri HTTP plugin
-    if (isTauriEnvironment()) {
-      try {
-        const tauriHttp = await import('@tauri-apps/plugin-http');
-        if (tauriHttp && tauriHttp.fetch) {
-          fetchFn = tauriHttp.fetch as any;
-        }
-      } catch {
-        // Fallback to standard fetch
-        fetchFn = window.fetch;
-      }
-    }
-
     let response: Response;
     try {
-      response = await fetchFn(targetUrl, {
+      response = await window.fetch(targetUrl, {
         method,
         headers,
         body: bodyPayload,
         signal: abortSignal,
       });
     } catch (fetchErr: any) {
-      if (fetchFn !== window.fetch) {
-        response = await window.fetch(targetUrl, {
-          method,
-          headers,
-          body: bodyPayload,
-          signal: abortSignal,
-        });
+      if (isTauriEnvironment()) {
+        try {
+          const tauriHttp = await import('@tauri-apps/plugin-http');
+          if (tauriHttp && tauriHttp.fetch) {
+            response = await (tauriHttp.fetch as any)(targetUrl, {
+              method,
+              headers,
+              body: bodyPayload,
+              signal: abortSignal,
+            });
+          } else {
+            throw fetchErr;
+          }
+        } catch {
+          throw fetchErr;
+        }
       } else {
         throw fetchErr;
       }

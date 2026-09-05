@@ -427,23 +427,15 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
     return content;
   }, [content, activeLanguage]);
 
-  // Parse lines
-  const parsedLines: ParsedLine[] = useMemo(() => {
+  // Fast raw lines extraction
+  const rawLines: string[] = useMemo(() => {
     if (!formattedContent) return [];
-    const rawLines = formattedContent.split('\n');
+    return formattedContent.split('\n');
+  }, [formattedContent]);
 
+  // Fast lightweight line metadata (avoids expensive tokenization of all lines upfront)
+  const lineMetadata = useMemo(() => {
     return rawLines.map((rawLine, idx) => {
-      const lineNum = idx + 1;
-      let tokens: Token[] = [];
-
-      if (activeLanguage === 'json') {
-        tokens = tokenizeJsonLine(rawLine);
-      } else if (activeLanguage === 'xml' || activeLanguage === 'html') {
-        tokens = tokenizeXmlLine(rawLine);
-      } else {
-        tokens = [{ type: 'plain', content: rawLine }];
-      }
-
       const trimmed = rawLine.trim();
       const foldable =
         trimmed.endsWith('{') ||
@@ -453,23 +445,22 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
         (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>'));
 
       return {
-        lineNumber: lineNum,
+        lineNumber: idx + 1,
         rawText: rawLine,
-        tokens,
         foldable,
       };
     });
-  }, [formattedContent, activeLanguage]);
+  }, [rawLines]);
 
   // Calculate folding ranges for JSON
   const foldRanges = useMemo(() => {
-    const map = new Map<number, number>(); // startLineIndex -> endLineIndex
-    if (activeLanguage !== 'json') return map;
+    const map = new Map<number, number>();
+    if (activeLanguage !== 'json' || rawLines.length > 10000) return map;
 
     const stack: { char: string; lineIndex: number }[] = [];
 
-    parsedLines.forEach((line, idx) => {
-      const raw = line.rawText;
+    for (let idx = 0; idx < rawLines.length; idx++) {
+      const raw = rawLines[idx];
       for (let c = 0; c < raw.length; c++) {
         const ch = raw[c];
         if (ch === '{' || ch === '[') {
@@ -484,10 +475,10 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
           }
         }
       }
-    });
+    }
 
     return map;
-  }, [parsedLines, activeLanguage]);
+  }, [rawLines, activeLanguage]);
 
   const toggleFold = (lineIndex: number) => {
     setCollapsedLines((prev) => {
@@ -584,14 +575,14 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
 
   // Flat list of visible lines
   const visibleLines = useMemo(() => {
-    const list: { line: ParsedLine; originalIdx: number }[] = [];
-    for (let i = 0; i < parsedLines.length; i++) {
+    const list: { line: (typeof lineMetadata)[0]; originalIdx: number }[] = [];
+    for (let i = 0; i < lineMetadata.length; i++) {
       if (!hiddenLines.has(i)) {
-        list.push({ line: parsedLines[i], originalIdx: i });
+        list.push({ line: lineMetadata[i], originalIdx: i });
       }
     }
     return list;
-  }, [parsedLines, hiddenLines]);
+  }, [lineMetadata, hiddenLines]);
 
   React.useEffect(() => {
     const container = scrollContainerRef.current;
@@ -669,7 +660,7 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
           </div>
 
           <span className="text-[11px] text-text-muted font-sans border-l border-border/70 pl-2.5">
-            {parsedLines.length} {parsedLines.length === 1 ? 'line' : 'lines'}
+            {lineMetadata.length} {lineMetadata.length === 1 ? 'line' : 'lines'}
           </span>
         </div>
 
@@ -771,6 +762,13 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
             const isCollapsed = collapsedLines.has(originalIdx);
             const endIdx = foldRanges.get(originalIdx);
 
+            const tokens: Token[] =
+              activeLanguage === 'json'
+                ? tokenizeJsonLine(line.rawText)
+                : activeLanguage === 'xml' || activeLanguage === 'html'
+                ? tokenizeXmlLine(line.rawText)
+                : [{ type: 'plain', content: line.rawText, isUrl: checkIsUrl(line.rawText) }];
+
             return (
               <div
                 key={line.lineNumber}
@@ -803,7 +801,7 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
                     wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'
                   }`}
                 >
-                  {line.tokens.map((token, tIdx) =>
+                  {tokens.map((token, tIdx) =>
                     renderToken(
                       token,
                       tIdx,
