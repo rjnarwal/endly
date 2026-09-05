@@ -1,10 +1,15 @@
+use rcgen::{CertificateParams, DnType, KeyPair, SanType};
+use rustls_pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 use tauri::{AppHandle, Emitter};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::broadcast;
+
+static CA_CERT_PEM: &str = include_str!("../../public/endly-root-ca.crt");
+static CA_KEY_PEM: &str = include_str!("../../public/endly-root-ca.key");
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HeaderItem {
@@ -60,11 +65,14 @@ pub struct TrafficLog {
     pub client_ip: Option<String>,
 }
 
+type TlsConfigCache = Arc<RwLock<HashMap<String, Arc<rustls::ServerConfig>>>>;
+
 pub struct ProxyManager {
     pub is_running: bool,
     pub port: u16,
     pub mocks: Vec<MockRule>,
     pub shutdown_tx: Option<broadcast::Sender<()>>,
+    pub tls_cache: TlsConfigCache,
 }
 
 fn get_manager() -> Arc<Mutex<ProxyManager>> {
@@ -77,6 +85,7 @@ fn get_manager() -> Arc<Mutex<ProxyManager>> {
                 port: 8888,
                 mocks: Vec::new(),
                 shutdown_tx: None,
+                tls_cache: Arc::new(RwLock::new(HashMap::new())),
             })));
         });
         MANAGER.as_ref().unwrap().clone()
@@ -187,6 +196,55 @@ pub fn get_local_ips() -> Vec<String> {
     get_local_ip_addresses()
 }
 
+// Generate dynamic SSL certificate signed by Endly Root CA
+fn get_or_create_tls_config(
+    domain: &str,
+    cache: &TlsConfigCache,
+) -> Option<Arc<rustls::ServerConfig>> {
+    {
+        if let Ok(r) = cache.read() {
+            if let Some(cfg) = r.get(domain) {
+                return Some(cfg.clone());
+            }
+        }
+    }
+
+    let ca_key_pair = KeyPair::from_pem(CA_KEY_PEM).ok()?;
+    let ca_params = CertificateParams::from_ca_cert_pem(CA_CERT_PEM).ok()?;
+    let ca_cert = ca_params.self_signed(&ca_key_pair).ok()?;
+
+    let mut subject_alt_names = Vec::new();
+    if let Ok(san) = SanType::try_from(domain.to_string()) {
+        subject_alt_names.push(san);
+    }
+    if let Ok(san_wildcard) = SanType::try_from(format!("*.{}", domain)) {
+        subject_alt_names.push(san_wildcard);
+    }
+
+    let mut params = CertificateParams::new(vec![domain.to_string()]).ok()?;
+    params.subject_alt_names = subject_alt_names;
+    params.distinguished_name.push(DnType::CommonName, domain);
+
+    let server_key_pair = KeyPair::generate().ok()?;
+    let cert = params.signed_by(&server_key_pair, &ca_cert, &ca_key_pair).ok()?;
+
+    let cert_der = CertificateDer::from(cert.der().to_vec());
+    let ca_cert_der = CertificateDer::from(ca_cert.der().to_vec());
+    let key_der = PrivateKeyDer::Pkcs8(PrivatePkcs8KeyDer::from(server_key_pair.serialize_der()));
+
+    let server_config = rustls::ServerConfig::builder()
+        .with_no_client_auth()
+        .with_single_cert(vec![cert_der, ca_cert_der], key_der)
+        .ok()?;
+
+    let config_arc = Arc::new(server_config);
+    if let Ok(mut w) = cache.write() {
+        w.insert(domain.to_string(), config_arc.clone());
+    }
+
+    Some(config_arc)
+}
+
 async fn handle_proxy_client(
     mut stream: TcpStream,
     client_ip: String,
@@ -231,6 +289,159 @@ async fn handle_proxy_client(
         }
     }
 
+    // 1. Handle HTTPS CONNECT Tunnel with Dynamic SSL MITM Decryption
+    if method == "CONNECT" {
+        let raw_host = target_uri.split(':').next().unwrap_or(&target_uri).to_lowercase();
+        let target_host = if target_uri.contains(':') {
+            target_uri.clone()
+        } else {
+            format!("{}:443", target_uri)
+        };
+
+        // Pinned apple / system hosts -> transparent TCP bypass
+        let is_pinned = ["apple.com", "icloud.com", "push.apple.com"].iter().any(|d| raw_host.ends_with(d));
+
+        if is_pinned {
+            if let Ok(mut target_stream) = TcpStream::connect(&target_host).await {
+                let _ = stream.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await;
+                let (mut ri, mut wi) = stream.into_split();
+                let (mut ro, mut wo) = target_stream.into_split();
+                let client_to_target = tokio::io::copy(&mut ri, &mut wo);
+                let target_to_client = tokio::io::copy(&mut ro, &mut wi);
+                let _ = tokio::select! {
+                    r1 = client_to_target => r1,
+                    r2 = target_to_client => r2,
+                };
+            }
+            return;
+        }
+
+        // Get or dynamically generate TLS configuration for domain
+        let tls_cache = {
+            let mg = manager.lock().unwrap();
+            mg.tls_cache.clone()
+        };
+
+        if let Some(tls_cfg) = get_or_create_tls_config(&raw_host, &tls_cache) {
+            let _ = stream.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await;
+            let acceptor = tokio_rustls::TlsAcceptor::from(tls_cfg);
+            if let Ok(mut tls_stream) = acceptor.accept(stream).await {
+                // Read inner decrypted HTTP requests
+                let mut dec_buf = vec![0u8; 16384];
+                if let Ok(dec_n) = tls_stream.read(&mut dec_buf).await {
+                    if dec_n > 0 {
+                        let dec_req_str = String::from_utf8_lossy(&dec_buf[..dec_n]);
+                        let mut dec_lines = dec_req_str.lines();
+                        if let Some(first_line) = dec_lines.next() {
+                            let dec_parts: Vec<&str> = first_line.split_whitespace().collect();
+                            if dec_parts.len() >= 2 {
+                                let inner_method = dec_parts[0].to_uppercase();
+                                let inner_path = dec_parts[1].to_string();
+
+                                let mut inner_headers = HashMap::new();
+                                for l in dec_lines {
+                                    if l.is_empty() {
+                                        break;
+                                    }
+                                    if let Some((k, v)) = l.split_once(':') {
+                                        inner_headers.insert(k.trim().to_string(), v.trim().to_string());
+                                    }
+                                }
+
+                                let full_decrypted_url = format!("https://{}{}", raw_host, inner_path);
+                                let start_time = std::time::Instant::now();
+
+                                // Forward decrypted request to upstream HTTPS
+                                let client_res = reqwest::Client::builder()
+                                    .danger_accept_invalid_certs(true)
+                                    .build();
+
+                                if let Ok(client) = client_res {
+                                    let mut req_builder = client.request(
+                                        reqwest::Method::from_bytes(inner_method.as_bytes()).unwrap_or(reqwest::Method::GET),
+                                        &full_decrypted_url,
+                                    );
+
+                                    for (k, v) in &inner_headers {
+                                        let k_lower = k.to_lowercase();
+                                        if k_lower != "proxy-connection" && k_lower != "host" && k_lower != "content-length" {
+                                            if let Ok(hn) = reqwest::header::HeaderName::from_bytes(k.as_bytes()) {
+                                                if let Ok(hv) = reqwest::header::HeaderValue::from_str(v) {
+                                                    req_builder = req_builder.header(hn, hv);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if let Ok(res) = req_builder.send().await {
+                                        let status = res.status().as_u16();
+                                        let status_text = res.status().canonical_reason().unwrap_or("OK").to_string();
+
+                                        let mut resp_headers = HashMap::new();
+                                        for (k, v) in res.headers() {
+                                            if let Ok(val_str) = v.to_str() {
+                                                resp_headers.insert(k.as_str().to_string(), val_str.to_string());
+                                            }
+                                        }
+
+                                        let body_bytes = res.bytes().await.unwrap_or_default();
+                                        let body_str = String::from_utf8(body_bytes.to_vec()).ok();
+
+                                        let mut http_res = format!("HTTP/1.1 {} {}\r\n", status, status_text);
+                                        for (k, v) in &resp_headers {
+                                            if !k.eq_ignore_ascii_case("content-length") && !k.eq_ignore_ascii_case("transfer-encoding") {
+                                                http_res.push_str(&format!("{}: {}\r\n", k, v));
+                                            }
+                                        }
+                                        http_res.push_str(&format!("Content-Length: {}\r\n\r\n", body_bytes.len()));
+
+                                        let _ = tls_stream.write_all(http_res.as_bytes()).await;
+                                        let _ = tls_stream.write_all(&body_bytes).await;
+                                        let _ = tls_stream.flush().await;
+
+                                        let log = TrafficLog {
+                                            id: format!("{:x}", rand_u32()),
+                                            timestamp: current_timestamp(),
+                                            method: inner_method,
+                                            url: full_decrypted_url,
+                                            path: inner_path,
+                                            status_code: status,
+                                            status_text,
+                                            is_mocked: false,
+                                            mock_id: None,
+                                            time_ms: start_time.elapsed().as_millis() as u64,
+                                            size_bytes: body_bytes.len(),
+                                            request_headers: inner_headers,
+                                            response_headers: resp_headers,
+                                            response_body: body_str,
+                                            client_ip: Some(client_ip.clone()),
+                                        };
+                                        let _ = app.emit("proxy_traffic_event", log);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        // Fallback transparent tunnel if cert generation fails
+        if let Ok(mut target_stream) = TcpStream::connect(&target_host).await {
+            let _ = stream.write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n").await;
+            let (mut ri, mut wi) = stream.into_split();
+            let (mut ro, mut wo) = target_stream.into_split();
+            let client_to_target = tokio::io::copy(&mut ri, &mut wo);
+            let target_to_client = tokio::io::copy(&mut ro, &mut wi);
+            let _ = tokio::select! {
+                r1 = client_to_target => r1,
+                r2 = target_to_client => r2,
+            };
+        }
+        return;
+    }
+
     let full_url = if target_uri.starts_with("http://") || target_uri.starts_with("https://") {
         target_uri.clone()
     } else if !host_header.is_empty() {
@@ -240,54 +451,6 @@ async fn handle_proxy_client(
     };
 
     let start_time = std::time::Instant::now();
-
-    // 1. Handle HTTPS CONNECT Tunnel
-    if method == "CONNECT" {
-        let target_host = if target_uri.contains(':') {
-            target_uri.clone()
-        } else {
-            format!("{}:443", target_uri)
-        };
-
-        if let Ok(mut target_stream) = TcpStream::connect(&target_host).await {
-            let _ = stream
-                .write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n")
-                .await;
-
-            let log = TrafficLog {
-                id: format!("{:x}", rand_u32()),
-                timestamp: current_timestamp(),
-                method: "CONNECT".into(),
-                url: format!("https://{}", target_host),
-                path: format!("https://{}", target_host),
-                status_code: 200,
-                status_text: "Tunnel Established".into(),
-                is_mocked: false,
-                mock_id: None,
-                time_ms: start_time.elapsed().as_millis() as u64,
-                size_bytes: 0,
-                request_headers: req_headers,
-                response_headers: HashMap::new(),
-                response_body: None,
-                client_ip: Some(client_ip),
-            };
-            let _ = app.emit("proxy_traffic_event", log);
-
-            let (mut ri, mut wi) = stream.into_split();
-            let (mut ro, mut wo) = target_stream.into_split();
-
-            let client_to_target = tokio::io::copy(&mut ri, &mut wo);
-            let target_to_client = tokio::io::copy(&mut ro, &mut wi);
-
-            let _ = tokio::select! {
-                r1 = client_to_target => r1,
-                r2 = target_to_client => r2,
-            };
-        } else {
-            let _ = stream.write_all(b"HTTP/1.1 502 Bad Gateway\r\n\r\n").await;
-        }
-        return;
-    }
 
     // 2. Check for matching Mock Rule
     let mocks = {
@@ -354,7 +517,7 @@ async fn handle_proxy_client(
         return;
     }
 
-    // 3. Forward HTTP request with full query params & headers
+    // 3. Forward plain HTTP request with full query params & headers
     let client_res = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build();
