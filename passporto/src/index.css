@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --color-bg-primary: #f8fafc;
+    --color-bg-secondary: #ffffff;
+    --color-bg-tertiary: #f1f5f9;
+    --color-bg-elevated: #ffffff;
+    --color-bg-base: #f8fafc;
+    --color-bg-card: #ffffff;
+    --color-bg-subtle: #f1f5f9;
+    --color-border: #cbd5e1;
+    --color-border-hover: #94a3b8;
+    --color-border-primary: #cbd5e1;
+    --color-border-secondary: #e2e8f0;
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #334155;
+    --color-text-muted: #64748b;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-accent-muted: rgba(37, 99, 235, 0.12);
+  }
+
+  .dark {
+    color-scheme: dark;
+    --color-bg-primary: #0a0d14;
+    --color-bg-secondary: #101522;
+    --color-bg-tertiary: #161c2e;
+    --color-bg-elevated: #1e2538;
+    --color-bg-base: #0a0d14;
+    --color-bg-card: #101522;
+    --color-bg-subtle: #161c2e;
+    --color-border: #2b3754;
+    --color-border-hover: #3b4d75;
+    --color-border-primary: #2b3754;
+    --color-border-secondary: #1a2236;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-accent: #3b82f6;
+    --color-accent-hover: #2563eb;
+    --color-accent-muted: rgba(59, 130, 246, 0.15);
+  }
+
+  .midnight {
+    color-scheme: dark;
+    --color-bg-primary: #060913;
+    --color-bg-secondary: #0b1120;
+    --color-bg-tertiary: #111a30;
+    --color-bg-elevated: #182442;
+    --color-bg-base: #060913;
+    --color-bg-card: #0b1120;
+    --color-bg-subtle: #111a30;
+    --color-border: #233352;
+    --color-border-hover: #334870;
+    --color-border-primary: #233352;
+    --color-border-secondary: #151e2e;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-accent: #60a5fa;
+    --color-accent-hover: #3b82f6;
+    --color-accent-muted: rgba(96, 165, 250, 0.15);
+  }
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  overflow-x: hidden;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+input, textarea, select {
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-bg-primary) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-muted) !important;
+  opacity: 0.8 !important;
+}
