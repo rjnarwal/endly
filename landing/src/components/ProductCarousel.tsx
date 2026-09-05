@@ -6,6 +6,7 @@ import {
   Regex,
   Binary,
   Images,
+  Camera,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
@@ -81,6 +82,8 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         return <Binary className="w-6 h-6 text-white" />;
       case 'Images':
         return <Images className="w-6 h-6 text-white" />;
+      case 'Camera':
+        return <Camera className="w-6 h-6 text-white" />;
       default:
         return <Sparkles className="w-6 h-6 text-white" />;
     }

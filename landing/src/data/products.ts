@@ -311,5 +311,56 @@ Status: Compiled in 180ms with 0 bytes uploaded`,
       isExternal: true,
     },
   },
+  {
+    id: 'passporto',
+    name: 'PassPorto (Passport Studio)',
+    category: 'utilities',
+    tagline: 'Instant AI Biometric Passport Photo & Printable 4×6" Sheet Maker',
+    description:
+      'Auto-detect face coordinates, align eye-line and crown guidelines according to strict embassy regulations, and generate official 300 DPI single passport photos and 4×6" printable sheets in seconds. 100% in-browser privacy.',
+    status: 'live',
+    badgeText: 'LIVE NOW',
+    iconName: 'Camera',
+    accentColor: '#2563eb',
+    gradient: 'from-blue-600 via-indigo-600 to-sky-500',
+    url: 'https://passporto.grassroot.digital',
+    features: [
+      {
+        title: 'Smart Biometric Auto-Centering',
+        description: 'Native Shape Detection & centroid analysis auto-centers eyes and scales head to 70–80% frame height.',
+      },
+      {
+        title: 'Global Embassy Presets',
+        description: 'US 2×2", UK/EU/India 35×45mm, Canada 50×70mm, China/Japan 33×48mm, Stamp, and Social Story/Avatar ratios.',
+      },
+      {
+        title: 'Printable 4×6" Sheets & PDF',
+        description: 'Tiled 6 or 8 photo layout with thin cutting marks formatted for CVS, Walgreens, or home photo paper.',
+      },
+      {
+        title: '100% Offline & Private',
+        description: 'Zero cloud server uploads. All face geometry, background fills, and canvas rendering happen locally.',
+      },
+    ],
+    previewMockup: {
+      type: 'passporto',
+      tags: ['Biometric AI', '300 DPI', '4x6" Sheet', '100% Local'],
+      sampleCode: `// FaceDetector AI: Centroid & Eye Alignment
+Preset: US Passport 2x2" (600x600 px @ 300 DPI)
+Eye Level: 40% (Biometric Compliant)
+Head Coverage: 72% (Embassy Standard)`,
+      sampleResult: `// Output Render:
+Single Photo: 600x600 px JPEG (Ultra 300 DPI)
+Printable Sheet: 1800x1200 px (6 photos + cut marks)
+Privacy: Processed 100% locally in browser memory`,
+    },
+    githubUrl: 'https://github.com/rjnarwal/passporto',
+    actions: {
+      primaryLabel: 'Launch PassPorto',
+      primaryUrl: 'https://passporto.grassroot.digital',
+      isExternal: true,
+    },
+  },
 ];
+
 

@@ -21,7 +21,7 @@ export interface ProductItem {
   url?: string;
   features: ProductFeature[];
   previewMockup: {
-    type: 'api-client' | 'jwt-decoder' | 'json-diff' | 'regex-tester' | 'crypto-studio' | 'pagely';
+    type: 'api-client' | 'jwt-decoder' | 'json-diff' | 'regex-tester' | 'crypto-studio' | 'pagely' | 'passporto';
     sampleCode?: string;
     sampleResult?: string;
     tags: string[];
