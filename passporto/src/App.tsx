@@ -152,10 +152,10 @@ export function App() {
                 <span>100% Client-Side & Private • Zero Cloud Uploads</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">
-                Instant AI Biometric Passport Photos
+                Instant Biometric Passport & ID Photos
               </h1>
               <p className="text-sm sm:text-base text-text-secondary leading-relaxed">
-                Automatically detect face coordinates, align eye-line guidelines, and export official 300 DPI passport photos and 4×6" printable sheets in seconds.
+                Auto-align facial geometry to official embassy eye-line & head coverage rules. Download compliance-ready digital photos for online visa portals, passports, and ID applications.
               </p>
             </div>
 
@@ -169,22 +169,22 @@ export function App() {
                   🎯
                 </div>
                 <h3 className="text-sm font-bold text-text-primary">
-                  Smart Biometric Centering
+                  Biometric Face Centering
                 </h3>
                 <p className="text-xs text-text-secondary leading-normal">
-                  Intelligent in-browser face and eye-line recognition automatically adjusts head coverage to strict 70–80% embassy guidelines.
+                  In-browser face and eye-line recognition automatically adjusts head coverage to strict 70–80% embassy guidelines.
                 </p>
               </div>
 
               <div className="bg-card-bg p-5 rounded-2xl border border-card-border shadow-sm space-y-2">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-lg">
-                  🖨️
+                  ⚡
                 </div>
                 <h3 className="text-sm font-bold text-text-primary">
-                  Printable 4×6" Sheets
+                  Online Portal Ready
                 </h3>
                 <p className="text-xs text-text-secondary leading-normal">
-                  Generate tiled 6 or 8 photo printable templates with high-precision cut marks, ready for CVS, Walgreens, or home printing.
+                  Auto-optimizes to meet strict government file limits (like US DS-160 &lt;240KB, Schengen, and Passport Seva &lt;100KB).
                 </p>
               </div>
 
@@ -196,7 +196,7 @@ export function App() {
                   100% Offline & Private
                 </h3>
                 <p className="text-xs text-text-secondary leading-normal">
-                  Your portraits never leave your computer or touch any server. Everything renders instantly in your browser memory.
+                  Your portraits never leave your device or touch any remote server. Everything processes locally in memory.
                 </p>
               </div>
             </div>

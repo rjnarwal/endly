@@ -1,30 +1,31 @@
 import { CropState, PhotoPreset, ExportSettings } from '../types';
-import { jsPDF } from 'jspdf';
 
 /**
- * Renders a single cropped photo on an offscreen canvas according to preset specifications.
+ * Renders a single cropped photo on an offscreen canvas with precision dimensions,
+ * transforms (pan, zoom, rotation), brightness/contrast filters, background fill,
+ * and optional max file size compression (e.g. <240KB for DS-160 or <100KB for government portals).
  */
 export async function renderCroppedPhoto(
   imageElement: HTMLImageElement,
   crop: CropState,
   preset: PhotoPreset,
   settings: ExportSettings
-): Promise<{ blob: Blob; dataUrl: string }> {
+): Promise<{ blob: Blob; dataUrl: string; sizeBytes: number; width: number; height: number }> {
   const canvas = document.createElement('canvas');
-  const outW = preset.widthPx;
-  const outH = preset.heightPx;
+  const scale = settings.targetScale || 1;
+  const outW = Math.round(preset.widthPx * scale);
+  const outH = Math.round(preset.heightPx * scale);
   canvas.width = outW;
   canvas.height = outH;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas 2D context not supported');
 
-  // 1. Background Fill
+  // 1. Background Fill (Crisp Solid Background for official digital passport standards)
   if (settings.backgroundColor !== 'original') {
     ctx.fillStyle = settings.backgroundColor;
     ctx.fillRect(0, 0, outW, outH);
   } else {
-    // Default crisp white for official passport presets if transparent
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, outW, outH);
   }
@@ -50,13 +51,13 @@ export async function renderCroppedPhoto(
   const drawW = naturalW * totalScale;
   const drawH = naturalH * totalScale;
 
-  const drawX = -drawW / 2 + crop.panX * (outW / 300);
-  const drawY = -drawH / 2 + crop.panY * (outH / 300);
+  const drawX = -drawW / 2 + (crop.panX * (outW / 300));
+  const drawY = -drawH / 2 + (crop.panY * (outH / 300));
 
   ctx.drawImage(imageElement, drawX, drawY, drawW, drawH);
   ctx.restore();
 
-  // 3. Export to Blob
+  // 3. Export to Blob with Target File Size Compression
   const mimeType =
     settings.format === 'png'
       ? 'image/png'
@@ -64,146 +65,57 @@ export async function renderCroppedPhoto(
       ? 'image/webp'
       : 'image/jpeg';
 
-  const dataUrl = canvas.toDataURL(mimeType, settings.quality);
-  const blob = await new Promise<Blob>((resolve) => {
-    canvas.toBlob(
-      (b) => resolve(b || new Blob()),
-      mimeType,
-      settings.quality
-    );
-  });
+  // Determine Max KB constraint
+  let maxBytes: number | null = null;
+  if (settings.maxSizeLimit === '240kb') maxBytes = 240 * 1024;
+  else if (settings.maxSizeLimit === '100kb') maxBytes = 100 * 1024;
+  else if (settings.maxSizeLimit === '50kb') maxBytes = 50 * 1024;
+  else if (settings.maxSizeLimit === 'custom' && settings.customMaxKb) {
+    maxBytes = settings.customMaxKb * 1024;
+  }
 
-  return { blob, dataUrl };
-}
+  // If format is PNG, compression quality is not variable in standard canvas
+  if (mimeType === 'image/png' || !maxBytes) {
+    const dataUrl = canvas.toDataURL(mimeType, settings.quality);
+    const blob = await new Promise<Blob>((resolve) => {
+      canvas.toBlob((b) => resolve(b || new Blob()), mimeType, settings.quality);
+    });
+    return { blob, dataUrl, sizeBytes: blob.size, width: outW, height: outH };
+  }
 
-/**
- * Creates a standard 4 × 6 inch (1200 × 1800 px @ 300 DPI) printable photo sheet
- * tiling 6 or 8 passport photos with thin dashed cutting guidelines.
- */
-export async function renderPrintableSheet(
-  photoDataUrl: string,
-  preset: PhotoPreset,
-  count: 6 | 8 = 6
-): Promise<{ blob: Blob; dataUrl: string; pdfBlob: Blob }> {
-  return new Promise((resolve, reject) => {
-    const photoImg = new Image();
-    photoImg.onload = () => {
-      const sheetCanvas = document.createElement('canvas');
-      // 4 x 6 inch in landscape = 1800 x 1200 px at 300 DPI
-      const sheetW = 1800;
-      const sheetH = 1200;
-      sheetCanvas.width = sheetW;
-      sheetCanvas.height = sheetH;
+  // Binary search quality to satisfy strict max KB limit (e.g. for DS-160 or gov portals)
+  let low = 0.3;
+  let high = settings.quality || 0.98;
+  let bestBlob: Blob | null = null;
+  let bestDataUrl = '';
 
-      const ctx = sheetCanvas.getContext('2d');
-      if (!ctx) return reject(new Error('Canvas 2D context error'));
+  for (let iter = 0; iter < 6; iter++) {
+    const mid = (low + high) / 2;
+    const testBlob = await new Promise<Blob>((resolve) => {
+      canvas.toBlob((b) => resolve(b || new Blob()), mimeType, mid);
+    });
 
-      // Sheet Background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, sheetW, sheetH);
+    if (testBlob.size <= maxBytes) {
+      bestBlob = testBlob;
+      bestDataUrl = canvas.toDataURL(mimeType, mid);
+      low = mid; // Try for higher quality while staying under limit
+    } else {
+      high = mid; // Too large, decrease quality
+    }
+  }
 
-      // Border & Guidelines
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(20, 20, sheetW - 40, sheetH - 40);
+  if (!bestBlob) {
+    bestDataUrl = canvas.toDataURL(mimeType, low);
+    bestBlob = await new Promise<Blob>((resolve) => {
+      canvas.toBlob((b) => resolve(b || new Blob()), mimeType, low);
+    });
+  }
 
-      // Header Tag
-      ctx.fillStyle = '#64748b';
-      ctx.font = 'bold 24px Inter, sans-serif';
-      ctx.fillText(
-        `PassPorto • Official 4×6" Printable Sheet (${preset.name} - 300 DPI)`,
-        40,
-        55
-      );
-      ctx.font = '18px Inter, sans-serif';
-      ctx.fillText('Ready for home printing, CVS, Walgreens, Walmart or instant photo kiosk', 40, 85);
-
-      // Layout Grid (2 rows x 3 cols or 2 rows x 4 cols)
-      const cols = count === 8 ? 4 : 3;
-      const rows = 2;
-
-      // Card dimensions on sheet
-      const cardMaxW = count === 8 ? 380 : 500;
-      const cardMaxH = 480;
-
-      let cardW = cardMaxW;
-      let cardH = cardW / preset.aspectRatio;
-
-      if (cardH > cardMaxH) {
-        cardH = cardMaxH;
-        cardW = cardH * preset.aspectRatio;
-      }
-
-      const availableAreaW = sheetW - 80;
-      const availableAreaH = sheetH - 140;
-
-      const gapX = (availableAreaW - cardW * cols) / (cols + 1);
-      const gapY = (availableAreaH - cardH * rows) / (rows + 1);
-
-      const startY = 120;
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const posX = 40 + gapX + c * (cardW + gapX);
-          const posY = startY + gapY + r * (cardH + gapY);
-
-          // Draw Photo
-          ctx.drawImage(photoImg, posX, posY, cardW, cardH);
-
-          // Draw Cutting Frame (Subtle dashed line)
-          ctx.strokeStyle = '#94a3b8';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([6, 6]);
-          ctx.strokeRect(posX, posY, cardW, cardH);
-          ctx.setLineDash([]); // Reset dash
-
-          // Corner Cut Marks
-          ctx.strokeStyle = '#475569';
-          ctx.lineWidth = 2;
-          const markLen = 12;
-
-          // Top-Left corner mark
-          ctx.beginPath();
-          ctx.moveTo(posX - markLen, posY);
-          ctx.lineTo(posX + markLen, posY);
-          ctx.moveTo(posX, posY - markLen);
-          ctx.lineTo(posX, posY + markLen);
-          ctx.stroke();
-
-          // Bottom-Right corner mark
-          ctx.beginPath();
-          ctx.moveTo(posX + cardW - markLen, posY + cardH);
-          ctx.lineTo(posX + cardW + markLen, posY + cardH);
-          ctx.moveTo(posX + cardW, posY + cardH - markLen);
-          ctx.lineTo(posX + cardW, posY + cardH + markLen);
-          ctx.stroke();
-        }
-      }
-
-      const sheetDataUrl = sheetCanvas.toDataURL('image/jpeg', 0.98);
-
-      // Generate 4x6" PDF
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'in',
-        format: [4, 6],
-      });
-      pdf.addImage(sheetDataUrl, 'JPEG', 0, 0, 6, 4);
-      const pdfBlob = pdf.output('blob');
-
-      sheetCanvas.toBlob(
-        (blob) => {
-          resolve({
-            blob: blob || new Blob(),
-            dataUrl: sheetDataUrl,
-            pdfBlob,
-          });
-        },
-        'image/jpeg',
-        0.98
-      );
-    };
-    photoImg.onerror = () => reject(new Error('Failed to load image for print sheet'));
-    photoImg.src = photoDataUrl;
-  });
+  return {
+    blob: bestBlob,
+    dataUrl: bestDataUrl,
+    sizeBytes: bestBlob.size,
+    width: outW,
+    height: outH,
+  };
 }

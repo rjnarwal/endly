@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { PhotoPreset, CropState, ExportSettings } from '../types';
-import { renderCroppedPhoto, renderPrintableSheet } from '../services/imageProcessor';
+import React, { useState, useEffect, useCallback } from 'react';
+import { PhotoPreset, CropState, ExportSettings, FileSizeLimitPreset } from '../types';
+import { renderCroppedPhoto } from '../services/imageProcessor';
+import { Download, Copy, Check, Sparkles, ShieldCheck, FileCheck, Sliders } from 'lucide-react';
 
 interface ExportPanelProps {
   imageElement: HTMLImageElement | null;
@@ -18,29 +19,57 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   const [settings, setSettings] = useState<ExportSettings>({
     format: 'jpeg',
     quality: 0.98,
-    targetDpi: 300,
+    targetScale: 1,
+    maxSizeLimit: 'max',
     backgroundColor: '#ffffff',
-    filename: rawFilename.replace(/\.[^/.]+$/, '') + '-passport',
-    generateSheet: false,
-    sheetSize: '4x6',
-    sheetPhotosCount: 6,
+    filename: (rawFilename.replace(/\.[^/.]+$/, '') || 'photo') + '-passport',
   });
 
   const [isExporting, setIsExporting] = useState(false);
-  const [sheetPreviewUrl, setSheetPreviewUrl] = useState<string | null>(null);
-  const [sheetPdfBlob, setSheetPdfBlob] = useState<Blob | null>(null);
-  const [showSheetModal, setShowSheetModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [estimatedKb, setEstimatedKb] = useState<number | null>(null);
 
-  // Background Options
+  // Compute live estimated file size when settings or crop change
+  useEffect(() => {
+    let active = true;
+    if (!imageElement) return;
+
+    const computeEstimate = async () => {
+      try {
+        const { sizeBytes } = await renderCroppedPhoto(imageElement, crop, preset, settings);
+        if (active) {
+          setEstimatedKb(Math.round(sizeBytes / 1024));
+        }
+      } catch (e) {
+        // silent
+      }
+    };
+
+    const timer = setTimeout(computeEstimate, 150);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [imageElement, crop, preset, settings]);
+
+  // Background Options with distinct borders and previews
   const bgOptions = [
     { label: 'Crisp White', value: '#ffffff', color: '#ffffff', border: '#cbd5e1' },
     { label: 'Off-White', value: '#f8fafc', color: '#f8fafc', border: '#cbd5e1' },
-    { label: 'Studio Gray', value: '#e2e8f0', color: '#e2e8f0', border: '#cbd5e1' },
-    { label: 'Studio Blue', value: '#e0f2fe', color: '#e0f2fe', border: '#7dd3fc' },
+    { label: 'Studio Gray', value: '#e2e8f0', color: '#e2e8f0', border: '#94a3b8' },
+    { label: 'Studio Blue', value: '#e0f2fe', color: '#e0f2fe', border: '#38bdf8' },
   ];
 
-  // Single Photo Export
-  const handleExportSingle = async () => {
+  // File size limit presets
+  const sizePresets: { id: FileSizeLimitPreset; label: string; desc: string }[] = [
+    { id: 'max', label: 'Ultra Quality', desc: 'Full 300 DPI clarity' },
+    { id: '240kb', label: '< 240 KB', desc: 'US DS-160 / Visa' },
+    { id: '100kb', label: '< 100 KB', desc: 'Strict Gov Portals' },
+    { id: '50kb', label: '< 50 KB', desc: 'Web / Resume' },
+  ];
+
+  // Download Single Photo
+  const handleDownload = async () => {
     if (!imageElement) return;
     try {
       setIsExporting(true);
@@ -49,80 +78,167 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       const link = document.createElement('a');
       link.href = dataUrl;
       const ext = settings.format === 'jpeg' ? 'jpg' : settings.format;
-      link.download = `${settings.filename || 'passport'}-${preset.id}.${ext}`;
+      link.download = `${settings.filename.trim() || 'passport-photo'}.${ext}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      console.error('Export single failed:', err);
+      console.error('Download single photo failed:', err);
     } finally {
       setIsExporting(false);
     }
   };
 
-  // Generate 4x6" Sheet
-  const handleGenerateSheet = async () => {
+  // Copy to Clipboard
+  const handleCopyToClipboard = async () => {
     if (!imageElement) return;
     try {
       setIsExporting(true);
-      const { dataUrl } = await renderCroppedPhoto(imageElement, crop, preset, settings);
-      const { dataUrl: sheetUrl, pdfBlob } = await renderPrintableSheet(
-        dataUrl,
-        preset,
-        settings.sheetPhotosCount
-      );
-      setSheetPreviewUrl(sheetUrl);
-      setSheetPdfBlob(pdfBlob);
-      setShowSheetModal(true);
+      // Canvas blob for clipboard must be PNG
+      const pngSettings: ExportSettings = { ...settings, format: 'png' };
+      const { blob } = await renderCroppedPhoto(imageElement, crop, preset, pngSettings);
+
+      if (navigator.clipboard && window.ClipboardItem) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'image/png': blob,
+          }),
+        ]);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
     } catch (err) {
-      console.error('Generate sheet failed:', err);
+      console.error('Copy to clipboard failed:', err);
     } finally {
       setIsExporting(false);
     }
   };
 
-  // Download Sheet JPG
-  const handleDownloadSheetJpg = () => {
-    if (!sheetPreviewUrl) return;
-    const link = document.createElement('a');
-    link.href = sheetPreviewUrl;
-    link.download = `${settings.filename || 'passport'}-4x6-sheet.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Download Sheet PDF
-  const handleDownloadSheetPdf = () => {
-    if (!sheetPdfBlob) return;
-    const url = URL.createObjectURL(sheetPdfBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${settings.filename || 'passport'}-4x6-sheet.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
+  const outputWidth = Math.round(preset.widthPx * settings.targetScale);
+  const outputHeight = Math.round(preset.heightPx * settings.targetScale);
 
   return (
-    <div className="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm space-y-4">
-      <div className="pb-3 border-b border-card-border">
-        <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">
-          Export & Download Options
-        </h3>
-        <p className="text-xs text-text-secondary mt-0.5">
-          High-resolution 300 DPI output matching embassy guidelines
-        </p>
+    <div className="bg-card-bg rounded-2xl border border-card-border p-5 shadow-sm space-y-5">
+      {/* Header with Digital Specs */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-3 border-b border-card-border">
+        <div>
+          <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <FileCheck className="w-4 h-4 text-brand" />
+            <span>Digital Upload & Download</span>
+          </h3>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Optimized for online visa portals, government forms, resumes & ID systems
+          </p>
+        </div>
+
+        {/* Live File Specs Badge */}
+        <div className="flex items-center gap-2 bg-body-bg px-3 py-1.5 rounded-xl border border-card-border shrink-0">
+          <span className="font-mono text-xs font-bold text-text-primary">
+            {outputWidth} × {outputHeight} px
+          </span>
+          <span className="text-text-muted text-xs">•</span>
+          <span className="font-mono text-xs font-bold text-brand">
+            {estimatedKb !== null ? `~${estimatedKb} KB` : '...'}
+          </span>
+        </div>
+      </div>
+
+      {/* Target File Size Optimization (e.g. DS-160 <240KB, <100KB, etc.) */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-text-secondary flex items-center justify-between">
+          <span className="flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-brand" />
+            <span>Portal File Size Limit</span>
+          </span>
+          <span className="text-[11px] text-text-muted">
+            Auto-compresses to satisfy portal rules
+          </span>
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {sizePresets.map((sp) => (
+            <button
+              key={sp.id}
+              type="button"
+              onClick={() => setSettings({ ...settings, maxSizeLimit: sp.id })}
+              className={`p-2.5 rounded-xl border text-left transition-all ${
+                settings.maxSizeLimit === sp.id
+                  ? 'border-brand bg-brand/10 ring-2 ring-brand/20 font-bold'
+                  : 'border-card-border bg-body-bg hover:border-brand/40'
+              }`}
+            >
+              <div
+                className={`text-xs font-bold ${
+                  settings.maxSizeLimit === sp.id ? 'text-brand' : 'text-text-primary'
+                }`}
+              >
+                {sp.label}
+              </div>
+              <div className="text-[10px] text-text-muted leading-tight mt-0.5">{sp.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Format & Resolution Scale */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Format Selector */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-text-secondary">Image Format</label>
+          <div className="grid grid-cols-3 gap-1 bg-body-bg p-1 rounded-xl border border-card-border">
+            {(['jpeg', 'png', 'webp'] as const).map((fmt) => (
+              <button
+                key={fmt}
+                type="button"
+                onClick={() => setSettings({ ...settings, format: fmt })}
+                className={`py-1.5 text-xs font-bold rounded-lg uppercase transition-all ${
+                  settings.format === fmt
+                    ? 'bg-brand text-white shadow-sm'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                {fmt === 'jpeg' ? 'JPG (Gov)' : fmt}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Resolution Scale */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-text-secondary">Resolution Scaling</label>
+          <div className="grid grid-cols-2 gap-1 bg-body-bg p-1 rounded-xl border border-card-border">
+            <button
+              type="button"
+              onClick={() => setSettings({ ...settings, targetScale: 1 })}
+              className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                settings.targetScale === 1
+                  ? 'bg-brand text-white shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              1× Standard ({preset.dpi} DPI)
+            </button>
+            <button
+              type="button"
+              onClick={() => setSettings({ ...settings, targetScale: 2 })}
+              className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                settings.targetScale === 2
+                  ? 'bg-brand text-white shadow-sm'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              2× Ultra HD (600 DPI)
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Background Color Picker */}
       <div className="space-y-1.5">
         <label className="text-xs font-semibold text-text-secondary flex items-center justify-between">
-          <span>Background Preset</span>
+          <span>Background Color Preset</span>
           {preset.bgRequirement && (
-            <span className="text-[10px] text-amber-500 font-normal">
-              {preset.bgRequirement}
+            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+              Req: {preset.bgRequirement}
             </span>
           )}
         </label>
@@ -139,170 +255,77 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               }
               className={`p-2 rounded-xl border flex flex-col items-center justify-center space-y-1.5 transition-all ${
                 settings.backgroundColor === opt.value
-                  ? 'border-brand ring-2 ring-brand/20 bg-brand/5 font-semibold text-brand'
-                  : 'border-card-border bg-body-bg text-text-secondary hover:text-text-primary'
+                  ? 'border-brand ring-2 ring-brand/20 bg-brand/10 font-bold text-brand'
+                  : 'border-card-border bg-body-bg text-text-secondary hover:text-text-primary hover:border-brand/40'
               }`}
             >
               <span
                 className="w-5 h-5 rounded-full border shadow-inner"
                 style={{ backgroundColor: opt.color, borderColor: opt.border }}
               />
-              <span className="text-[10px]">{opt.label}</span>
+              <span className="text-[11px] font-medium">{opt.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Format & Quality */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Format Selector */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-text-secondary">Image Format</label>
-          <div className="grid grid-cols-3 gap-1 bg-body-bg p-1 rounded-xl border border-card-border">
-            {(['jpeg', 'png', 'webp'] as const).map((fmt) => (
-              <button
-                key={fmt}
-                type="button"
-                onClick={() => setSettings({ ...settings, format: fmt })}
-                className={`py-1 text-xs font-semibold rounded-lg uppercase transition-all ${
-                  settings.format === fmt
-                    ? 'bg-brand text-white shadow-sm'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                {fmt === 'jpeg' ? 'JPG' : fmt}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Quality / DPI */}
-        <div className="space-y-1">
-          <label className="text-xs font-semibold text-text-secondary">Print Quality</label>
-          <div className="grid grid-cols-2 gap-1 bg-body-bg p-1 rounded-xl border border-card-border">
-            <button
-              type="button"
-              onClick={() => setSettings({ ...settings, quality: 0.98 })}
-              className={`py-1 text-xs font-semibold rounded-lg transition-all ${
-                settings.quality >= 0.95
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Ultra (300 DPI)
-            </button>
-            <button
-              type="button"
-              onClick={() => setSettings({ ...settings, quality: 0.85 })}
-              className={`py-1 text-xs font-semibold rounded-lg transition-all ${
-                settings.quality < 0.95
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              Standard
-            </button>
-          </div>
+      {/* Custom Output Filename */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-text-secondary">File Name</label>
+        <div className="flex items-center rounded-xl bg-body-bg border border-card-border focus-within:border-brand focus-within:ring-1 focus-within:ring-brand overflow-hidden">
+          <input
+            type="text"
+            value={settings.filename}
+            onChange={(e) => setSettings({ ...settings, filename: e.target.value })}
+            placeholder="passport-photo"
+            className="flex-1 px-3 py-2 text-xs text-text-primary bg-transparent focus:outline-none"
+          />
+          <span className="px-3 py-2 text-xs font-mono text-text-muted bg-card-bg/60 border-l border-card-border">
+            .{settings.format === 'jpeg' ? 'jpg' : settings.format}
+          </span>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="pt-2 space-y-2.5">
-        {/* Single Photo Download */}
+      {/* Primary Actions: Download Single Photo & Copy to Clipboard */}
+      <div className="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
         <button
-          onClick={handleExportSingle}
+          onClick={handleDownload}
           disabled={isExporting}
-          className="w-full py-3 px-4 rounded-xl bg-brand text-white font-bold text-sm shadow-md hover:bg-brand-hover active:scale-[0.99] transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+          className="w-full sm:flex-1 py-3 px-5 rounded-xl bg-brand text-white font-extrabold text-sm shadow-md hover:bg-brand-hover active:scale-[0.99] transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
+          <Download className="w-4 h-4" />
           <span>
             {isExporting
-              ? 'Processing Photo...'
-              : `Download Single Photo (${preset.widthPx}×${preset.heightPx}px)`}
+              ? 'Rendering Photo...'
+              : `Download Photo (${outputWidth}×${outputHeight} px)`}
           </span>
         </button>
 
-        {/* 4x6" Sheet Generator Button */}
         <button
-          onClick={handleGenerateSheet}
+          onClick={handleCopyToClipboard}
           disabled={isExporting}
-          className="w-full py-3 px-4 rounded-xl bg-body-bg border border-brand/40 text-brand font-bold text-sm hover:bg-brand/5 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+          className={`w-full sm:w-auto py-3 px-4 rounded-xl border text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+            copied
+              ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500'
+              : 'bg-body-bg border-card-border text-text-secondary hover:text-text-primary hover:border-brand/50'
+          }`}
+          title="Copy photo directly to clipboard to paste in applications"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          <span>Create Printable 4×6" Sheet (6 Photos)</span>
+          {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+          <span>{copied ? 'Copied Image!' : 'Copy to Clipboard'}</span>
         </button>
       </div>
 
-      {/* Printable Sheet Modal */}
-      {showSheetModal && sheetPreviewUrl && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card-bg border border-card-border rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-card-border">
-              <div>
-                <h3 className="text-base font-bold text-text-primary">
-                  Official 4×6" Printable Sheet Preview
-                </h3>
-                <p className="text-xs text-text-secondary">
-                  Ready to print at CVS, Walgreens, Walmart or on home photo paper
-                </p>
-              </div>
-              <button
-                onClick={() => setShowSheetModal(false)}
-                className="text-text-secondary hover:text-text-primary p-1 rounded-lg hover:bg-body-bg"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Sheet Preview Image */}
-            <div className="border border-card-border rounded-xl overflow-hidden bg-slate-900 shadow-inner">
-              <img
-                src={sheetPreviewUrl}
-                alt="4x6 Printable Sheet Preview"
-                className="w-full h-auto object-contain select-none"
-              />
-            </div>
-
-            {/* Print Tips Note */}
-            <div className="bg-brand/5 border border-brand/20 rounded-xl p-3 text-xs text-text-secondary space-y-1">
-              <span className="font-semibold text-brand flex items-center space-x-1">
-                <span>💡</span>
-                <span>Printing Instructions</span>
-              </span>
-              <p>
-                When printing, select standard <strong>4 × 6 inch (10 × 15 cm) Photo Paper</strong> and choose <strong>"Actual Size" / 100% scale</strong> (do NOT select "Fit to page").
-              </p>
-            </div>
-
-            {/* Download Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
-              <button
-                onClick={handleDownloadSheetJpg}
-                className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-brand text-white font-bold text-xs shadow hover:bg-brand-hover transition-all flex items-center justify-center space-x-1.5"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Download Sheet (High-Res JPG)</span>
-              </button>
-
-              <button
-                onClick={handleDownloadSheetPdf}
-                className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-body-bg border border-card-border text-text-primary hover:border-brand/40 font-bold text-xs shadow-sm transition-all flex items-center justify-center space-x-1.5"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                <span>Download Sheet (PDF)</span>
-              </button>
-            </div>
-          </div>
+      {/* Digital Upload Portal Tip */}
+      <div className="bg-body-bg rounded-xl border border-card-border p-3 text-xs text-text-secondary space-y-1">
+        <div className="font-bold text-text-primary flex items-center gap-1.5">
+          <span>💡</span>
+          <span>Online Portal Upload Tip</span>
         </div>
-      )}
+        <p className="text-[11px] leading-relaxed text-text-muted">
+          Most online visa portals (like US DS-160, Schengen, or Singapore ICA) require a square JPEG under 240 KB with equal width and height. Simply click <strong>"Download Photo"</strong> to save a compliant file ready for instant upload.
+        </p>
+      </div>
     </div>
   );
 };

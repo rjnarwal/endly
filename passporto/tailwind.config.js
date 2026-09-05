@@ -5,6 +5,17 @@ export default {
   theme: {
     extend: {
       colors: {
+        'body-bg': 'var(--color-bg-primary)',
+        'card-bg': 'var(--color-bg-secondary)',
+        'card-border': 'var(--color-border-primary)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-muted': 'var(--color-text-muted)',
+        brand: {
+          DEFAULT: 'var(--color-accent)',
+          hover: 'var(--color-accent-hover)',
+          muted: 'var(--color-accent-muted)',
+        },
         background: {
           DEFAULT: 'var(--color-bg-primary)',
           primary: 'var(--color-bg-primary)',

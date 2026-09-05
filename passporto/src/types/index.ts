@@ -1,4 +1,4 @@
-export type PresetCategory = 'passport' | 'social' | 'print';
+export type PresetCategory = 'passport' | 'social';
 
 export interface PhotoPreset {
   id: string;
@@ -15,6 +15,7 @@ export interface PhotoPreset {
   headCoverageMin?: number; // % of frame e.g. 70
   headCoverageMax?: number; // % of frame e.g. 80
   bgRequirement?: string;
+  portalNotes?: string;
 }
 
 export interface DetectedFace {
@@ -34,15 +35,16 @@ export interface CropState {
   contrast: number; // -50 to 50
 }
 
+export type FileSizeLimitPreset = 'max' | '240kb' | '100kb' | '50kb' | 'custom';
+
 export interface ExportSettings {
   format: 'jpeg' | 'png' | 'webp';
-  quality: number; // 0.7 to 1.0
-  targetDpi: 300 | 600;
-  backgroundColor: 'original' | '#ffffff' | '#f8fafc' | '#e2e8f0' | '#e0f2fe';
+  quality: number; // 0.6 to 1.0
+  targetScale: 1 | 2; // 1x standard (e.g. 600x600) or 2x Ultra HD (1200x1200)
+  maxSizeLimit: FileSizeLimitPreset;
+  customMaxKb?: number;
+  backgroundColor: '#ffffff' | '#f8fafc' | '#e2e8f0' | '#e0f2fe' | 'original';
   filename: string;
-  generateSheet: boolean;
-  sheetSize: '4x6';
-  sheetPhotosCount: 6 | 8;
 }
 
 export interface UploadedPhoto {
