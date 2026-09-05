@@ -246,6 +246,52 @@ function autoDetectLocalIp(callback: (ip: string) => void) {
   } catch {}
 }
 
+let tauriEventListenerAttached = false;
+
+async function setupTauriProxyEventListener(get: () => ProxyState) {
+  if (tauriEventListenerAttached || !isTauriEnvironment()) return;
+  try {
+    const { listen } = await import('@tauri-apps/api/event');
+    await listen<any>('proxy_traffic_event', (event) => {
+      const payload = event.payload;
+      if (!payload) return;
+
+      const logItem: TrafficLogItem = {
+        id: payload.id || Math.random().toString(36).substring(2, 9),
+        timestamp: payload.timestamp || Date.now(),
+        method: payload.method || 'GET',
+        url: payload.url || payload.path || '',
+        path: payload.path || payload.url || '',
+        statusCode: payload.statusCode || payload.status_code || 200,
+        statusText: payload.statusText || payload.status_text || 'OK',
+        isMocked: payload.isMocked || payload.is_mocked || false,
+        mockId: payload.mockId || payload.mock_id,
+        timeMs: payload.timeMs || payload.time_ms || 0,
+        sizeBytes: payload.sizeBytes || payload.size_bytes || 0,
+        requestHeaders: payload.requestHeaders || payload.request_headers || {},
+        responseHeaders: payload.responseHeaders || payload.response_headers || {},
+        requestBody: payload.requestBody || payload.request_body,
+        responseBody: payload.responseBody || payload.response_body,
+        clientIp: payload.clientIp || payload.client_ip,
+      };
+
+      get().addTrafficLog(logItem);
+      if (logItem.clientIp) {
+        useProxyStore.setState({ lastDeviceIp: logItem.clientIp });
+        get().addConsoleLog('info', 'device', `Data received from device ${logItem.clientIp}`);
+      }
+      get().addConsoleLog(
+        logItem.statusCode >= 400 ? 'warn' : 'info',
+        (logItem.method as string) === 'CONNECT' ? 'tunnel' : 'http',
+        `[${logItem.method}] ${logItem.url} -> ${logItem.statusCode} (${logItem.timeMs}ms, ${logItem.sizeBytes} B)`
+      );
+    });
+    tauriEventListenerAttached = true;
+  } catch (err) {
+    console.error('Failed to attach Tauri proxy event listener', err);
+  }
+}
+
 export const useProxyStore = create<ProxyState>((set, get) => ({
   isOpen: false,
   isRunning: false,
@@ -263,7 +309,7 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
       timestamp: Date.now(),
       level: 'info',
       stage: 'bridge',
-      message: 'Proxy Diagnostics Console initialized. Checking companion runner on port 8889...',
+      message: 'Proxy Diagnostics Console initialized.',
     },
   ],
   isConsoleOpen: true,
@@ -298,15 +344,32 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
   openModal: () => {
     set({ isOpen: true });
     get().addConsoleLog('info', 'bridge', 'Opening Mobile Interceptor Studio...');
-    autoDetectLocalIp((detectedIp) => {
-      if (detectedIp) {
-        set({ localIps: [detectedIp] });
-        get().addConsoleLog('success', 'server', `Auto-detected machine LAN IP: ${detectedIp}`);
-        if (typeof window !== 'undefined') localStorage.setItem('endly_proxy_ip', detectedIp);
+
+    if (isTauriEnvironment()) {
+      setupTauriProxyEventListener(get);
+      import('@tauri-apps/api/core')
+        .then(({ invoke }) => {
+          invoke<string[]>('get_local_ips')
+            .then((ips) => {
+              if (ips && ips.length > 0) {
+                set({ localIps: ips });
+                get().addConsoleLog('success', 'server', `Native Engine detected local IP: ${ips[0]}`);
+              }
+            })
+            .catch(() => {});
+        })
+        .catch(() => {});
+    } else {
+      autoDetectLocalIp((detectedIp) => {
+        if (detectedIp) {
+          set({ localIps: [detectedIp] });
+          get().addConsoleLog('success', 'server', `Auto-detected machine LAN IP: ${detectedIp}`);
+          if (typeof window !== 'undefined') localStorage.setItem('endly_proxy_ip', detectedIp);
+        }
+      });
+      if (!wsConnection) {
+        connectToLocalProxyBridge(get);
       }
-    });
-    if (!isTauriEnvironment() && !wsConnection) {
-      connectToLocalProxyBridge(get);
     }
   },
 
@@ -349,16 +412,19 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
 
     if (isTauriEnvironment()) {
       try {
+        await setupTauriProxyEventListener(get);
         const { invoke } = await import('@tauri-apps/api/core');
-        const res = await invoke<{ success: boolean; ips: string[] }>('start_proxy_server', {
+        const res = await invoke<{ success: boolean; ips: string[]; port: number }>('start_proxy_server', {
           port,
           mocks,
         });
         if (res.success) {
           set({ isRunning: true, localIps: res.ips || ['127.0.0.1'] });
+          get().addConsoleLog('success', 'server', `Native Proxy server is listening on 0.0.0.0:${port}`);
           return true;
         }
-      } catch (err) {
+      } catch (err: any) {
+        get().addConsoleLog('error', 'server', `Failed to start Native proxy: ${err?.message || err}`);
         console.error('Failed to start Tauri proxy server:', err);
       }
     } else {
@@ -384,7 +450,6 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
         console.warn('Companion proxy not running yet', err);
       }
     }
-
     set({ isRunning: true });
     return true;
   },
