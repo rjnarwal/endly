@@ -313,7 +313,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
             onChange={(e) =>
               onCropChange({ ...crop, zoom: parseFloat(e.target.value) })
             }
-            className="w-full h-1.5 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="custom-slider"
           />
         </div>
 
@@ -360,7 +360,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onChange={(e) =>
                 onCropChange({ ...crop, rotation: parseInt(e.target.value, 10) })
               }
-              className="flex-1 h-1.5 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="flex-1 custom-slider"
             />
             <button
               onClick={() =>
@@ -393,7 +393,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onChange={(e) =>
                 onCropChange({ ...crop, brightness: parseInt(e.target.value, 10) })
               }
-              className="w-full h-1 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="custom-slider"
             />
           </div>
 
@@ -411,7 +411,7 @@ export const BiometricCropper: React.FC<BiometricCropperProps> = ({
               onChange={(e) =>
                 onCropChange({ ...crop, contrast: parseInt(e.target.value, 10) })
               }
-              className="w-full h-1 bg-card-border rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="custom-slider"
             />
           </div>
         </div>
