@@ -53,10 +53,10 @@ Content-Type: application/json
     },
     githubUrl: 'https://github.com/rjnarwal/endly',
     downloads: {
-      macArmUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1-arm64.dmg',
-      macIntelUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.dmg',
-      winUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly.Setup.1.0.1.exe',
-      linuxUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.AppImage',
+      macArmUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_aarch64.dmg',
+      macIntelUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_x64.dmg',
+      winUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_x64-setup.exe',
+      linuxUrl: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_amd64.AppImage',
       releasesUrl: 'https://github.com/rjnarwal/endly/releases',
     },
     actions: {

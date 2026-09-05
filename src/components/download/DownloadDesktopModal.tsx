@@ -33,13 +33,13 @@ interface DownloadDesktopModalProps {
 
 const DEFAULT_ENDLY_CONFIG: AppDownloadConfig = {
   appName: 'Endly',
-  tagline: 'Modern Cross-Platform API Client & Proxy',
+  tagline: 'Modern Native Cross-Platform API Client & Proxy',
   version: 'v1.0.1',
   downloads: {
-    macArm: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1-arm64.dmg',
-    macIntel: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.dmg',
-    winX64: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly.Setup.1.0.1.exe',
-    linuxAppImage: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly-1.0.1.AppImage',
+    macArm: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_aarch64.dmg',
+    macIntel: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_x64.dmg',
+    winX64: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_x64-setup.exe',
+    linuxAppImage: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/Endly_1.0.1_amd64.AppImage',
     linuxDeb: 'https://github.com/rjnarwal/endly/releases/download/v1.0.1/endly_1.0.1_amd64.deb',
   },
 };
