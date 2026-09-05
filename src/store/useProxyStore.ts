@@ -359,6 +359,9 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
             .catch(() => {});
         })
         .catch(() => {});
+      if (!wsConnection) {
+        connectToLocalProxyBridge(get);
+      }
     } else {
       autoDetectLocalIp((detectedIp) => {
         if (detectedIp) {
@@ -421,12 +424,27 @@ export const useProxyStore = create<ProxyState>((set, get) => ({
         if (res.success) {
           set({ isRunning: true, localIps: res.ips || ['127.0.0.1'] });
           get().addConsoleLog('success', 'server', `Native Proxy server is listening on 0.0.0.0:${port}`);
-          return true;
         }
       } catch (err: any) {
-        get().addConsoleLog('error', 'server', `Failed to start Native proxy: ${err?.message || err}`);
-        console.error('Failed to start Tauri proxy server:', err);
+        get().addConsoleLog('info', 'server', `Native proxy notice: ${err?.message || err}`);
       }
+
+      if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+        wsConnection.send(
+          JSON.stringify({
+            type: 'START_PROXY',
+            port,
+            mocks,
+            breakpoints: breakpointRules,
+            mapRemote: mapRemoteRules,
+            mapLocal: mapLocalRules,
+            throttling,
+            domainFilter,
+          })
+        );
+      }
+      set({ isRunning: true });
+      return true;
     } else {
       try {
         connectToLocalProxyBridge(get);

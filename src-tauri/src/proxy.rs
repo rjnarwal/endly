@@ -193,7 +193,7 @@ async fn handle_proxy_client(
     app: AppHandle,
     manager: Arc<Mutex<ProxyManager>>,
 ) {
-    let mut buf = vec![0u8; 8192];
+    let mut buf = vec![0u8; 16384];
     let n = match stream.read(&mut buf).await {
         Ok(n) if n > 0 => n,
         _ => return,
@@ -212,14 +212,44 @@ async fn handle_proxy_client(
     }
 
     let method = parts[0].to_uppercase();
-    let full_url = parts[1];
+    let target_uri = parts[1].to_string();
+
+    let mut req_headers = HashMap::new();
+    let mut host_header = String::new();
+
+    for line in lines {
+        if line.is_empty() {
+            break;
+        }
+        if let Some((k, v)) = line.split_once(':') {
+            let key = k.trim().to_string();
+            let val = v.trim().to_string();
+            if key.eq_ignore_ascii_case("host") {
+                host_header = val.clone();
+            }
+            req_headers.insert(key, val);
+        }
+    }
+
+    let full_url = if target_uri.starts_with("http://") || target_uri.starts_with("https://") {
+        target_uri.clone()
+    } else if !host_header.is_empty() {
+        format!("http://{}{}", host_header, target_uri)
+    } else {
+        target_uri.clone()
+    };
 
     let start_time = std::time::Instant::now();
 
-    // 1. Handle HTTPS CONNECT
+    // 1. Handle HTTPS CONNECT Tunnel
     if method == "CONNECT" {
-        let target_host = full_url;
-        if let Ok(mut target_stream) = TcpStream::connect(target_host).await {
+        let target_host = if target_uri.contains(':') {
+            target_uri.clone()
+        } else {
+            format!("{}:443", target_uri)
+        };
+
+        if let Ok(mut target_stream) = TcpStream::connect(&target_host).await {
             let _ = stream
                 .write_all(b"HTTP/1.1 200 Connection Established\r\n\r\n")
                 .await;
@@ -236,7 +266,7 @@ async fn handle_proxy_client(
                 mock_id: None,
                 time_ms: start_time.elapsed().as_millis() as u64,
                 size_bytes: 0,
-                request_headers: HashMap::new(),
+                request_headers: req_headers,
                 response_headers: HashMap::new(),
                 response_body: None,
                 client_ip: Some(client_ip),
@@ -283,6 +313,17 @@ async fn handle_proxy_client(
         }
 
         let body_bytes = mock.body.as_bytes();
+        let mut resp_headers = HashMap::new();
+        resp_headers.insert("Content-Type".into(), "application/json".into());
+        resp_headers.insert("X-Mocked-By".into(), "Endly-Proxy".into());
+        resp_headers.insert("Access-Control-Allow-Origin".into(), "*".into());
+
+        for h in &mock.headers {
+            if h.enabled {
+                resp_headers.insert(h.key.clone(), h.value.clone());
+            }
+        }
+
         let response = format!(
             "HTTP/1.1 {} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nX-Mocked-By: Endly-Proxy\r\nAccess-Control-Allow-Origin: *\r\n\r\n{}",
             mock.status_code,
@@ -296,16 +337,16 @@ async fn handle_proxy_client(
             id: format!("{:x}", rand_u32()),
             timestamp: current_timestamp(),
             method: method.clone(),
-            url: full_url.into(),
-            path: full_url.into(),
+            url: full_url.clone(),
+            path: target_uri.clone(),
             status_code: mock.status_code,
             status_text: "OK (Endly Mock)".into(),
             is_mocked: true,
             mock_id: Some(mock.id),
             time_ms: start_time.elapsed().as_millis() as u64,
             size_bytes: body_bytes.len(),
-            request_headers: HashMap::new(),
-            response_headers: HashMap::new(),
+            request_headers: req_headers,
+            response_headers: resp_headers,
             response_body: Some(mock.body),
             client_ip: Some(client_ip),
         };
@@ -313,19 +354,52 @@ async fn handle_proxy_client(
         return;
     }
 
-    // 3. Fallback: HTTP Forward to destination
-    if let Ok(client) = reqwest::Client::builder().build() {
-        if let Ok(res) = client.request(reqwest::Method::from_bytes(method.as_bytes()).unwrap_or(reqwest::Method::GET), full_url).send().await {
+    // 3. Forward HTTP request with full query params & headers
+    let client_res = reqwest::Client::builder()
+        .gzip(true)
+        .brotli(true)
+        .deflate(true)
+        .danger_accept_invalid_certs(true)
+        .build();
+
+    if let Ok(client) = client_res {
+        let mut req_builder = client.request(
+            reqwest::Method::from_bytes(method.as_bytes()).unwrap_or(reqwest::Method::GET),
+            &full_url,
+        );
+
+        for (k, v) in &req_headers {
+            let k_lower = k.to_lowercase();
+            if k_lower != "proxy-connection" && k_lower != "host" {
+                if let Ok(hn) = reqwest::header::HeaderName::from_bytes(k.as_bytes()) {
+                    if let Ok(hv) = reqwest::header::HeaderValue::from_str(v) {
+                        req_builder = req_builder.header(hn, hv);
+                    }
+                }
+            }
+        }
+
+        if let Ok(res) = req_builder.send().await {
             let status = res.status().as_u16();
             let status_text = res.status().canonical_reason().unwrap_or("OK").to_string();
-            let body_bytes = res.bytes().await.unwrap_or_default();
 
-            let http_res = format!(
-                "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n",
-                status,
-                status_text,
-                body_bytes.len()
-            );
+            let mut resp_headers = HashMap::new();
+            for (k, v) in res.headers() {
+                if let Ok(val_str) = v.to_str() {
+                    resp_headers.insert(k.as_str().to_string(), val_str.to_string());
+                }
+            }
+
+            let body_bytes = res.bytes().await.unwrap_or_default();
+            let body_str = String::from_utf8(body_bytes.to_vec()).ok();
+
+            let mut http_res = format!("HTTP/1.1 {} {}\r\n", status, status_text);
+            for (k, v) in &resp_headers {
+                if !k.eq_ignore_ascii_case("content-length") && !k.eq_ignore_ascii_case("transfer-encoding") {
+                    http_res.push_str(&format!("{}: {}\r\n", k, v));
+                }
+            }
+            http_res.push_str(&format!("Content-Length: {}\r\n\r\n", body_bytes.len()));
 
             let _ = stream.write_all(http_res.as_bytes()).await;
             let _ = stream.write_all(&body_bytes).await;
@@ -334,20 +408,22 @@ async fn handle_proxy_client(
                 id: format!("{:x}", rand_u32()),
                 timestamp: current_timestamp(),
                 method: method.clone(),
-                url: full_url.into(),
-                path: full_url.into(),
+                url: full_url.clone(),
+                path: target_uri.clone(),
                 status_code: status,
                 status_text,
                 is_mocked: false,
                 mock_id: None,
                 time_ms: start_time.elapsed().as_millis() as u64,
                 size_bytes: body_bytes.len(),
-                request_headers: HashMap::new(),
-                response_headers: HashMap::new(),
-                response_body: String::from_utf8(body_bytes.to_vec()).ok(),
+                request_headers: req_headers,
+                response_headers: resp_headers,
+                response_body: body_str,
                 client_ip: Some(client_ip),
             };
             let _ = app.emit("proxy_traffic_event", log);
+        } else {
+            let _ = stream.write_all(b"HTTP/1.1 502 Bad Gateway\r\n\r\n").await;
         }
     }
 }
