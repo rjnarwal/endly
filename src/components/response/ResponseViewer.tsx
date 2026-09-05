@@ -341,10 +341,10 @@ export const ResponseViewer: React.FC = () => {
       </div>
 
       {/* Response Panel Body */}
-      <div className={`flex-1 overflow-auto font-mono text-xs ${activeResponseTab === 'pretty' ? 'p-2' : 'p-3'}`}>
+      <div className={`flex-1 ${activeResponseTab === 'pretty' ? 'overflow-hidden p-1.5' : 'overflow-auto p-3'} font-mono text-xs`}>
         {/* 1. Pretty View */}
         {activeResponseTab === 'pretty' && (
-          <div className="h-full">
+          <div className="h-full w-full">
             <PrettyViewer
               content={formattedJson || response.body}
               contentType={response.contentType}

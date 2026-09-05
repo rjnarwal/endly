@@ -564,6 +564,10 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
     }, 220);
   };
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(600);
+
   // Compute hidden lines based on folded blocks
   const hiddenLines = useMemo(() => {
     const hidden = new Set<number>();
@@ -577,6 +581,62 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
     });
     return hidden;
   }, [collapsedLines, foldRanges]);
+
+  // Flat list of visible lines
+  const visibleLines = useMemo(() => {
+    const list: { line: ParsedLine; originalIdx: number }[] = [];
+    for (let i = 0; i < parsedLines.length; i++) {
+      if (!hiddenLines.has(i)) {
+        list.push({ line: parsedLines[i], originalIdx: i });
+      }
+    }
+    return list;
+  }, [parsedLines, hiddenLines]);
+
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    let frameId: number | null = null;
+    const handleScroll = () => {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        setScrollTop(container.scrollTop);
+      });
+    };
+
+    const updateHeight = () => {
+      if (container.clientHeight > 0) {
+        setContainerHeight(container.clientHeight);
+      }
+    };
+
+    updateHeight();
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(container);
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      if (frameId) cancelAnimationFrame(frameId);
+      container.removeEventListener('scroll', handleScroll);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  const LINE_HEIGHT = 20;
+  const OVERSCAN = 30;
+  const totalLines = visibleLines.length;
+
+  const isVirtualized = totalLines > 80 && !wrapLines;
+  const startIndex = isVirtualized ? Math.max(0, Math.floor(scrollTop / LINE_HEIGHT) - OVERSCAN) : 0;
+  const endIndex = isVirtualized
+    ? Math.min(totalLines, Math.ceil((scrollTop + containerHeight) / LINE_HEIGHT) + OVERSCAN)
+    : totalLines;
+
+  const topSpacerHeight = isVirtualized ? startIndex * LINE_HEIGHT : 0;
+  const bottomSpacerHeight = isVirtualized ? (totalLines - endIndex) * LINE_HEIGHT : 0;
+
+  const renderedLines = isVirtualized ? visibleLines.slice(startIndex, endIndex) : visibleLines;
 
   if (!content) {
     return (
@@ -698,26 +758,30 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
         </div>
       )}
 
-      {/* Code Body with Synchronized Gutter & Syntax Highlighted Spans */}
-      <div className="flex-1 overflow-auto bg-background p-0 select-text font-mono text-[12px] leading-5">
+      {/* Code Body with Synchronized Gutter & Virtualized Syntax Highlighted Spans */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-auto bg-background p-0 select-text font-mono text-[12px] leading-5"
+      >
         <div className="min-w-full">
-          {parsedLines.map((line, idx) => {
-            if (hiddenLines.has(idx)) return null;
+          {topSpacerHeight > 0 && <div style={{ height: `${topSpacerHeight}px` }} />}
 
-            const isFoldable = foldRanges.has(idx);
-            const isCollapsed = collapsedLines.has(idx);
-            const endIdx = foldRanges.get(idx);
+          {renderedLines.map(({ line, originalIdx }) => {
+            const isFoldable = foldRanges.has(originalIdx);
+            const isCollapsed = collapsedLines.has(originalIdx);
+            const endIdx = foldRanges.get(originalIdx);
 
             return (
               <div
                 key={line.lineNumber}
                 className="flex items-start hover:bg-background-tertiary/25 transition-colors group"
+                style={{ minHeight: `${LINE_HEIGHT}px` }}
               >
                 {/* Line Gutter */}
-                <div className="flex items-center justify-end select-none w-12 pl-1 pr-2 py-0.5 bg-background-secondary/40 text-text-muted/50 text-[11px] shrink-0 border-r border-border/40 font-mono sticky left-0 z-10 space-x-0.5">
+                <div className="flex items-center justify-end select-none w-12 pl-1 pr-2 py-0 bg-background-secondary/40 text-text-muted/50 text-[11px] shrink-0 border-r border-border/40 font-mono sticky left-0 z-10 space-x-0.5">
                   {isFoldable ? (
                     <button
-                      onClick={() => toggleFold(idx)}
+                      onClick={() => toggleFold(originalIdx)}
                       className="p-0.5 hover:text-accent text-text-muted/60 rounded transition-colors focus:outline-none"
                       title={isCollapsed ? 'Expand block' : 'Collapse block'}
                     >
@@ -735,7 +799,7 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
 
                 {/* Line Tokens */}
                 <div
-                  className={`flex-1 pl-3 pr-4 py-0.5 font-mono text-[12px] leading-5 select-text ${
+                  className={`flex-1 pl-3 pr-4 py-0 font-mono text-[12px] leading-5 select-text ${
                     wrapLines ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'
                   }`}
                 >
@@ -752,13 +816,13 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
                   {/* Collapsed Ellipsis Badge */}
                   {isCollapsed && endIdx !== undefined && (
                     <span
-                      onClick={() => toggleFold(idx)}
+                      onClick={() => toggleFold(originalIdx)}
                       className="ml-1.5 px-1.5 py-0.5 bg-accent/20 text-accent hover:bg-accent/30 rounded text-[10px] cursor-pointer font-sans select-none inline-flex items-center space-x-1"
                       title="Click to expand"
                     >
                       <span>...</span>
                       <span className="text-[9px] opacity-75 font-mono">
-                        ({endIdx - idx} lines hidden)
+                        ({endIdx - originalIdx} lines hidden)
                       </span>
                     </span>
                   )}
@@ -766,6 +830,8 @@ export const PrettyViewer: React.FC<PrettyViewerProps> = ({
               </div>
             );
           })}
+
+          {bottomSpacerHeight > 0 && <div style={{ height: `${bottomSpacerHeight}px` }} />}
         </div>
       </div>
 
