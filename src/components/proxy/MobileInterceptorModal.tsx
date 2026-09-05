@@ -43,6 +43,7 @@ import {
 import { useProxyStore, BreakpointRule, MapRemoteRule, MapLocalRule, ThrottlingProfile, ProxyConsoleLog } from '../../store/useProxyStore';
 import { useWorkspaceStore } from '../../store/useWorkspaceStore';
 import { createDefaultRequest } from '../../store/useCollectionStore';
+import { isTauriEnvironment } from '../../services/httpDispatcher';
 
 export const MobileInterceptorModal: React.FC = () => {
   const {
@@ -140,15 +141,28 @@ export const MobileInterceptorModal: React.FC = () => {
   if (!isOpen) return null;
 
   const handleDownloadCaCert = () => {
-    const fakeCaPem = `-----BEGIN CERTIFICATE-----
-MIICljCCAX4CCQDU3g1+Jp2z2jANBgkqhkiG9w0BAQsFADANMQswCQYDVQQGEwJV
-UzEUMBIGA1UECAwLRW5kbHkgUHJveHkxEzARBgNVBAoMCkdyYXNzcm9vdDEhMB8G
-A1UEAwwYRW5kbHkgUm9vdCBDZXJ0aWZpY2F0ZSBDQTAeFw0yNjA5MDEwMDAwMDBa
-Fw0zNjA5MDEwMDAwMDBaMA0xCzAJBgNVBAYTAlVTMRQwEgYDVQQIDAtFbmRseSBQ
-cm94eTETMBEGA1UECgwKR3Jhc3Nyb290MSEwHwYDVQQDDBhFbmRseSBSb290IENl
-cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
+    const rootCaPem = `-----BEGIN CERTIFICATE-----
+MIIDhTCCAm2gAwIBAgIUQsB5+J8rJUBJ6t7j4Rzlj82AZ8IwDQYJKoZIhvcNAQEL
+BQAwSjELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExDjAMBgNVBAoM
+BUVuZGx5MRYwFAYDVQQDDA1FbmRseSBSb290IENBMB4XDTI2MDkwNDE2NTQzOVoX
+DTM2MDkwMTE2NTQzOVowSjELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3Ju
+aWExDjAMBgNVBAoMBUVuZGx5MRYwFAYDVQQDDA1FbmRseSBSb290IENBMIIBIjAN
+BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvp7y753VRq0oMkhgDGAPtQlWlEXz
+d+/cKg64Yv3yfHmAq4gEqHuGNy9hC6j5R7TYZd7+7VZAKqUac5Mb9g0U1AzZGPyT
+tUZUBv1sihUlrPYwc29WBm2qmEw2l62FjUNaPJmLgv3TlGm0k71hOCer4/pCUVHm
+wb1k8X+GRQYGn1t73tF+wvkW95h0a7XrE8M55KtiifErrkT6OLuGGVar/geET72W
+FXupzS9CfV/IG+4C2ECx3aRfnda4u2fH1Yz5taPwuVRogu/bgE9d3eQZJNSKLaUs
+EoJBvNLMLXY37fYBKnz/HcNcXfn+QryDsUh17ZnvaY3H/8If5LL4/Qq1iQIDAQAB
+o2MwYTAfBgNVHSMEGDAWgBSZT3wmyLrFE4Ny1TgtdNCSSzwKdDAPBgNVHRMBAf8E
+BTADAQH/MA4GA1UdDwEB/wQEAwIBBjAdBgNVHQ4EFgQUmU98Jsi6xRODctU4LXTQ
+kks8CnQwDQYJKoZIhvcNAQELBQADggEBAGv6Qj4bYRIjwMYwyxAZYk78i3SAhwGr
+BtJygcLUsw/BX/zgtawEfCTbLONco/Cv+bLiDfRKrxhMOhKBmUrPhtKSmLRs1sNl
+liprXdkDorez7xVwFJh5+AWoULqAr+N5psPz1gg5dwhZspslRdIHTd5gPsZSjPd+
+YhR4HCzz9D8CZ+VH/e0ecbLpGUEjGzzp7IYsPrTs8AzCtcEioXwQ7tJcqbF3AndK
+eg23/DUg6f/EnFhuSqE2qpo+oj5IdLePIywIKJwblxugJ7TqML+5eVn77ASgMU/o
+c4meXH3guzQPX4395yj8Opb2vC8HFwDm9KNyzvHX4YbsU866Xsna/1g=
 -----END CERTIFICATE-----`;
-    const blob = new Blob([fakeCaPem], { type: 'application/x-x509-ca-cert' });
+    const blob = new Blob([rootCaPem], { type: 'application/x-x509-ca-cert' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -346,8 +360,13 @@ cnRpZmljYXRlIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0G4J
           <div className="flex items-center space-x-3 overflow-x-auto no-scrollbar">
             {/* Stage 1: Bridge Connection */}
             <div className="flex items-center space-x-1.5 shrink-0">
-              <span className="text-[10px] text-text-muted font-bold">1. BRIDGE:</span>
-              {bridgeStatus === 'connected' ? (
+              <span className="text-[10px] text-text-muted font-bold">1. ENGINE:</span>
+              {isTauriEnvironment() ? (
+                <span className="flex items-center space-x-1 text-emerald-400 font-semibold text-[11px]">
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Native Core Integrated</span>
+                </span>
+              ) : bridgeStatus === 'connected' ? (
                 <span className="flex items-center space-x-1 text-emerald-400 font-semibold text-[11px]">
                   <CheckCircle2 className="w-3 h-3" />
                   <span>Port 8889 Connected</span>
