@@ -50,7 +50,7 @@ export const App: React.FC = () => {
   // Apply saved theme on mount & synchronize with grassroot_theme
   useEffect(() => {
     const savedGrassrootTheme = localStorage.getItem('grassroot_theme') as any;
-    const activeTheme = savedGrassrootTheme || settings.theme || 'dark';
+    const activeTheme = savedGrassrootTheme || settings.theme || 'light';
     const root = document.documentElement;
     root.classList.remove('dark', 'midnight', 'light', 'contrast');
     root.classList.add(activeTheme);

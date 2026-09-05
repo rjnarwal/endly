@@ -11,6 +11,7 @@ tokenlens-dist
 jsonlens-dist
 regexforge-dist
 cipherlab-dist
+pagely-dist
 release
 release-mac
 release-win
@@ -26,6 +27,7 @@ cipherlab/
 jsonlens/
 regexforge/
 tokenlens/
+pagely/
 
 # Environment & Secrets
 .env

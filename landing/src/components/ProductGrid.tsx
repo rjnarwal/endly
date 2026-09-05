@@ -5,6 +5,7 @@ import {
   FileCode2,
   Regex,
   Binary,
+  Images,
   ExternalLink,
   ArrowUpRight,
   Sparkles,
@@ -46,6 +47,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         return <Regex className="w-5 h-5 text-white" />;
       case 'Binary':
         return <Binary className="w-5 h-5 text-white" />;
+      case 'Images':
+        return <Images className="w-5 h-5 text-white" />;
       default:
         return <Sparkles className="w-5 h-5 text-white" />;
     }

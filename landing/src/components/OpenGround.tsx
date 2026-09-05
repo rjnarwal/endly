@@ -75,13 +75,15 @@ export interface ForumPost {
   id: string;
   title: string;
   slug: string;
+  summary: string;
+  content: string[];
   author: {
     name: string;
     role: string;
     badge?: string;
     avatarUrl?: string;
   };
-  category: 'guides' | 'dispatches' | 'discussions' | 'rfcs' | 'endly' | 'tokenlens' | 'jsonlens' | 'regexforge' | 'cipherlab';
+  category: 'guides' | 'dispatches' | 'discussions' | 'rfcs' | 'endly' | 'tokenlens' | 'jsonlens' | 'regexforge' | 'cipherlab' | 'pagely';
   tags: string[];
   publishedAt: string;
   readTime?: string;
@@ -828,6 +830,7 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
     { id: 'jsonlens', label: '🗂️ JSONLens Diff', icon: FileCode2 },
     { id: 'regexforge', label: '🎯 RegexForge', icon: Regex },
     { id: 'cipherlab', label: '🔐 CipherLab Crypto', icon: Lock },
+    { id: 'pagely', label: '📄 Pagely PDF', icon: Images },
     { id: 'dispatches', label: '🏗️ Tech Dispatches', icon: FileText },
     { id: 'rfcs', label: '💡 Feature RFCs', icon: Sparkles },
   ];
@@ -1453,6 +1456,7 @@ export const OpenGround: React.FC<OpenGroundProps> = ({ onBackToHome, onSelectPr
                     <option value="jsonlens">JSONLens Diff</option>
                     <option value="regexforge">RegexForge</option>
                     <option value="cipherlab">CipherLab Crypto</option>
+                    <option value="pagely">Pagely PDF</option>
                     <option value="dispatches">Technical Dispatch</option>
                   </select>
                 </div>

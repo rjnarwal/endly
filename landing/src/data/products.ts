@@ -261,4 +261,55 @@ Base64:  R3Jhc3Nyb290IERpZ2l0YWwgLSBMb2NhbCBGaXJzdA==`,
       isExternal: true,
     },
   },
+  {
+    id: 'pagely',
+    name: 'Pagely (Image to PDF)',
+    category: 'utilities',
+    tagline: '100% In-Browser Image to PDF Converter & Multi-Page Studio',
+    description:
+      'Convert JPG, PNG, WebP, SVG, and GIF images into high-resolution multi-page PDF documents. Zero server uploads, custom page layouts (A4, Letter, Legal, Aspect Fit), rotation, and lossless/balanced compression.',
+    status: 'live',
+    badgeText: 'LIVE NOW',
+    iconName: 'Images',
+    accentColor: '#f43f5e',
+    gradient: 'from-rose-500 via-pink-500 to-red-500',
+    url: 'https://pagely.grassroot.digital',
+    features: [
+      {
+        title: '100% Client-Side Privacy',
+        description: 'Zero cloud server uploads or bandwidth costs. Confidential documents never leave your browser.',
+      },
+      {
+        title: 'Multi-Page Grid & Reordering',
+        description: 'Drag-and-drop batch upload, individual 90° page rotation, and natural alphabetical sorting.',
+      },
+      {
+        title: 'Custom Layouts & Margins',
+        description: 'A4, US Letter, US Legal, Poster A3, Aspect Fit, and customizable margin presets.',
+      },
+      {
+        title: 'In-Memory Canvas Compression',
+        description: 'Hardware-accelerated offscreen canvas processing with Balanced, High, or Compact output sizes.',
+      },
+    ],
+    previewMockup: {
+      type: 'pagely',
+      tags: ['JPG/PNG/WebP', 'PDF Studio', '100% Local', 'Zero-Cloud'],
+      sampleCode: `// Batch Upload: 3 Images (PNG / WebP / JPG)
+Page 1: Architecture_2026.png (1200x800) -> 0°
+Page 2: Benchmark_Graph.webp (1920x1080) -> 90°
+Page 3: Signature_Scan.jpg (800x600) -> 12mm Margin`,
+      sampleResult: `// In-Memory jsPDF Stream Output:
+File: "pagely_document.pdf"
+Size: 1.42 MB (Balanced 82% Compression)
+Status: Compiled in 180ms with 0 bytes uploaded`,
+    },
+    githubUrl: 'https://github.com/rjnarwal/pagely',
+    actions: {
+      primaryLabel: 'Launch Pagely',
+      primaryUrl: 'https://pagely.grassroot.digital',
+      isExternal: true,
+    },
+  },
 ];
+

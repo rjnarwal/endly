@@ -9,7 +9,7 @@ const MOCKS_KEY = 'endly_mocks_v1';
 const SETTINGS_KEY = 'endly_settings_v1';
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  theme: 'dark',
+  theme: 'light',
   responseOrientation: 'horizontal',
   sendNoCache: false,
   followRedirects: true,

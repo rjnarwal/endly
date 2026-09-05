@@ -170,6 +170,17 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView 
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
+              <li>
+                <a
+                  href="https://pagely.grassroot.digital"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
+                >
+                  <span>pagely.grassroot.digital</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
             </ul>
           </div>
 

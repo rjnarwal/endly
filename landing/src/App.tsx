@@ -14,14 +14,14 @@ import { ProductItem } from './types';
 import { PRODUCTS } from './data/products';
 
 export const App: React.FC = () => {
-  const [theme, setTheme] = useState<'dark' | 'midnight' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'midnight' | 'light'>('light');
   const [activeView, setActiveView] = useState<'home' | 'openground'>('home');
   const [selectedProductId, setSelectedProductId] = useState<string>('endly');
   const [earlyAccessProduct, setEarlyAccessProduct] = useState<ProductItem | null>(null);
   const [downloadProduct, setDownloadProduct] = useState<ProductItem | null>(null);
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('grassroot_theme') as 'dark' | 'midnight' | 'light') || 'dark';
+    const savedTheme = (localStorage.getItem('grassroot_theme') as 'dark' | 'midnight' | 'light') || 'light';
     setTheme(savedTheme);
     document.documentElement.classList.remove('dark', 'midnight', 'light');
     document.documentElement.classList.add(savedTheme);

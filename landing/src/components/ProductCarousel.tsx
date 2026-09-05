@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Zap,
   KeyRound,
   FileCode2,
   Regex,
   Binary,
+  Images,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
@@ -78,6 +79,8 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({
         return <Regex className="w-6 h-6 text-white" />;
       case 'Binary':
         return <Binary className="w-6 h-6 text-white" />;
+      case 'Images':
+        return <Images className="w-6 h-6 text-white" />;
       default:
         return <Sparkles className="w-6 h-6 text-white" />;
     }
