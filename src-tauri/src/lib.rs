@@ -1,5 +1,6 @@
 mod proxy;
 
+use tauri::Manager;
 use proxy::{start_proxy_server, stop_proxy_server, sync_mock_rules, get_local_ips};
 
 #[tauri::command]
@@ -25,15 +26,7 @@ pub fn run() {
             sync_mock_rules,
             get_local_ips
         ])
-        .setup(|app| {
-            #[cfg(debug_assertions)]
-            {
-                let window = app.get_webview_window("main");
-                if let Some(w) = window {
-                    // Open dev tools in debug mode if needed
-                    let _ = w;
-                }
-            }
+        .setup(|_app| {
             Ok(())
         })
         .run(tauri::generate_context!())
