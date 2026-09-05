@@ -219,12 +219,26 @@ export async function dispatchHttpRequest(options: DispatchOptions): Promise<Res
       }
     }
 
-    const response = await fetchFn(targetUrl, {
-      method,
-      headers,
-      body: bodyPayload,
-      signal: abortSignal,
-    });
+    let response: Response;
+    try {
+      response = await fetchFn(targetUrl, {
+        method,
+        headers,
+        body: bodyPayload,
+        signal: abortSignal,
+      });
+    } catch (fetchErr: any) {
+      if (fetchFn !== window.fetch) {
+        response = await window.fetch(targetUrl, {
+          method,
+          headers,
+          body: bodyPayload,
+          signal: abortSignal,
+        });
+      } else {
+        throw fetchErr;
+      }
+    }
 
     ttfb = Math.round(performance.now() - startTime);
 
