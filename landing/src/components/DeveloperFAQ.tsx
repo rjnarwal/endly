@@ -19,7 +19,7 @@ const FAQS: FAQItem[] = [
       'Unlike cloud-dependent API clients that sync your requests and secrets to remote databases, Endly is 100% local-first and zero-cloud. Your workspaces, environment variables, and auth tokens are stored strictly in your browser or local desktop filesystem. Additionally, Endly includes a built-in Wi-Fi Mobile Interceptor to capture live HTTP/HTTPS traffic from physical iOS & Android devices without installing separate bulky proxy software.',
     toolLink: {
       name: 'Launch Endly API Client ↗',
-      url: 'https://endly.grassroot.digital',
+      url: '/api-client',
     },
   },
   {
@@ -29,7 +29,7 @@ const FAQS: FAQItem[] = [
       'Endly runs a lightweight, native local proxy daemon on your machine. By setting your Android or iOS device Wi-Fi proxy to your computer’s local IP address (e.g. 192.168.1.X:8080) and downloading the self-signed CA certificate from Endly’s dashboard, you can inspect, filter, and mock mobile app API traffic in real time directly from your Endly workspace.',
     toolLink: {
       name: 'Open Mobile Interceptor in Endly ↗',
-      url: 'https://endly.grassroot.digital',
+      url: '/api-client',
     },
   },
   {
@@ -39,7 +39,7 @@ const FAQS: FAQItem[] = [
       'Yes, 100%. TokenLens runs entirely in client-side browser memory using the W3C WebCrypto API (window.crypto.subtle). Your JWT tokens, RSA/ECDSA private keys, and HMAC secret keys are never transmitted over the network or logged anywhere. You can verify RS256, HS256, and ES256 signatures completely offline.',
     toolLink: {
       name: 'Launch TokenLens JWT Studio ↗',
-      url: 'https://tokenlens.grassroot.digital',
+      url: '/jwt-decoder',
     },
   },
   {
@@ -49,7 +49,7 @@ const FAQS: FAQItem[] = [
       'TokenLens includes live countdown timers for exp, iat, and nbf claims, timezone conversions (Local vs UTC), an interactive RFC 7519 claim dictionary, two-way payload and header editing with instant re-signing, and side-by-side visual diff comparison between refreshed or modified tokens.',
     toolLink: {
       name: 'Try TokenLens JWT Studio ↗',
-      url: 'https://tokenlens.grassroot.digital',
+      url: '/jwt-decoder',
     },
   },
   {
@@ -59,7 +59,7 @@ const FAQS: FAQItem[] = [
       'JSONLens parses and structures JSON payloads into semantic trees rather than doing raw character matching. This means it can ignore insignificant key ordering differences, sort keys alphabetically, and cleanly highlight true added, removed, or modified fields with line-by-line colored diff markers and summary metrics.',
     toolLink: {
       name: 'Launch JSONLens Diff & Studio ↗',
-      url: 'https://jsonlens.grassroot.digital',
+      url: '/json-diff',
     },
   },
   {
@@ -69,7 +69,7 @@ const FAQS: FAQItem[] = [
       'Yes. JSONLens includes an integrated Type Generator that instantly converts raw JSON into type-safe TypeScript interfaces (with nested models and array support) or idiomatic Go structs (complete with `json:"..."` tags). You can copy or download the generated code in one click.',
     toolLink: {
       name: 'Try JSON Formatter & Type Generator ↗',
-      url: 'https://jsonlens.grassroot.digital',
+      url: '/json-diff',
     },
   },
   {

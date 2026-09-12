@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   root: path.resolve(__dirname, 'cipherlab'),
-  base: '/',
+  base: '/hash-generator/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, 'cipherlab-dist'),

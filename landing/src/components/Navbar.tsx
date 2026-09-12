@@ -109,12 +109,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                   Developer Tools Suite
                 </div>
                 {PRODUCTS.map((product) => (
-                  <button
+                  <a
                     key={product.id}
+                    href={product.actions.primaryUrl || product.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => {
                       setProductsDropdownOpen(false);
-                      if (activeView !== 'home') onNavigateView('home');
-                      onSelectProduct(product.id);
                     }}
                     className="w-full text-left p-2.5 rounded-xl hover:bg-background-tertiary flex items-start space-x-3 transition-colors group cursor-pointer"
                   >
@@ -142,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         {product.tagline}
                       </p>
                     </div>
-                  </button>
+                  </a>
                 ))}
               </div>
             )}
@@ -210,9 +211,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Primary CTA: Launch Endly in New Tab */}
+          {/* Primary CTA: Launch API Client */}
           <a
-            href="https://endly.grassroot.digital"
+            href="/api-client"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white text-sm font-semibold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
@@ -272,18 +273,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="space-y-1 pt-2 border-t border-border">
             <div className="text-[10px] uppercase font-bold text-text-muted px-2 py-1">Products</div>
             {PRODUCTS.map((p) => (
-              <button
+              <a
                 key={p.id}
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  if (activeView !== 'home') onNavigateView('home');
-                  onSelectProduct(p.id);
-                }}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-background-tertiary flex items-center justify-between text-sm text-text-primary"
+                href={p.actions.primaryUrl || p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-background-tertiary flex items-center justify-between text-sm text-text-primary group"
               >
-                <span>{p.name}</span>
+                <span className="group-hover:text-accent transition-colors">{p.name}</span>
                 <span className="text-[10px] text-text-muted">{p.badgeText}</span>
-              </button>
+              </a>
             ))}
           </div>
 
@@ -312,7 +312,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <a
-            href="https://endly.grassroot.digital"
+            href="/api-client"
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full text-center py-2.5 rounded-xl bg-accent text-white font-semibold text-sm shadow-md"

@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
             </a>
 
             <a
-              href="https://endly.grassroot.digital"
+              href="https://grassroot.digital/api-client"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-secondary hover:text-orange-500 flex items-center space-x-1 transition-colors"
@@ -44,7 +44,7 @@ export const Footer: React.FC = () => {
             </a>
 
             <a
-              href="https://pagely.grassroot.digital"
+              href="https://grassroot.digital/image-to-pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-secondary hover:text-rose-500 flex items-center space-x-1 transition-colors"
@@ -54,7 +54,7 @@ export const Footer: React.FC = () => {
             </a>
 
             <a
-              href="https://tokenlens.grassroot.digital"
+              href="https://grassroot.digital/jwt-decoder"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-secondary hover:text-purple-500 flex items-center space-x-1 transition-colors"
@@ -64,7 +64,7 @@ export const Footer: React.FC = () => {
             </a>
 
             <a
-              href="https://jsonlens.grassroot.digital"
+              href="https://grassroot.digital/json-diff"
               target="_blank"
               rel="noopener noreferrer"
               className="text-text-secondary hover:text-cyan-500 flex items-center space-x-1 transition-colors"

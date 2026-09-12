@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   root: path.resolve(__dirname, 'passporto'),
-  base: '/',
+  base: '/passport-photo-maker/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, 'passporto-dist'),

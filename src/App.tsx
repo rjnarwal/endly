@@ -14,6 +14,7 @@ import { CodeSnippetModal } from './components/modals/CodeSnippetModal';
 import { DocumentationViewer } from './components/docs/DocumentationViewer';
 import { SettingsModal } from './components/settings/SettingsModal';
 import { MobileInterceptorModal } from './components/proxy/MobileInterceptorModal';
+import { ApiClientKnowledgeBase } from './components/layout/ApiClientKnowledgeBase';
 import { RealtimeClient } from './components/realtime/RealtimeClient';
 import { useWorkspaceStore } from './store/useWorkspaceStore';
 
@@ -81,12 +82,12 @@ export const App: React.FC = () => {
   }, [activeTabId, openTab, closeTab]);
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-background text-text overflow-hidden font-sans select-none">
+    <div className="flex flex-col min-h-screen w-screen bg-background text-text overflow-x-hidden overflow-y-auto font-sans select-none">
       {/* 1. Top Navbar */}
       <Header />
 
       {/* 2. Main Workspace Layout */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex shrink-0 h-[calc(100vh-3rem)] overflow-hidden relative">
         {/* Sidebar */}
         <div
           className={`${
@@ -202,6 +203,9 @@ export const App: React.FC = () => {
           })()}
         </div>
       </div>
+
+      {/* Rich In-Tool Technical Knowledge Base & FAQ (Live DOM Crawlable for Google) */}
+      <ApiClientKnowledgeBase />
 
       {/* 3. Global Modals & Overlays */}
       <EnvironmentModal />

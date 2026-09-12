@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   root: path.resolve(__dirname, 'pagely'),
-  base: '/',
+  base: '/image-to-pdf/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, 'pagely-dist'),

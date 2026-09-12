@@ -2,33 +2,39 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg>" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0d14" />
 
     <!-- Primary SEO Title & Search Metadata -->
-    <title>Endly | Modern Cross-Platform API Client & Mobile Proxy Interceptor</title>
-    <meta name="title" content="Endly | Modern Cross-Platform API Client & Mobile Proxy Interceptor" />
-    <meta name="description" content="Endly is a lightning-fast, zero-cloud Postman alternative with built-in Wi-Fi mobile proxy interception, dynamic environment cascading, automated collection runner, and 100% browser-local storage." />
+    <title>Lightweight Web API Client & HTTP Runner - Grassroot</title>
+    <meta name="title" content="Lightweight Web API Client & HTTP Runner - Grassroot" />
+    <meta name="description" content="Endly is a lightweight, zero-cloud web API client, GraphQL debugger, and HTTP collection runner with built-in Wi-Fi mobile proxy interception and 100% browser-local storage." />
     <meta name="keywords" content="Postman alternative, API client, REST client, GraphQL client, mobile proxy interceptor, HTTP interceptor iOS Android, collection runner, offline API testing, mobile HTTPS traffic interceptor, zero cloud API client, Endly, Grassroot Digital, Rajesh Narwal" />
     <meta name="author" content="Rajesh Narwal" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://endly.grassroot.digital/" />
+    <link rel="canonical" href="https://grassroot.digital/api-client" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://endly.grassroot.digital/" />
-    <meta property="og:site_name" content="Endly" />
-    <meta property="og:title" content="Endly | Modern Cross-Platform API Client & Mobile Interceptor" />
-    <meta property="og:description" content="A lightning-fast, zero-cloud Postman alternative with built-in Wi-Fi mobile proxy interception, collection runner, and 100% local storage." />
+    <meta property="og:url" content="https://grassroot.digital/api-client" />
+    <meta property="og:site_name" content="Endly by Grassroot Digital" />
+    <meta property="og:title" content="Lightweight Web API Client & HTTP Runner - Grassroot" />
+    <meta property="og:description" content="A lightweight, zero-cloud Postman alternative with built-in Wi-Fi mobile proxy interception, collection runner, and 100% local storage." />
     <meta property="og:image" content="https://grassroot.digital/images/rajesh-narwal.jpg" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://endly.grassroot.digital/" />
-    <meta name="twitter:title" content="Endly | Zero-Cloud API Client & Mobile Proxy" />
+    <meta name="twitter:url" content="https://grassroot.digital/api-client" />
+    <meta name="twitter:title" content="Lightweight Web API Client & HTTP Runner - Grassroot" />
     <meta name="twitter:description" content="Lightning-fast Postman alternative with built-in Wi-Fi mobile proxy interception and collection runner." />
     <meta name="twitter:image" content="https://grassroot.digital/images/rajesh-narwal.jpg" />
 
@@ -54,12 +60,12 @@
             "priceCurrency": "USD"
           },
           "featureList": [
-            "Zero-cloud offline API Client for REST and GraphQL",
+            "Zero-cloud offline API Client for REST, GraphQL, and WebSocket testing",
             "Built-in Wi-Fi Mobile Proxy Interceptor for physical iOS and Android devices",
-            "Multi-environment variable cascading with instant {{variable}} interpolation",
-            "Automated collection runner with real-time assertions and latency charts",
-            "One-click Postman Collections, OpenAPI/Swagger YAML/JSON, cURL, and HAR import",
-            "Code generator for 10+ languages including Kotlin, cURL, Python, Go, Node.js",
+            "Multi-environment variable cascading with dynamic {{variable}} interpolation",
+            "Automated collection runner with real-time assertions, latency charts, and test logs",
+            "One-click Postman Collections v2.1, OpenAPI/Swagger YAML/JSON, cURL, and HAR import",
+            "Multi-language code generator for Kotlin, Java, cURL, Python, Go, Node.js, and Swift",
             "100% local IndexedDB and filesystem storage with zero cloud telemetry"
           ],
           "author": {
@@ -76,7 +82,15 @@
               "name": "What makes Endly different from Postman or Insomnia?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Endly is 100% local-first and zero-cloud. Your workspaces, requests, environment variables, and authentication tokens are saved strictly on your local machine and never transmitted to external cloud servers. Furthermore, Endly includes a built-in Wi-Fi Mobile Interceptor to capture physical Android & iOS device traffic without installing heavy desktop proxies."
+                "text": "Endly is 100% local-first and zero-cloud. Your workspaces, requests, environment variables, and authentication tokens are saved strictly on your local machine in IndexedDB and never transmitted to external cloud servers. Furthermore, Endly includes a built-in Wi-Fi Mobile Interceptor to capture physical Android & iOS device traffic without installing heavy desktop proxies."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Endly capture mobile API traffic from iOS and Android devices?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Endly features a native Wi-Fi Proxy mode. When your mobile phone is connected to the same local network, setting its proxy IP to your workstation routes all HTTP/HTTPS traffic through Endly, allowing instant live request inspection, header analysis, and response mocking."
               }
             },
             {
@@ -86,6 +100,14 @@
                 "@type": "Answer",
                 "text": "Yes! Endly supports one-click import of Postman Collections (v2.1), OpenAPI/Swagger YAML and JSON specifications, cURL commands, and browser HAR network captures."
               }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Endly work completely offline?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Endly requires no cloud account or internet connection to manage workspaces, edit requests, execute collection test suites, or interpolate environment variables."
+              }
             }
           ]
         }
@@ -93,8 +115,101 @@
     }
     </script>
   </head>
-  <body class="bg-background text-text select-none overflow-hidden antialiased">
-    <div id="root"></div>
+  <body class="bg-background text-text select-none antialiased">
+    <!-- Static Fallback / Search Engine Readable Content -->
+    <div id="root">
+      <header style="padding: 2.5rem 1.5rem; text-align: center; max-width: 960px; margin: 0 auto;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; color: #f97316;">
+          Endly — Zero-Cloud Cross-Platform API Client & Mobile Proxy Interceptor
+        </h1>
+        <p style="font-size: 1.125rem; line-height: 1.6; color: #94a3b8; max-width: 780px; margin: 0 auto;">
+          The modern, lightweight, privacy-first Postman alternative engineered for speed, offline reliability, and mobile app debugging. Built by <a href="https://grassroot.digital" style="color: #f97316; font-weight: 600;">Grassroot Digital</a>.
+        </p>
+      </header>
+
+      <main style="padding: 1rem 1.5rem 4rem; max-width: 1000px; margin: 0 auto;">
+        <section style="margin-bottom: 3rem; background: rgba(30, 41, 59, 0.4); border: 1px solid #334155; border-radius: 0.75rem; padding: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 1rem;">
+            Why Developers and Mobile Engineers Choose Endly
+          </h2>
+          <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem;">
+            As traditional API clients become bloated with mandatory cloud sign-ins, forced team workspace synchronization, and aggressive data tracking, developers and mobile engineers face security risks with proprietary API keys and backend tokens.
+          </p>
+          <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem;">
+            <strong>Endly</strong> is engineered from the ground up as a zero-cloud, 100% local-first developer workstation. Your request collections, historical runs, auth headers, and environment variables remain in your local browser IndexedDB or native filesystem—never synchronizing to a remote third-party cloud.
+          </p>
+          <p style="color: #cbd5e1; line-height: 1.7;">
+            Designed specifically with mobile engineers in mind, Endly features a built-in <strong>Wi-Fi Mobile Interceptor</strong>. Debug production or staging network calls directly from physical iPhone and Android devices over local Wi-Fi without needing heavy proxy software like Charles or Proxyman.
+          </p>
+        </section>
+
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem;">
+            Key Features & Technical Capabilities
+          </h2>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f97316; margin-bottom: 0.5rem;">📡 Wi-Fi Mobile Proxy Interceptor</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">Capture, view, inspect, and mock HTTP/HTTPS requests from physical iOS and Android devices connected on the same Wi-Fi network.</p>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f97316; margin-bottom: 0.5rem;">⚡ Automated Collection Runner</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">Execute multi-request test suites sequentially with automated assertion validation, latency charts, and CSV/JSON test report exports.</p>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f97316; margin-bottom: 0.5rem;">🔄 Dynamic Environment Variables</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">Cascading environment variable resolution with real-time <code style="color: #f97316;">{{variable}}</code> interpolation across global, workspace, and folder scopes.</p>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f97316; margin-bottom: 0.5rem;">📦 Universal Spec Import</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">One-click seamless import for Postman Collections v2.1, OpenAPI/Swagger YAML/JSON, raw cURL commands, and HAR network logs.</p>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f97316; margin-bottom: 0.5rem;">💻 Multi-Language Code Generator</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">Instant copy-ready code generation for Kotlin (OkHttp/Retrofit), Swift, Python (requests), Go, Node.js (Axios/Fetch), and cURL.</p>
+            </div>
+
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f97316; margin-bottom: 0.5rem;">🔒 100% Offline & Private</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5;">Zero cloud sign-in required. High-performance IndexedDB persistence guarantees your API credentials never touch a remote server.</p>
+            </div>
+          </div>
+        </section>
+
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #f8fafc; margin-bottom: 1.25rem;">
+            Frequently Asked Questions
+          </h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">What makes Endly different from Postman or Insomnia?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Endly is 100% local-first and zero-cloud. Your workspaces, requests, environment variables, and authentication tokens are saved strictly on your local machine in IndexedDB and never transmitted to external cloud servers. Furthermore, Endly includes a built-in Wi-Fi Mobile Interceptor to capture physical Android & iOS device traffic without installing heavy desktop proxies.</p>
+            </div>
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">How does Endly capture mobile API traffic from iOS and Android devices?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Endly features a native Wi-Fi Proxy mode. When your mobile phone is connected to the same local network, setting its proxy IP to your workstation routes all HTTP/HTTPS traffic through Endly, allowing instant live request inspection, header analysis, and response mocking.</p>
+            </div>
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">Can I import my existing Postman collections into Endly?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Yes! Endly supports one-click import of Postman Collections (v2.1), OpenAPI/Swagger YAML and JSON specifications, cURL commands, and browser HAR network captures.</p>
+            </div>
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">Does Endly work completely offline?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Yes. Endly requires no cloud account or internet connection to manage workspaces, edit requests, execute collection test suites, or interpolate environment variables.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer style="text-align: center; padding: 2rem; border-top: 1px solid #334155; color: #64748b; font-size: 0.875rem;">
+        <p>&copy; 2026 Endly by <a href="https://grassroot.digital" style="color: #94a3b8;">Grassroot Digital</a>. Part of the privacy-first developer ecosystem.</p>
+      </footer>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

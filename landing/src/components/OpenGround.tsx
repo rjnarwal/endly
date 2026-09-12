@@ -39,6 +39,7 @@ import {
   Terminal,
   Copy,
   Check,
+  Images,
 } from 'lucide-react';
 
 export interface ForumComment {

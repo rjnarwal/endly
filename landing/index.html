@@ -2,7 +2,16 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z'/></svg>" />
+    <!-- Standard Favicon & Site Icons for Google Search & Browsers -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0d14" />
 
@@ -91,7 +100,7 @@
               "@type": "SoftwareApplication",
               "position": 1,
               "name": "Endly",
-              "url": "https://endly.grassroot.digital",
+              "url": "https://grassroot.digital/api-client",
               "applicationCategory": "DeveloperApplication",
               "operatingSystem": "macOS, Windows, Linux, Web",
               "description": "Zero-cloud API Client and Wi-Fi Mobile Proxy Interceptor for REST, GraphQL, and automated test collections."
@@ -100,7 +109,7 @@
               "@type": "SoftwareApplication",
               "position": 2,
               "name": "TokenLens",
-              "url": "https://tokenlens.grassroot.digital",
+              "url": "https://grassroot.digital/jwt-decoder",
               "applicationCategory": "SecurityApplication",
               "operatingSystem": "Web",
               "description": "100% Client-Side WebCrypto JWT Debugger, Claim Inspector, and RS256/HS256/ES256 Signature Verifier."
@@ -109,7 +118,7 @@
               "@type": "SoftwareApplication",
               "position": 3,
               "name": "JSONLens",
-              "url": "https://jsonlens.grassroot.digital",
+              "url": "https://grassroot.digital/json-diff",
               "applicationCategory": "DeveloperApplication",
               "operatingSystem": "Web",
               "description": "Semantic JSON side-by-side diff comparator, beautifier, minifier, and TypeScript/Go type generator."
@@ -118,7 +127,7 @@
               "@type": "SoftwareApplication",
               "position": 4,
               "name": "RegexForge",
-              "url": "https://regexforge.grassroot.digital",
+              "url": "https://grassroot.digital/regex-tester",
               "applicationCategory": "DeveloperApplication",
               "operatingSystem": "Web",
               "description": "Real-time regular expression visualizer, capture group inspector, syntax explainer, and multi-language code generator."
@@ -127,7 +136,7 @@
               "@type": "SoftwareApplication",
               "position": 5,
               "name": "CipherLab",
-              "url": "https://cipherlab.grassroot.digital",
+              "url": "https://grassroot.digital/hash-generator",
               "applicationCategory": "SecurityApplication",
               "operatingSystem": "Web",
               "description": "Cryptographic hashing (SHA-256, MD5), HMAC signing, WebCrypto AES-256-GCM, UUID v4/v7 generator, and multi-format encoder."
@@ -136,7 +145,7 @@
               "@type": "SoftwareApplication",
               "position": 6,
               "name": "Pagely",
-              "url": "https://pagely.grassroot.digital",
+              "url": "https://grassroot.digital/image-to-pdf",
               "applicationCategory": "UtilitiesApplication",
               "operatingSystem": "Web",
               "description": "100% in-browser Image to PDF converter and multi-page studio with zero cloud uploads."
@@ -145,10 +154,39 @@
               "@type": "SoftwareApplication",
               "position": 7,
               "name": "PassPorto",
-              "url": "https://passporto.grassroot.digital",
+              "url": "https://grassroot.digital/passport-photo-maker",
               "applicationCategory": "UtilitiesApplication",
               "operatingSystem": "Web",
               "description": "Instant in-browser biometric passport photo maker, AI eye-line centering, and visa portal file size optimizer."
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is the core philosophy of Grassroot Digital developer tools?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Grassroot Digital builds 100% local-first, zero-cloud developer tools. Sensitive data such as API secrets, private cryptographic keys, JWT tokens, images, and JSON payloads execute exclusively inside browser memory or local storage, completely isolated from third-party cloud servers."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Endly capture mobile API traffic without cloud proxies?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Endly includes a built-in Wi-Fi mobile proxy interceptor. By connecting an Android or iOS device to the same local Wi-Fi network and configuring the proxy IP, HTTP and HTTPS requests are routed directly to your local workstation for real-time inspection, inspection, and mocking."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are Grassroot Digital tools completely free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! All web utilities in the Grassroot Digital ecosystem (TokenLens, JSONLens, RegexForge, CipherLab, Pagely, PassPorto, and the web edition of Endly) are completely free with zero account sign-up required."
+              }
             }
           ]
         }
@@ -159,22 +197,130 @@
   <body class="bg-background text-text select-none antialiased">
     <!-- Static Fallback / Search Engine Readable Content -->
     <div id="root">
-      <header style="padding: 2rem; text-align: center;">
-        <h1>Grassroot Digital — Privacy-First Developer Tools & Mobile Engineering Hub</h1>
-        <p>Zero-cloud, client-side developer utilities built by Rajesh Narwal.</p>
+      <header style="padding: 2.5rem 1.5rem; text-align: center; max-width: 960px; margin: 0 auto;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; color: #10b981;">
+          Grassroot Digital — Privacy-First Developer Tools & Mobile Engineering Hub
+        </h1>
+        <p style="font-size: 1.125rem; line-height: 1.6; color: #94a3b8; max-width: 780px; margin: 0 auto;">
+          An independent ecosystem of zero-cloud, client-side developer utilities engineered for speed, privacy, and offline productivity by <strong>Rajesh Narwal</strong>. Every tool runs locally in your browser with zero server data telemetry.
+        </p>
       </header>
-      <main style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
-        <h2>Live Tools & Products</h2>
-        <ul>
-          <li><strong><a href="https://endly.grassroot.digital">Endly</a></strong>: Cross-Platform API Client & Mobile Wi-Fi Proxy Interceptor (REST, GraphQL, Automated Runner).</li>
-          <li><strong><a href="https://tokenlens.grassroot.digital">TokenLens</a></strong>: Client-Side JWT Parser, Claim Inspector & WebCrypto RS256/HS256 Verifier.</li>
-          <li><strong><a href="https://jsonlens.grassroot.digital">JSONLens</a></strong>: Semantic JSON Side-by-Side Diff Comparator, Beautifier & Type Generator.</li>
-          <li><strong><a href="https://regexforge.grassroot.digital">RegexForge</a></strong>: Real-Time Regular Expression Visualizer, Parser & Multi-Language Code Generator.</li>
-          <li><strong><a href="https://cipherlab.grassroot.digital">CipherLab</a></strong>: Cryptographic Hashes (SHA-256), AES-256-GCM, UUID v7 & Multi-Format Encoder.</li>
-          <li><strong><a href="https://pagely.grassroot.digital">Pagely</a></strong>: 100% In-Browser Image to PDF Converter & Multi-Page Studio.</li>
-          <li><strong><a href="https://passporto.grassroot.digital">PassPorto</a></strong>: Biometric Passport & Visa Photo Maker with AI Eye-Line Centering.</li>
-        </ul>
+
+      <main style="padding: 1rem 1.5rem 4rem; max-width: 1100px; margin: 0 auto;">
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem;">
+            Ecosystem Suite & Live Applications
+          </h2>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #f97316; margin-bottom: 0.5rem;">
+                <a href="/api-client" style="color: inherit; text-decoration: none;">1. API Client & Mobile Proxy (Endly)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                A zero-cloud Postman alternative with built-in Wi-Fi mobile proxy interception for physical iOS & Android devices, dynamic environment cascading, automated collection runner, and 100% local IndexedDB storage.
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/api-client" style="color: #38bdf8; font-weight: 600;">Launch API Client &rarr;</a></p>
+            </article>
+
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #8b5cf6; margin-bottom: 0.5rem;">
+                <a href="/jwt-decoder" style="color: inherit; text-decoration: none;">2. JWT Decoder & Verifier (TokenLens)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                100% Client-Side WebCrypto JWT Debugger, Claim Inspector, and RS256/HS256/ES256 Signature Verifier. Verify tokens locally in browser memory without sending authentication secrets over the wire.
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/jwt-decoder" style="color: #38bdf8; font-weight: 600;">Launch JWT Decoder &rarr;</a></p>
+            </article>
+
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #3b82f6; margin-bottom: 0.5rem;">
+                <a href="/json-diff" style="color: inherit; text-decoration: none;">3. Semantic JSON Diff (JSONLens)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                Semantic JSON side-by-side tree diff comparator, beautifier, minifier, syntax auto-repair for broken commas/quotes, and instant TypeScript interface & Go struct generator.
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/json-diff" style="color: #38bdf8; font-weight: 600;">Launch JSON Diff &rarr;</a></p>
+            </article>
+
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #10b981; margin-bottom: 0.5rem;">
+                <a href="/regex-tester" style="color: inherit; text-decoration: none;">4. Regex Visualizer & Tester (RegexForge)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                Real-time regular expression visualizer, capture group inspector, human-readable syntax breakdown, substitution diff preview, and multi-language code generator for Kotlin, Java, TS, Python, and Go.
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/regex-tester" style="color: #38bdf8; font-weight: 600;">Launch Regex Tester &rarr;</a></p>
+            </article>
+
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #ec4899; margin-bottom: 0.5rem;">
+                <a href="/hash-generator" style="color: inherit; text-decoration: none;">5. Cryptographic Hash & AES (CipherLab)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                Cryptographic hashing (SHA-256, SHA-512, MD5), HMAC signing, WebCrypto AES-256-GCM symmetric encryption, sortable UUID v7 and random UUID v4 generator, and multi-format encoder (Base64, Hex, Binary).
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/hash-generator" style="color: #38bdf8; font-weight: 600;">Launch Hash Generator &rarr;</a></p>
+            </article>
+
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #f43f5e; margin-bottom: 0.5rem;">
+                <a href="/image-to-pdf" style="color: inherit; text-decoration: none;">6. Image to PDF Studio (Pagely)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                100% in-browser Image to PDF converter and layout studio. Merge JPG, PNG, WebP to PDF with custom page formats (A4, Letter), margins, rotation, and compression with zero cloud uploads.
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/image-to-pdf" style="color: #38bdf8; font-weight: 600;">Launch Image to PDF &rarr;</a></p>
+            </article>
+
+            <article style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155; border-radius: 0.75rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #38bdf8; margin-bottom: 0.5rem;">
+                <a href="/passport-photo-maker" style="color: inherit; text-decoration: none;">7. Passport Photo Maker (PassPorto)</a>
+              </h3>
+              <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                Instant in-browser biometric passport & visa photo maker. Official 2x2 inch US and 35x45mm UK/EU/India specs, eye-line centering guides, and strict file size compressor (&lt;240KB, &lt;100KB).
+              </p>
+              <p style="margin-top: 0.75rem;"><a href="/passport-photo-maker" style="color: #38bdf8; font-weight: 600;">Launch Passport Photo Maker &rarr;</a></p>
+            </article>
+          </div>
+        </section>
+
+        <section style="margin-bottom: 3rem; background: rgba(15, 23, 42, 0.6); padding: 2rem; border-radius: 0.75rem; border: 1px solid #334155;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #38bdf8;">
+            Zero-Cloud Architecture & Privacy Philosophy
+          </h2>
+          <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1rem;">
+            In an era where modern developer utilities routinely mandate cloud logins, third-party workspace synchronization, and background telemetry, sensitive credentials—such as production API tokens, JWT signing secrets, personal identification documents, and private endpoints—frequently leak to remote servers.
+          </p>
+          <p style="color: #cbd5e1; line-height: 1.7;">
+            <strong>Grassroot Digital</strong> is architected on a non-negotiable principle: <em>Computation belongs where the developer is</em>. Utilizing the standard W3C WebCrypto API (<code style="color: #f43f5e;">window.crypto.subtle</code>), HTML5 Canvas, and client-side IndexedDB databases, every operation executes within your browser's private memory sandbox with zero telemetry.
+          </p>
+        </section>
+
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.25rem;">
+            Frequently Asked Questions
+          </h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">Why is client-side privacy essential for developer tools?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Developer tokens, HMAC secrets, and database payloads frequently contain personally identifiable information (PII) or high-privilege credentials. Client-side tools eliminate data breach vectors by ensuring that sensitive plaintext never crosses the network.</p>
+            </div>
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">How does Endly capture mobile API requests without root or cloud proxies?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Endly runs a lightweight, local WebSocket-bridged HTTP proxy server directly on your development machine. By configuring your physical mobile device's Wi-Fi proxy settings to your machine's local IP, network traffic is intercepted and analyzed in real-time within Endly's UI.</p>
+            </div>
+            <div style="background: rgba(30, 41, 59, 0.4); padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #334155;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem;">Are the tools open, free, and accessible without registration?</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">Yes, all web-based applications across the Grassroot Digital hub are completely free, open for immediate use, and do not require account creation, cookies, or tracking permissions.</p>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <footer style="text-align: center; padding: 2rem; border-top: 1px solid #334155; color: #64748b; font-size: 0.875rem;">
+        <p>&copy; 2026 Grassroot Digital. Engineered by <a href="https://grassroot.digital/#about" style="color: #94a3b8;">Rajesh Narwal</a>. All tools operate 100% client-side with zero cloud telemetry.</p>
+      </footer>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

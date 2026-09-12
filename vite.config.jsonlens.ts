@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   root: path.resolve(__dirname, 'jsonlens'),
-  base: '/',
+  base: '/json-diff/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, 'jsonlens-dist'),

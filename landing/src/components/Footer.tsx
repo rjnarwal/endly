@@ -117,67 +117,78 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView 
               </li>
               <li>
                 <a
-                  href="https://endly.grassroot.digital"
+                  href="/api-client"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
                 >
-                  <span>endly.grassroot.digital</span>
+                  <span>API Client (Endly)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
               <li>
                 <a
-                  href="https://tokenlens.grassroot.digital"
+                  href="/jwt-decoder"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
                 >
-                  <span>tokenlens.grassroot.digital</span>
+                  <span>JWT Decoder (TokenLens)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
               <li>
                 <a
-                  href="https://jsonlens.grassroot.digital"
+                  href="/json-diff"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
                 >
-                  <span>jsonlens.grassroot.digital</span>
+                  <span>JSON Diff (JSONLens)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
               <li>
                 <a
-                  href="https://regexforge.grassroot.digital"
+                  href="/regex-tester"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
                 >
-                  <span>regexforge.grassroot.digital</span>
+                  <span>Regex Tester (RegexForge)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
               <li>
                 <a
-                  href="https://cipherlab.grassroot.digital"
+                  href="/hash-generator"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
                 >
-                  <span>cipherlab.grassroot.digital</span>
+                  <span>Hash & Crypto (CipherLab)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>
               <li>
                 <a
-                  href="https://pagely.grassroot.digital"
+                  href="/image-to-pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
                 >
-                  <span>pagely.grassroot.digital</span>
+                  <span>Image to PDF (Pagely)</span>
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/passport-photo-maker"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-secondary hover:text-accent flex items-center space-x-1 transition-colors"
+                >
+                  <span>Passport Photo Maker (PassPorto)</span>
                   <ExternalLink className="w-3 h-3 opacity-60" />
                 </a>
               </li>

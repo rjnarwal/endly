@@ -1,11 +1,15 @@
-# PassPorto 📷
+# 📷 PassPorto — In-Browser Biometric Passport, Visa & ID Photo Studio
 
-**100% In-Browser Biometric Passport, Visa & ID Photo Studio with 4×6" Printable Sheet Generator**
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Live Web App](https://img.shields.io/badge/Web_App-grassroot.digital%2Fpassport--photo--maker-3b82f6.svg)](https://grassroot.digital/passport-photo-maker)
+[![Developer Hub](https://img.shields.io/badge/Platform-Grassroot_Digital-10b981.svg)](https://grassroot.digital)
+[![Author](https://img.shields.io/badge/Author-Rajesh_Narwal-blue.svg)](https://grassroot.digital/#about)
+[![GitHub](https://img.shields.io/badge/GitHub-rjnarwal-181717.svg?logo=github)](https://github.com/rjnarwal)
 
-PassPorto is a privacy-first, zero-cloud web application that creates official biometric passport, visa, and ID photos directly in your browser.
+**[PassPorto](https://grassroot.digital/passport-photo-maker)** is a privacy-first, zero-cloud web application that creates official biometric passport, visa, and ID photos directly in your browser with automated 4×6" printable sheet generation.
 
-🌐 **Live Web Application**: [https://passporto.grassroot.digital](https://passporto.grassroot.digital) (Mirror: [https://passporto-digital.web.app](https://passporto-digital.web.app))  
-🚀 **Grassroot Digital Hub**: [https://grassroot.digital](https://grassroot.digital)
+🌐 **Try Online**: **[https://grassroot.digital/passport-photo-maker](https://grassroot.digital/passport-photo-maker)**  
+🚀 **Grassroot Digital Suite**: **[https://grassroot.digital](https://grassroot.digital)**
 
 ---
 
@@ -27,12 +31,16 @@ PassPorto is a privacy-first, zero-cloud web application that creates official b
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Explore the Grassroot Digital Developer Suite
 
-- **Framework**: React 18 + TypeScript + Vite
-- **Styling**: TailwindCSS with CSS custom properties (Light default, Dark, Midnight)
-- **PDF Generation**: jsPDF
-- **Face Detection**: Native browser `FaceDetector` API with Canvas color/centroid fallback
+PassPorto is part of the **[Grassroot Digital](https://grassroot.digital)** suite of zero-cloud web utilities:
+
+- ⚡ **[API Client & Mobile Proxy](https://grassroot.digital/api-client)**: Lightweight REST, GraphQL & WebSocket client with Wi-Fi traffic interception.
+- 🔑 **[JWT Decoder & Verifier](https://grassroot.digital/jwt-decoder)**: Client-side RS256/HS256 signature verification & claim inspection.
+- 🗂️ **[JSON Diff & Comparison](https://grassroot.digital/json-diff)**: Semantic AST JSON diffing, syntax fixer & TypeScript/Go type generator.
+- 🎯 **[Regex Tester & Visualizer](https://grassroot.digital/regex-tester)**: Live regular expression match highlighter & multi-language code export.
+- 🔐 **[Cryptographic Hash Generator](https://grassroot.digital/hash-generator)**: SHA-256, SHA-512, MD5, AES-256-GCM encryption & UUID v7 generator.
+- 📄 **[Image to PDF Converter](https://grassroot.digital/image-to-pdf)**: 100% in-browser multi-page PDF creator & optimizer.
 
 ---
 
@@ -40,8 +48,8 @@ PassPorto is a privacy-first, zero-cloud web application that creates official b
 
 ```bash
 # Clone repository
-git clone https://github.com/rjnarwal/passporto.git
-cd passporto
+git clone https://github.com/rjnarwal/endly.git
+cd endly/passporto
 
 # Install dependencies
 npm install
@@ -54,4 +62,4 @@ npm run dev
 
 ## 📄 License
 
-MIT © [Rajesh Narwal](https://github.com/rjnarwal) • [Grassroot Digital](https://grassroot.digital)
+MIT © 2026 [Rajesh Narwal](https://grassroot.digital/#about) • [Grassroot Digital](https://grassroot.digital)

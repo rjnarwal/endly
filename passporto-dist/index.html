@@ -2,34 +2,41 @@
 <html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M22 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>" />
+    <link rel="icon" type="image/x-icon" href="/passport-photo-maker/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/passport-photo-maker/icon-48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/passport-photo-maker/icon-96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/passport-photo-maker/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/passport-photo-maker/apple-touch-icon.png" />
+    <link rel="manifest" href="/passport-photo-maker/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
 
     <!-- Primary SEO Title & Metadata -->
-    <title>PassPorto | 100% In-Browser Biometric Passport, Visa & ID Photo Studio</title>
-    <meta name="title" content="PassPorto | 100% In-Browser Biometric Passport, Visa & ID Photo Studio" />
-    <meta name="description" content="Generate official 2x2 inch US Passport photos, 35x45mm UK/EU/India Schengen Visa photos, LinkedIn headshots, and printable 4x6 inch photo sheets. 100% in-browser face centering with zero cloud uploads." />
-    <meta name="keywords" content="passport photo maker, biometric visa photo, 2x2 inch passport photo, 35x45mm photo, US passport photo online, printable 4x6 photo sheet, ID photo cropper, LinkedIn headshot cropper, zero cloud passport maker, face detector photo, PassPorto" />
+    <title>Passport & Visa Photo Maker Online (In-Browser) - Grassroot</title>
+    <meta name="title" content="Passport & Visa Photo Maker Online (In-Browser) - Grassroot" />
+    <meta name="description" content="Generate official 2x2 inch US Passport photos, 35x45mm UK/EU/India Schengen Visa photos, and printable 4x6 inch sheets online with 100% in-browser privacy and zero cloud uploads." />
+    <meta name="keywords" content="passport photo maker, biometric visa photo, 2x2 inch passport photo, 35x45mm photo, US passport photo online, DS-160 photo maker, UK visa photo, Schengen visa photo, India passport photo online, ID photo cropper, zero cloud passport maker, face detector photo, PassPorto, Grassroot Digital" />
     <meta name="author" content="Rajesh Narwal" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://passporto.grassroot.digital/" />
+    <link rel="canonical" href="https://grassroot.digital/passport-photo-maker" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://passporto.grassroot.digital/" />
+    <meta property="og:url" content="https://grassroot.digital/passport-photo-maker" />
     <meta property="og:site_name" content="PassPorto by Grassroot Digital" />
-    <meta property="og:title" content="PassPorto | Biometric Passport & ID Photo Studio" />
-    <meta property="og:description" content="100% client-side passport and ID photo studio. Official biometric guidelines, automatic face centering, and printable 4x6 photo sheets." />
+    <meta property="og:title" content="Passport & Visa Photo Maker Online (In-Browser) - Grassroot" />
+    <meta property="og:description" content="100% client-side passport and ID photo studio. Official biometric guidelines, automatic face centering, and instant digital photo downloads." />
     <meta property="og:image" content="https://grassroot.digital/images/rajesh-narwal.jpg" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://passporto.grassroot.digital/" />
-    <meta name="twitter:title" content="PassPorto | Biometric Passport & ID Photo Studio" />
-    <meta name="twitter:description" content="Zero-cloud biometric passport, visa, and ID photo studio. Automatic face centering and printable photo sheets." />
+    <meta name="twitter:url" content="https://grassroot.digital/passport-photo-maker" />
+    <meta name="twitter:title" content="Passport & Visa Photo Maker Online (In-Browser) - Grassroot" />
+    <meta name="twitter:description" content="Zero-cloud biometric passport, visa, and ID photo studio. Automatic face centering and strict government portal size optimizer." />
+    <meta name="twitter:image" content="https://grassroot.digital/images/rajesh-narwal.jpg" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,24 +47,169 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "PassPorto",
-      "url": "https://passporto.grassroot.digital",
-      "description": "100% In-Browser Biometric Passport, Visa, ID, and Social Photo Studio by Grassroot Digital.",
-      "applicationCategory": "PhotoApplication",
-      "operatingSystem": "All modern browsers",
-      "browserRequirements": "Requires JavaScript and HTML5 Canvas support",
-      "creator": {
-        "@type": "Person",
-        "name": "Rajesh Narwal",
-        "url": "https://grassroot.digital/#about"
-      }
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "PassPorto",
+          "url": "https://passporto.grassroot.digital",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All modern browsers",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "featureList": [
+            "100% Client-side biometric passport and visa photo maker",
+            "Official dimensional presets for US (2x2 inch / 600x600px), UK/EU/Schengen (35x45mm), India, Canada, Australia, Singapore, and China",
+            "Interactive biometric eye-line and chin centering overlay guides",
+            "Strict government portal file size compression presets (<240 KB for US DS-160, <100 KB, <50 KB)",
+            "High-resolution single digital JPEG photo download and clipboard copy",
+            "Zero cloud telemetry and zero server uploads promise"
+          ],
+          "author": {
+            "@type": "Person",
+            "name": "Rajesh Narwal",
+            "url": "https://grassroot.digital/#about"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What are the official requirements for US DS-160 and US Passport photos?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "US State Department specifications require a 2x2 inch (600x600 px to 1200x1200 px) square image on a plain white or off-white background, with the head centered and between 50% and 69% of the total image height (1 to 1 3/8 inches from chin to top of head), and a file size under 240 KB."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does PassPorto compress photos to meet visa portal size limits?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "PassPorto uses an iterative client-side canvas compression algorithm that precisely compresses your cropped image under 240 KB (US DS-160 portal), 100 KB (India OCI / Passport Seva), or 50 KB without sacrificing biometric facial resolution."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does PassPorto upload my biometric face photos to any server?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. PassPorto operates 100% in your browser's local memory. Your photos, crops, and exported files never leave your device."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which country passport and visa standards are supported?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "PassPorto includes presets for United States (2x2 in / 51x51 mm), United Kingdom (35x45 mm), Schengen / European Union (35x45 mm), India (35x45 mm & 2x2 in), Canada (50x70 mm & 35x45 mm), Australia (35x45 mm), Singapore (35x45 mm), and China (33x48 mm)."
+              }
+            }
+          ]
+        }
+      ]
     }
     </script>
-    <script type="module" crossorigin src="/assets/index-D_hqvguz.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CoEGtCqm.css">
+    <script type="module" crossorigin src="/passport-photo-maker/assets/index-sqGm_MFl.js"></script>
+    <link rel="stylesheet" crossorigin href="/passport-photo-maker/assets/index-DRACnwjE.css">
   </head>
-  <body>
-    <div id="root"></div>
+  <body class="bg-background text-text select-none antialiased">
+    <!-- Static Fallback / Search Engine Readable Content -->
+    <div id="root">
+      <header style="padding: 2.5rem 1.5rem; text-align: center; max-width: 960px; margin: 0 auto;">
+        <h1 style="font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; color: #3b82f6;">
+          PassPorto — 100% In-Browser Biometric Passport & Visa Photo Studio
+        </h1>
+        <p style="font-size: 1.125rem; line-height: 1.6; color: #475569; max-width: 780px; margin: 0 auto;">
+          The private, zero-cloud passport and visa photo maker for US, UK, Schengen, India, Canada, and Australia official online portals. Built by <a href="https://grassroot.digital" style="color: #3b82f6; font-weight: 600;">Grassroot Digital</a>.
+        </p>
+      </header>
+
+      <main style="padding: 1rem 1.5rem 4rem; max-width: 1000px; margin: 0 auto;">
+        <section style="margin-bottom: 3rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem;">
+            Official Biometric Passport & Visa Standards Made Simple
+          </h2>
+          <p style="color: #334155; line-height: 1.7; margin-bottom: 1rem;">
+            Submitting passport or visa renewal applications online (such as the US DS-160/DS-260, UK eVisa, Schengen Visa, or India Passport Seva / OCI) frequently leads to rejection due to incorrect aspect ratios, improper face sizing, misaligned eye-lines, or exceeding strict file size upload limits.
+          </p>
+          <p style="color: #334155; line-height: 1.7; margin-bottom: 1rem;">
+            <strong>PassPorto</strong> solves this by embedding official international biometric standards (US State Department 2x2 inch, ICAO 35x45mm, Canadian 50x70mm) directly in your browser. With interactive eye-line alignment overlays, real-time zoom & rotation sliders, and single-click file size optimizers (<code style="color: #2563eb;">&lt;240 KB</code>, <code style="color: #2563eb;">&lt;100 KB</code>, <code style="color: #2563eb;">&lt;50 KB</code>), you generate government-compliant photos in seconds.
+          </p>
+          <p style="color: #334155; line-height: 1.7;">
+            Best of all, PassPorto executes 100% locally on your computer or mobile device. Your biometric facial photos are never uploaded to any remote server or stored in the cloud.
+          </p>
+        </section>
+
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+            Biometric Presets & Optimization Features
+          </h2>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+            <div style="background: #ffffff; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">🇺🇸 US Passport & Visa (2x2 inch)</h3>
+              <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">600x600 px square format compliant with US State Department DS-160/DS-260 portal requirements and 50–69% head height ratio.</p>
+            </div>
+
+            <div style="background: #ffffff; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">🇪🇺 UK & Schengen Visa (35x45 mm)</h3>
+              <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">Standard European and British 35x45 mm biometric portrait format with crown-to-chin guidelines (70–80% face coverage).</p>
+            </div>
+
+            <div style="background: #ffffff; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">🇮🇳 India Passport & OCI</h3>
+              <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">Formatted for Passport Seva and OCI applications (35x45 mm & 2x2 in) with automatic &lt;100 KB and &lt;50 KB output compression.</p>
+            </div>
+
+            <div style="background: #ffffff; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">🎯 Eye-Line & Chin Alignment Guides</h3>
+              <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">Interactive visual crosshairs and oval head framing guides ensure your eyes, nose, and chin align precisely to ICAO standards.</p>
+            </div>
+
+            <div style="background: #ffffff; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">💾 Digital Photo Download & Copy</h3>
+              <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">Download a single clean high-resolution digital JPEG image ready for online portal uploads, or copy image directly to your clipboard.</p>
+            </div>
+
+            <div style="background: #ffffff; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #2563eb; margin-bottom: 0.5rem;">🔒 Zero Cloud Telemetry</h3>
+              <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">100% in-browser memory execution. Your personal portrait and sensitive biometric data never leave your computer or phone.</p>
+            </div>
+          </div>
+        </section>
+
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 1.25rem;">
+            Frequently Asked Questions
+          </h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: #f8fafc; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem;">What are the official requirements for US DS-160 and US Passport photos?</h3>
+              <p style="color: #475569; font-size: 0.95rem; line-height: 1.6;">US State Department specifications require a 2x2 inch (600x600 px to 1200x1200 px) square image on a plain white or off-white background, with the head centered and between 50% and 69% of the total image height (1 to 1 3/8 inches from chin to top of head), and a file size under 240 KB.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem;">How does PassPorto compress photos to meet visa portal size limits?</h3>
+              <p style="color: #475569; font-size: 0.95rem; line-height: 1.6;">PassPorto uses an iterative client-side canvas compression algorithm that precisely compresses your cropped image under 240 KB (US DS-160 portal), 100 KB (India OCI / Passport Seva), or 50 KB without sacrificing biometric facial resolution.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem;">Does PassPorto upload my biometric face photos to any server?</h3>
+              <p style="color: #475569; font-size: 0.95rem; line-height: 1.6;">No. PassPorto operates 100% in your browser's local memory. Your photos, crops, and exported files never leave your device.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 1.25rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem;">Which country passport and visa standards are supported?</h3>
+              <p style="color: #475569; font-size: 0.95rem; line-height: 1.6;">PassPorto includes presets for United States (2x2 in / 51x51 mm), United Kingdom (35x45 mm), Schengen / European Union (35x45 mm), India (35x45 mm & 2x2 in), Canada (50x70 mm & 35x45 mm), Australia (35x45 mm), Singapore (35x45 mm), and China (33x48 mm).</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer style="text-align: center; padding: 2rem; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.875rem;">
+        <p>&copy; 2026 PassPorto by <a href="https://grassroot.digital" style="color: #64748b;">Grassroot Digital</a>. Part of the privacy-first developer ecosystem.</p>
+      </footer>
+    </div>
   </body>
 </html>

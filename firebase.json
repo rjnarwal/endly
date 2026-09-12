@@ -8,10 +8,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/api-client",
+          "type": 301
         }
       ],
       "headers": [
@@ -45,10 +46,68 @@
       ],
       "rewrites": [
         {
+          "source": "/api-client",
+          "destination": "/api-client/index.html"
+        },
+        {
+          "source": "/api-client/**",
+          "destination": "/api-client/index.html"
+        },
+        {
+          "source": "/jwt-decoder",
+          "destination": "/jwt-decoder/index.html"
+        },
+        {
+          "source": "/jwt-decoder/**",
+          "destination": "/jwt-decoder/index.html"
+        },
+        {
+          "source": "/json-diff",
+          "destination": "/json-diff/index.html"
+        },
+        {
+          "source": "/json-diff/**",
+          "destination": "/json-diff/index.html"
+        },
+        {
+          "source": "/regex-tester",
+          "destination": "/regex-tester/index.html"
+        },
+        {
+          "source": "/regex-tester/**",
+          "destination": "/regex-tester/index.html"
+        },
+        {
+          "source": "/hash-generator",
+          "destination": "/hash-generator/index.html"
+        },
+        {
+          "source": "/hash-generator/**",
+          "destination": "/hash-generator/index.html"
+        },
+        {
+          "source": "/image-to-pdf",
+          "destination": "/image-to-pdf/index.html"
+        },
+        {
+          "source": "/image-to-pdf/**",
+          "destination": "/image-to-pdf/index.html"
+        },
+        {
+          "source": "/passport-photo-maker",
+          "destination": "/passport-photo-maker/index.html"
+        },
+        {
+          "source": "/passport-photo-maker/**",
+          "destination": "/passport-photo-maker/index.html"
+        },
+        {
           "source": "**",
           "destination": "/index.html"
         }
       ],
+      "cleanUrls": true,
+      "trailingSlash": false,
       "headers": [
         {
           "source": "**/*.@(html|json)",
@@ -78,10 +137,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/jwt-decoder",
+          "type": 301
         }
       ],
       "headers": [
@@ -113,10 +173,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/json-diff",
+          "type": 301
         }
       ],
       "headers": [
@@ -148,10 +209,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/regex-tester",
+          "type": 301
         }
       ],
       "headers": [
@@ -183,10 +245,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/hash-generator",
+          "type": 301
         }
       ],
       "headers": [
@@ -218,10 +281,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/image-to-pdf",
+          "type": 301
         }
       ],
       "headers": [
@@ -253,10 +317,11 @@
         "**/.*",
         "**/node_modules/**"
       ],
-      "rewrites": [
+      "redirects": [
         {
           "source": "**",
-          "destination": "/index.html"
+          "destination": "https://grassroot.digital/passport-photo-maker",
+          "type": 301
         }
       ],
       "headers": [

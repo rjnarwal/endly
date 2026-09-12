@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   root: path.resolve(__dirname, 'regexforge'),
-  base: '/',
+  base: '/regex-tester/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, 'regexforge-dist'),

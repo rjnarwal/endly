@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   root: path.resolve(__dirname, 'tokenlens'),
-  base: '/',
+  base: '/jwt-decoder/',
   plugins: [react()],
   build: {
     outDir: path.resolve(__dirname, 'tokenlens-dist'),

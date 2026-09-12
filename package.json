@@ -21,7 +21,7 @@
     "build:cipherlab": "vite build --config vite.config.cipherlab.ts",
     "build:pagely": "vite build --config vite.config.pagely.ts",
     "build:passporto": "vite build --config vite.config.passporto.ts",
-    "build:all": "npm run build && npm run build:landing && npm run build:tokenlens && npm run build:jsonlens && npm run build:regexforge && npm run build:cipherlab && npm run build:pagely && npm run build:passporto",
+    "build:all": "npm run build && npm run build:landing && npm run build:tokenlens && npm run build:jsonlens && npm run build:regexforge && npm run build:cipherlab && npm run build:pagely && npm run build:passporto && node scripts/sync-flat-tools.mjs",
     "build:win": "npm run build && electron-builder --win --x64",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

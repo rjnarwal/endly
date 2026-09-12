@@ -108,7 +108,7 @@ export const PrivacyManifesto: React.FC<PrivacyManifestoProps> = ({ onOpenDownlo
               <div className="flex flex-wrap items-center gap-3 pt-3">
                 {/* Launch Endly Web App */}
                 <a
-                  href="https://endly.grassroot.digital"
+                  href="/api-client"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="min-h-[44px] flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-extrabold text-sm shadow-md shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer"

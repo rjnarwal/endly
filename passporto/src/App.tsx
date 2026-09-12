@@ -5,6 +5,7 @@ import { PhotoUploader } from './components/PhotoUploader';
 import { BiometricCropper } from './components/BiometricCropper';
 import { PresetSelector } from './components/PresetSelector';
 import { ExportPanel } from './components/ExportPanel';
+import { PassportKnowledgeBase } from './components/PassportKnowledgeBase';
 import { PHOTO_PRESETS } from './data/presets';
 import { detectFace, calculateOptimalCrop } from './services/faceDetection';
 import { UploadedPhoto, PhotoPreset, CropState, DetectedFace } from './types';
@@ -313,6 +314,9 @@ export function App() {
             </div>
           </div>
         )}
+
+        {/* Rich In-Tool Technical Knowledge Base & FAQ (Live DOM Crawlable for Google) */}
+        <PassportKnowledgeBase />
       </main>
 
       <Footer />

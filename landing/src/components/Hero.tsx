@@ -62,7 +62,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, onOpenDownload }) =>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto mb-10">
           {/* Launch Endly Web App */}
           <a
-            href="https://endly.grassroot.digital"
+            href="/api-client"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto min-h-[54px] px-8 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-extrabold text-base shadow-xl shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-3 whitespace-nowrap cursor-pointer group"
