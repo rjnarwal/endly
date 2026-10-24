@@ -132,3 +132,49 @@ code, pre, .font-mono {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* Eye-Catching Shimmer Sweeping Sheen Animation */
+@keyframes sweep-sheen {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+  }
+  35%, 100% {
+    transform: translateX(350%) skewX(-25deg);
+  }
+}
+
+.animate-sweep-sheen {
+  animation: sweep-sheen 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Pulsing Emerald Glow for High-Priority Action Buttons */
+@keyframes emerald-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5), 0 0 16px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0), 0 0 28px rgba(16, 185, 129, 0.6);
+  }
+}
+
+.animate-emerald-pulse {
+  animation: emerald-pulse-glow 2.4s ease-in-out infinite;
+}
+
+/* Attention-Grabbing Gentle Bounce & Sparkle */
+@keyframes sparkle-wiggle {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-12deg) scale(1.15);
+  }
+  75% {
+    transform: rotate(12deg) scale(1.15);
+  }
+}
+
+.animate-sparkle-wiggle {
+  animation: sparkle-wiggle 1.8s ease-in-out infinite;
+}
+
