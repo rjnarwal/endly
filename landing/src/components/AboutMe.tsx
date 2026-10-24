@@ -14,9 +14,16 @@ import {
   Briefcase,
   ShieldCheck,
   CheckCircle2,
+  Send,
+  Mail,
+  ArrowRight,
 } from 'lucide-react';
 
-export const AboutMe: React.FC = () => {
+interface AboutMeProps {
+  onOpenQuote?: (tab?: 'form' | 'email' | 'qr') => void;
+}
+
+export const AboutMe: React.FC<AboutMeProps> = ({ onOpenQuote }) => {
   return (
     <section id="about" className="py-12 md:py-16 relative overflow-hidden bg-background-primary select-none">
       {/* Ambient background glow orbs */}
@@ -117,6 +124,18 @@ export const AboutMe: React.FC = () => {
                 </span>
               </div>
             </div>
+
+            {/* Direct Hire / Quote Action CTA */}
+            {onOpenQuote && (
+              <button
+                onClick={() => onOpenQuote('form')}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-amber-500/15 hover:from-emerald-500/25 hover:to-amber-500/25 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition-all cursor-pointer group"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span>Hire the Builder — Request a Project Quote</span>
+                <ArrowRight className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            )}
           </div>
 
           {/* Right Column: Mission Story & What You'll Find Here */}

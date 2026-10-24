@@ -21,6 +21,7 @@ interface NavbarProps {
   onSelectProduct: (productId: string) => void;
   activeView: 'home' | 'openground';
   onNavigateView: (view: 'home' | 'openground') => void;
+  onOpenQuote?: (tab?: 'form' | 'email' | 'qr') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -29,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectProduct,
   activeView,
   onNavigateView,
+  onOpenQuote,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -174,6 +176,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               FORUM
             </span>
           </button>
+
+          {/* Request a Quote CTA */}
+          <button
+            onClick={() => onOpenQuote && onOpenQuote('form')}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30 transition-all cursor-pointer shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Get a Quote</span>
+          </button>
         </nav>
 
         {/* Right CTA Actions */}
@@ -269,6 +280,23 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             About The Builder
           </a>
+
+          {/* Request a Quote Button on Mobile */}
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              if (onOpenQuote) onOpenQuote('form');
+            }}
+            className="w-full text-left px-3.5 py-2.5 rounded-xl font-bold text-sm flex items-center justify-between transition-colors bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+          >
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>Request a Project Quote</span>
+            </div>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
+              DIRECT
+            </span>
+          </button>
 
           <div className="space-y-1 pt-2 border-t border-border">
             <div className="text-[10px] uppercase font-bold text-text-muted px-2 py-1">Products</div>

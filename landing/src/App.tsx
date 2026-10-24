@@ -10,6 +10,8 @@ import { Footer } from './components/Footer';
 import { OpenGround } from './components/OpenGround';
 import { EarlyAccessModal } from './components/EarlyAccessModal';
 import { DownloadDesktopModal, AppDownloadConfig } from './components/DownloadDesktopModal';
+import { ProjectQuoteSection } from './components/ProjectQuoteSection';
+import { ProjectQuoteModal } from './components/ProjectQuoteModal';
 import { ProductItem } from './types';
 import { PRODUCTS } from './data/products';
 
@@ -19,6 +21,10 @@ export const App: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<string>('endly');
   const [earlyAccessProduct, setEarlyAccessProduct] = useState<ProductItem | null>(null);
   const [downloadProduct, setDownloadProduct] = useState<ProductItem | null>(null);
+
+  // Project Quote Modal State
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [quoteModalTab, setQuoteModalTab] = useState<'form' | 'email' | 'qr'>('form');
 
   useEffect(() => {
     const savedTheme = (localStorage.getItem('grassroot_theme') as 'dark' | 'midnight' | 'light') || 'light';
@@ -30,15 +36,39 @@ export const App: React.FC = () => {
     const hash = window.location.hash.toLowerCase();
     if (hash === '#openground' || hash === '#open-ground' || hash === '#forum') {
       setActiveView('openground');
+    } else if (
+      hash === '#quote' ||
+      hash === '#get-quote' ||
+      hash === '#get-a-quote' ||
+      hash === '#request-quote' ||
+      hash === '#hire'
+    ) {
+      setIsQuoteModalOpen(true);
+      setQuoteModalTab('form');
     }
 
     const handleHashChange = () => {
       const currentHash = window.location.hash.toLowerCase();
       if (currentHash === '#openground' || currentHash === '#open-ground' || currentHash === '#forum') {
         setActiveView('openground');
+      } else if (
+        currentHash === '#quote' ||
+        currentHash === '#get-quote' ||
+        currentHash === '#get-a-quote' ||
+        currentHash === '#request-quote' ||
+        currentHash === '#hire'
+      ) {
+        if (activeView === 'openground') {
+          setActiveView('home');
+        }
+        setIsQuoteModalOpen(true);
+        setQuoteModalTab('form');
       } else if (currentHash === '' || currentHash === '#home' || currentHash.startsWith('#')) {
-        if (currentHash !== '#openground' && currentHash !== '#open-ground' && currentHash !== '#forum') {
-          // If navigating to an anchor on home
+        if (
+          currentHash !== '#openground' &&
+          currentHash !== '#open-ground' &&
+          currentHash !== '#forum'
+        ) {
           if (activeView === 'openground') {
             setActiveView('home');
           }
@@ -49,6 +79,27 @@ export const App: React.FC = () => {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [activeView]);
+
+  const handleOpenQuoteModal = (tab: 'form' | 'email' | 'qr' = 'form') => {
+    setQuoteModalTab(tab);
+    setIsQuoteModalOpen(true);
+    if (!window.location.hash.includes('quote')) {
+      window.location.hash = 'quote';
+    }
+  };
+
+  const handleCloseQuoteModal = () => {
+    setIsQuoteModalOpen(false);
+    if (
+      window.location.hash === '#quote' ||
+      window.location.hash === '#get-quote' ||
+      window.location.hash === '#get-a-quote' ||
+      window.location.hash === '#request-quote' ||
+      window.location.hash === '#hire'
+    ) {
+      history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+  };
 
   const handleNavigateView = (view: 'home' | 'openground') => {
     setActiveView(view);
@@ -134,6 +185,7 @@ export const App: React.FC = () => {
         onSelectProduct={handleSelectProduct}
         activeView={activeView}
         onNavigateView={handleNavigateView}
+        onOpenQuote={handleOpenQuoteModal}
       />
 
       {/* Main Content View Switcher */}
@@ -166,7 +218,10 @@ export const App: React.FC = () => {
             />
 
             {/* About The Builder Section */}
-            <AboutMe />
+            <AboutMe onOpenQuote={handleOpenQuoteModal} />
+
+            {/* Request a Quote & Custom Development Section */}
+            <ProjectQuoteSection onOpenQuoteModal={handleOpenQuoteModal} />
 
             {/* Privacy & Performance Manifesto + Desktop Downloads */}
             <PrivacyManifesto onOpenDownload={handleOpenDownload} />
@@ -181,6 +236,7 @@ export const App: React.FC = () => {
       <Footer
         onSelectProduct={handleSelectProduct}
         onNavigateView={handleNavigateView}
+        onOpenQuote={handleOpenQuoteModal}
       />
 
       {/* Early Access / Preview Modal */}
@@ -197,6 +253,14 @@ export const App: React.FC = () => {
           config={getDownloadConfig(downloadProduct)}
         />
       )}
+
+      {/* Project Quote & Requirements Modal (In-Page Website Popup) */}
+      <ProjectQuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={handleCloseQuoteModal}
+        initialTab={quoteModalTab}
+        theme={theme}
+      />
     </div>
   );
 };

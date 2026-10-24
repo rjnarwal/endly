@@ -5,9 +5,10 @@ import { PRODUCTS } from '../data/products';
 interface FooterProps {
   onSelectProduct: (productId: string) => void;
   onNavigateView?: (view: 'home' | 'openground') => void;
+  onOpenQuote?: (tab?: 'form' | 'email' | 'qr') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView }) => {
+export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView, onOpenQuote }) => {
   return (
     <footer className="bg-background-secondary border-t border-border pt-12 pb-10 text-xs text-text-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,6 +90,15 @@ export const Footer: React.FC<FooterProps> = ({ onSelectProduct, onNavigateView 
               Community & Hubs
             </div>
             <ul className="space-y-2">
+              <li>
+                <button
+                  onClick={() => onOpenQuote && onOpenQuote('form')}
+                  className="text-emerald-400 hover:text-emerald-300 flex items-center space-x-1.5 transition-colors font-bold text-left cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Request a Project Quote</span>
+                </button>
+              </li>
               <li>
                 <button
                   onClick={() => onNavigateView && onNavigateView('openground')}

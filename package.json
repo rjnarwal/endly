@@ -83,6 +83,7 @@
     "js-yaml": "^4.1.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.16.0",
+    "qrcode": "^1.5.4",
     "tailwind-merge": "^3.0.1",
     "ws": "^8.21.3",
     "zustand": "^5.0.3"
@@ -91,6 +92,7 @@
     "@tauri-apps/cli": "^2.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/ws": "^8.18.1",
